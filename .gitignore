@@ -90,6 +90,7 @@ axi_lite_generic_reg
 *construct_tx_table.v
 *rtefi_blob.v
 *rtefi_preblob.vh
+*evfr_marble_top.mmi
 
 ######################
 # Vivado files
