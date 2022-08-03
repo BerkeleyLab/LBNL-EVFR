@@ -31,12 +31,13 @@ gw_evfr_marble:
     - cd gateware/syn/evfr_marble && ls /non-free
   stage: gateware
   script:
-    - make clean && PATH=$XILINX_VIVADO/bin:$PATH time make evfr_marble_top.bit
+    - make clean && PATH=$XILINX_VIVADO/bin:$PATH time make evfr_marble_top.bit && PATH=$XILINX_VIVADO/bin:$PATH time make evfr_marble_top.mmi
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 7 days
     paths:
       - gateware/syn/evfr_marble/evfr_marble_top.bit
+      - gateware/syn/evfr_marble/evfr_marble_top.mmi
       - gateware/syn/evfr_marble/_xilinx/evfr_marble_top/*.runs/impl_1/*.rpt
       - gateware/syn/evfr_marble/bd.xsa
 
@@ -59,3 +60,5 @@ sw_evfr_marble:
     expire_in: 7 days
     paths:
       - software/app/evfr/evfr_marble.elf
+      - software/app/evfr/evfr_marble.elf.size
+      - software/app/evfr/downloadEVFR.bit
