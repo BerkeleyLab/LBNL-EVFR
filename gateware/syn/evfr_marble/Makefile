@@ -14,8 +14,11 @@ include ../../../dir_list.mk
 # Top level design name
 TARGET ?= evfr_marble
 
+GW_EVFR_TGT_DIR = $(GW_SYN_DIR)/$(TARGET)
+XPR      	    = $(GW_EVFR_TGT_DIR)/_xilinx/$(TARGET)_top/$(TARGET)_top.xpr
+
 # Top level bitstream name
-all: $(TARGET)_top.bit
+all: $(TARGET)_top.bit $(TARGET)_top.mmi
 
 # Search for .v files here
 vpath %.v $(MODULES_DIR)
@@ -179,6 +182,9 @@ vpath %.sh $(GW_SCRIPTS_DIR)
 $(TARGET)_top.bit: system_top.xdc $(VIVADO_SYNTH_EXTRA_TCL) $(TOP_LVL_DIR)/$(TARGET)_top.v $(BD_bds) evLogFIFO.xci eventMonitorFIFO.xci ila_td256_s4096_cap.xci
 $(TOP_LVL_DIR)/$(TARGET)_top.v: $(TOP_LVL_DIR)/firmwareBuildDate.v $(TOP_LVL_DIR)/gpioIDX.vh $(RTEFI_V) $(IP_CORES_CUSTOM) $(IP_CORES_TOP_LVL_SRCS) $(BD_TOP_LVL_SRCS)
 
+$(TARGET)_top.mmi: $(XPR) $(TARGET)_top.bit
+	vivado -mode batch -nojou -nolog -source $(GW_SCRIPTS_DIR)/gen_mem_info.tcl -tclargs $< $@
+
 # Generate bundled .xdc from other .xdc. Don't change the order of the
 # prerequisites as we need constraints in tGe order specified
 system_top.xdc: $(SYSTEM_TOP_PINS_XDC) $(IP_CORES_XDCS) $(SYSTEM_TOP_TIM_XDC)
@@ -253,6 +259,7 @@ CLEAN += psu_init*
 CLEAN += ipcores_repos.tcl
 CLEAN += prio_xci_files.tcl
 CLEAN += $(RTEFI_CLEAN)
+CLEAN += $(TARGET)_top.mmi
 CLEAN_DIRS +=  _xilinx .Xil .ip_user_files .hbs $(IP_CORES_CUSTOM_TARGET_DIRS)
 CLEAN_DIRS += _gen
 
