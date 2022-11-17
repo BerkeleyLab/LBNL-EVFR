@@ -167,7 +167,7 @@ $(TARGET).elf: $(HDR_FILES) $(HDR_GEN_FILES) $(OBJ_FILES) $(LINKER_FILES)
 $(TARGET).elf.size: $(TARGET).elf
 	$(SIZE) $< | tee $@
 
-$(DEPLOY_BIT): $(MMI)
+$(DEPLOY_BIT): $(MMI) $(BIT) $(ELF)
 	rm -f updatemem.jou updatemem.log
 	updatemem -force -meminfo $< -bit $(BIT) \
 		-data $(ELF) -proc bd_i/$(CPU_NAME) \
@@ -181,5 +181,5 @@ $(DEPLOY_BIT): $(MMI)
 	$(CC) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" $(CFLAGS) $(USER_FLAGS) $(INCLUDE_FLAGS) -c $*.c -o $@
 
 clean::
-	$(RM) -rf $(TARGET).elf $(TARGET).elf.size $(HDR_GEN_FILES) \
+	$(RM) -rf $(TARGET).elf $(TARGET).elf.size $(DEPLOY_BIT) $(HDR_GEN_FILES) \
 		$(OBJ_FILES) $(OBJ_FILES:.o=.d) $(TARGET)
