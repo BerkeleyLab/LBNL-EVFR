@@ -256,7 +256,7 @@ evioInit(void)
      */
     xpSetRxEqualization(XPOINT_IO_FIRST_FIREFLY, XP_RX_EQ_3_DB);
     for (xpChannel = XPOINT_IO_FIRST_FIREFLY ;
-                        xpChannel <= XPOINT_IO_FMC_DP0 ; xpChannel++) {
+                        xpChannel <= XPOINT_IO_LAST_FIREFLY ; xpChannel++) {
         int ffIdx;
         ffIdx = (xpChannel-XPOINT_IO_FIRST_FIREFLY) / CHANNELS_PER_FIREFLY;
         if (fireflyStatus[ffIdx][0].isPresent) {
@@ -264,6 +264,17 @@ evioInit(void)
             xpEnableOutput(xpChannel);
         }
     }
+
+    /*
+     * XPOINT_IO_FMC_DP0 is special. Output first firefly so FPGA
+     * can monitor the event stream
+     */
+    xpOutFromIn(XPOINT_IO_FMC_DP0, XPOINT_IO_FIRST_FIREFLY);
+    xpEnableOutput(XPOINT_IO_FMC_DP0);
+
+    /*
+     * Set loopback for the receiving upstream stream
+     */
     evioSetLoopback(XPOINT_IO_FIRST_FIREFLY);
 }
 
