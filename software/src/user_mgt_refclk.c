@@ -55,14 +55,14 @@ refAdjust(int offsetPPM)
  Set the Si570 target frequency and configure U39 IO0_0 polarity. 
  Note: it require to call iicProcTakeControl() before
  @param  defaultFrequency the initial frequency of the batch.
- @param  SetPolarityLow insert 1 in case of Si570_OE active low, otherwise set it 0.
+ @param  EnablePolarity insert 1 in case of Si570_OE active high, otherwise set it 0.
  @param  temperatureStability use 1 for 7 ppm type, otherwise set it 0 for  20 ppm and 50 ppm.
 */
 static int
-refInit100MHz(double defaultFrequency, uint8_t SetPolarityLow, uint8_t temperatureStability)
+refInit100MHz(double defaultFrequency, uint8_t EnablePolarity, uint8_t temperatureStability)
 {
     int i;
-    uint8_t buf[6], hsdiv_reg, hsdiv_new=11, n1_reg, n1_new=128;
+    uint8_t buf[6], U39reg, hsdiv_reg, hsdiv_new=11, n1_reg, n1_new=128;
     uint64_t rfreq_reg;
     static const uint8_t hsdiv_values[] = { 11, 9, 7, 6, 5, 4 };
 
@@ -74,13 +74,23 @@ refInit100MHz(double defaultFrequency, uint8_t SetPolarityLow, uint8_t temperatu
 
     if (!iicProcSetMux(IIC_MUX_PORT_PORT_EXPANDER)) return 0; //select Y6 and U39 channel
 
-    if(SetPolarityLow == 1) // reverse the output polarity of U39 (IO0_0)
+    if( debugFlags && DEBUGFLAG_SHOW_RX_ALIGNER | debugFlags && DEBUGFLAG_SHOW_MGT_RESETS )
     {
-        uint8_t U39polReg;
-        if (!iicProcRead(0x21, 0, &U39polReg, 1)) return 0; // read polarity register IO0 
-        U39polReg |= 0x1; // set the bit IO0_0
-        if (!iicProcWrite(0x21, 4, &U39polReg, 1)) return 0; // write polarity register IO0 
+        printf("Register of Si570:\n");
+        for(int y=0; y<8; y++)
+        {
+            uint8_t U;
+            if (!iicProcRead(0x21, y, &U, 1)) return 0; 
+            printf("Reg%u - value = %x\n", y, U);
+        }
     }
+
+    if (!iicProcRead(0x21, 0, &U39reg, 1)) return 0; // read the IO0 register
+    if(EnablePolarity == 1) // drive the output of U39 (IO0_0 connected to Si570_EO)
+        U39reg |= 0x1; // set the bit IO0_0 to 1
+    else
+        U39reg &= 0xFE; // set the bit IO0_0 to 0
+    if (!iicProcWrite(0x21, 2, &U39reg, 1)) return 0; // set IO0 output register
 
     if (!setReg(135, 0x01)) return 0; // Reset the device to initial frequency
     if (!iicProcRead(si570Address, Si570_reg_idx, buf, 6)) return 0; // read the device registers
@@ -156,13 +166,13 @@ userMGTrefClkAdjust(int offsetPPM)
         switch (si570Address)
         {
         case 0x55: // Part number 570BBC000121DG
-            r = refInit100MHz(100000000, 0, 0);
+            r = refInit100MHz(100000000, 1, 0);
             break;
-        case 0x75: // Part number ???
-            r = refInit100MHz(125000000, 0, 0);
+        case 0x75: // Part number 570BBB000309DG
+            r = refInit100MHz(312500000, 1, 0);
             break;
         case 0x77: // Part number 570NCB000933DG
-            r = refInit100MHz(125000000, 1, 1);
+            r = refInit100MHz(125000000, 0, 1);
             break;
         }
         r &= refAdjust(offsetPPM);
