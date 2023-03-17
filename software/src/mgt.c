@@ -149,6 +149,7 @@ mgtCrankRxAlignerFor(struct rxAligner *rxp)
         else if ((MICROSECONDS_SINCE_BOOT() - rxp->whenEntered) > 1000) {
             rxp->state = S_APPLY_RESET;
         }
+        break;
 
     case S_POST_ALIGNMENT_DELAY:
         if ((MICROSECONDS_SINCE_BOOT() - rxp->whenEntered) > 250000) {
