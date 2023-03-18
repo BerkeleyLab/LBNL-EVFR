@@ -74,7 +74,7 @@ refInit100MHz(double defaultFrequency, uint8_t EnablePolarity, uint8_t temperatu
 
     if (!iicProcSetMux(IIC_MUX_PORT_PORT_EXPANDER)) return 0; //select Y6 and U39 channel
 
-    if( debugFlags && DEBUGFLAG_SHOW_RX_ALIGNER | debugFlags && DEBUGFLAG_SHOW_MGT_RESETS )
+    if( (debugFlags & DEBUGFLAG_SHOW_RX_ALIGNER) | (debugFlags & DEBUGFLAG_SHOW_MGT_RESETS) )
     {
         printf("Register of Si570:\n");
         for(int y=0; y<8; y++)
