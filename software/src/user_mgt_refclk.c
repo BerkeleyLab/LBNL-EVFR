@@ -76,17 +76,6 @@ refInit100MHz(double defaultFrequency, uint8_t EnablePolarity, uint8_t temperatu
 
     if (!iicProcSetMux(IIC_MUX_PORT_PORT_EXPANDER)) return 0; //select Y6 and U39 channel
 
-    if( (debugFlags & DEBUGFLAG_SHOW_RX_ALIGNER) | (debugFlags & DEBUGFLAG_SHOW_MGT_RESETS) )
-    {
-        printf("Register of Si570:\n");
-        for(int y=0; y<8; y++)
-        {
-            uint8_t U;
-            if (!iicProcRead(0x21, y, &U, 1)) return 0; 
-            printf("Reg%u - value = %x\n", y, U);
-        }
-    }
-
     if (!iicProcRead(0x21, 0, &U39reg, 1)) return 0; // read the IO0 register
     if(enablePolarity == 1) // drive the output of U39 (IO0_0 connected to Si570_EO)
         U39reg |= 0x1; // set the bit IO0_0 to 1
