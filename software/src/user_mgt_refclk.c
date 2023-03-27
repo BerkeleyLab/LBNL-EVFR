@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include "user_mgt_refclk.h"
 #include "iicProc.h"
 #include "util.h"
 
@@ -16,6 +17,12 @@
 #define SI570_DEFAULT_TARGET_FREQUENCY 100000000.0
 static uint8_t si570Address = 0; // 7-bit address
 static uint8_t Si570_reg_idx = 13; // internal register address
+static const struct si57x_part_numbers si57x_pn[] = {
+    {0x55, SI570_DEFAULT_TARGET_FREQUENCY, 100000000, 1, 0}, // Part number 570BBC000121DG
+    {0x75, SI570_DEFAULT_TARGET_FREQUENCY, 312500000, 1, 0}, // Part number 570BBB000309DG
+    {0x77, SI570_DEFAULT_TARGET_FREQUENCY, 125000000, 0, 1}, // Part number 570NCB000933DG
+};
+
 
 static int
 setReg(int reg, int value)
@@ -24,8 +31,13 @@ setReg(int reg, int value)
     return iicProcWrite(si570Address, reg, &cv, 1);
 }
 
+ /**
+ Perform small changes in the Si570 output frequency without interrupt the signal. 
+ Note: it require to call refInit100MHz() almost once to find iic address, and 
+ @param  offsetPPM the amount of ppm (referring to the current frequency) to be changed.
+ */
 static int
-refAdjust(int offsetPPM)
+refSmallChanges(int offsetPPM)
 {
     int i;
     uint8_t buf[5];
@@ -57,11 +69,12 @@ refAdjust(int offsetPPM)
  Set the Si570 target frequency and configure U39 IO0_0 polarity. 
  Note: it require to call iicProcTakeControl() before
  @param  defaultFrequency the initial frequency of the batch.
+ @param  targetFrequency desired frequency
  @param  enablePolarity insert 1 in case of Si570_OE active high, otherwise set it 0.
  @param  temperatureStability use 1 for 7 ppm type, otherwise set it 0 for  20 ppm and 50 ppm.
 */
 static int
-refInit100MHz(double defaultFrequency, uint8_t EnablePolarity, uint8_t temperatureStability)
+refInit100MHz(double defaultFrequency, double targetFrequency, uint8_t enablePolarity, uint8_t temperatureStability)
 {
     int i;
     uint8_t buf[6], U39reg, hsdiv_reg, hsdiv_new=11, n1_reg, n1_new=128;
@@ -117,7 +130,7 @@ refInit100MHz(double defaultFrequency, uint8_t EnablePolarity, uint8_t temperatu
             hsdiv_new = hsdiv_tmp;
         }
     }
-    rfreq_reg = (uint64_t)( (( (double) targetFrequency * hsdiv_new * n1_new / f_xtal))*268435456.0);
+    rfreq_reg = (uint64_t)( (( targetFrequency * hsdiv_new * n1_new / f_xtal))*268435456.0);
     buf[0] = ((hsdiv_new-4)<<5 & 0xE0) | ((n1_new-1)>>2 & 0x1F);
     buf[1] = ((n1_new-1)<<6 & 0xC0) | (rfreq_reg>>32 & 0x3F);
     for (i = 2; i < 6; i++) {
@@ -141,29 +154,24 @@ userMGTrefClkAdjust(int offsetPPM)
     if (si570Address == 0) {
         if (iicProcSetMux(IIC_MUX_PORT_PORT_EXPANDER)) {
             int i;
-            static const uint8_t addrList[] = { 0x55, 0x75, 0x77 };
-            for (i = 0 ; i < sizeof(addrList)/sizeof(addrList[0]) ; i++) {
-                if (iicProcWrite(addrList[i], -1, NULL, 0)) {
-                    si570Address = addrList[i];
+            for (i = 0 ; i < sizeof(si57x_pn)/sizeof(si57x_pn[0]) ; i++) {
+                if (iicProcWrite(si57x_pn[i].iicAddr, -1, NULL, 0)) {
+                    si570Address = si57x_pn[i].iicAddr;
                     break;
                 }
             }
         }
     }
     if (si570Address) {
-        switch (si570Address)
-        {
-        case 0x55: // Part number 570BBC000121DG
-            r = refInit100MHz(100000000, 1, 0);
-            break;
-        case 0x75: // Part number 570BBB000309DG
-            r = refInit100MHz(312500000, 1, 0);
-            break;
-        case 0x77: // Part number 570NCB000933DG
-            r = refInit100MHz(125000000, 0, 1);
-            break;
+        for (uint8_t idx = 0 ; idx < sizeof(si57x_pn)/sizeof(si57x_pn[0]) ; idx++) {
+            if(si57x_pn[idx].iicAddr == si570Address) {
+                r = refInit100MHz(si57x_pn[idx].startupFrequency,
+                                  si57x_pn[idx].targetFrequency,
+                                  si57x_pn[idx].outputEnablePolarity,
+                                  si57x_pn[idx].temperatureStability);
+                r &= refSmallChanges(offsetPPM);
+            }
         }
-        r &= refAdjust(offsetPPM);
     }
     iicProcRelinquishControl();
     if (r) {
