@@ -7,4 +7,13 @@
 
 int userMGTrefClkAdjust(int offsetPPM);
 
+struct si57x_part_numbers {
+    uint8_t iicAddr;
+    double targetFrequency;
+    double startupFrequency;
+    int outputEnablePolarity;
+    int temperatureStability;
+};
+
+
 #endif
