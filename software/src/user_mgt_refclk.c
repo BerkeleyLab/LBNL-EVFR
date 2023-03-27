@@ -8,10 +8,12 @@
 #include "iicProc.h"
 #include "util.h"
 
-/* Si57x defines and variables */
-#define fDCO_min 4.85*1000000000
-#define fDCO_max 5.67*1000000000
-#define targetFrequency 100000000.0
+/* 
+** Si57x defines and variables 
+*/
+#define F_DCO_MIN 4.85*1000000000
+#define F_DCO_MAX 5.67*1000000000
+#define SI570_DEFAULT_TARGET_FREQUENCY 100000000.0
 static uint8_t si570Address = 0; // 7-bit address
 static uint8_t Si570_reg_idx = 13; // internal register address
 
@@ -55,7 +57,7 @@ refAdjust(int offsetPPM)
  Set the Si570 target frequency and configure U39 IO0_0 polarity. 
  Note: it require to call iicProcTakeControl() before
  @param  defaultFrequency the initial frequency of the batch.
- @param  EnablePolarity insert 1 in case of Si570_OE active high, otherwise set it 0.
+ @param  enablePolarity insert 1 in case of Si570_OE active high, otherwise set it 0.
  @param  temperatureStability use 1 for 7 ppm type, otherwise set it 0 for  20 ppm and 50 ppm.
 */
 static int
@@ -86,7 +88,7 @@ refInit100MHz(double defaultFrequency, uint8_t EnablePolarity, uint8_t temperatu
     }
 
     if (!iicProcRead(0x21, 0, &U39reg, 1)) return 0; // read the IO0 register
-    if(EnablePolarity == 1) // drive the output of U39 (IO0_0 connected to Si570_EO)
+    if(enablePolarity == 1) // drive the output of U39 (IO0_0 connected to Si570_EO)
         U39reg |= 0x1; // set the bit IO0_0 to 1
     else
         U39reg &= 0xFE; // set the bit IO0_0 to 0
@@ -114,12 +116,10 @@ refInit100MHz(double defaultFrequency, uint8_t EnablePolarity, uint8_t temperatu
     double f_xtal = (defaultFrequency * hsdiv_reg * n1_reg)/(rfreq_reg/268435456.0);
 
     // Calculate HSDIV, N1, RFREQ with lower power consumption
-    uint8_t Si57x_param_calculation_done = 0;
-    double fDCO_min_fOUT_ratio_threshold = fDCO_min / targetFrequency;
-    for(uint8_t j=0; j<6 && !Si57x_param_calculation_done; j++)
-    {
+    double F_DCO_MIN_FOUT_ratio_threshold = F_DCO_MIN / targetFrequency;
+    for (uint8_t j=0; j<6; j++) {
         uint8_t hsdiv_tmp = hsdiv_values[j];
-        double ratio = fDCO_min_fOUT_ratio_threshold/hsdiv_tmp;
+        double ratio = F_DCO_MIN_FOUT_ratio_threshold/hsdiv_tmp;
         uint8_t n1_tmp = ((ratio)-((uint32_t) ratio))*10 > 0 ? ratio+1 : ratio;
         if(n1_tmp & 1) n1_tmp++;
         if( (hsdiv_tmp*n1_tmp) < (hsdiv_new*n1_new) )
@@ -131,8 +131,7 @@ refInit100MHz(double defaultFrequency, uint8_t EnablePolarity, uint8_t temperatu
     rfreq_reg = (uint64_t)( (( (double) targetFrequency * hsdiv_new * n1_new / f_xtal))*268435456.0);
     buf[0] = ((hsdiv_new-4)<<5 & 0xE0) | ((n1_new-1)>>2 & 0x1F);
     buf[1] = ((n1_new-1)<<6 & 0xC0) | (rfreq_reg>>32 & 0x3F);
-    for (i = 2; i < 6; i++)
-    {
+    for (i = 2; i < 6; i++) {
         buf[i]= (rfreq_reg>>((5-i)*8) & 0xFF);
     }
 
