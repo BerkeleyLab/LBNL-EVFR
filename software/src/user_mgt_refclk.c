@@ -12,15 +12,21 @@
 /* 
 ** Si57x defines and variables 
 */
+struct si57x_part_numbers {
+    uint8_t iicAddr;
+    double startupFrequency;
+    int outputEnablePolarity;
+    int temperatureStability;
+};
 #define F_DCO_MIN 4.85*1000000000
 #define F_DCO_MAX 5.67*1000000000
 #define SI570_DEFAULT_TARGET_FREQUENCY 100000000.0
 static uint8_t si570Address = 0; // 7-bit address
 static uint8_t Si570_reg_idx = 13; // internal register address
 static const struct si57x_part_numbers si57x_pn[] = {
-    {0x55, SI570_DEFAULT_TARGET_FREQUENCY, 100000000, 1, 0}, // Part number 570BBC000121DG
-    {0x75, SI570_DEFAULT_TARGET_FREQUENCY, 312500000, 1, 0}, // Part number 570BBB000309DG
-    {0x77, SI570_DEFAULT_TARGET_FREQUENCY, 125000000, 0, 1}, // Part number 570NCB000933DG
+    {0x55, 100000000, 1, 0}, // Part number 570BBC000121DG
+    {0x75, 312500000, 1, 0}, // Part number 570BBB000309DG
+    {0x77, 125000000, 0, 1}, // Part number 570NCB000933DG
 };
 
 
@@ -166,7 +172,7 @@ userMGTrefClkAdjust(int offsetPPM)
         for (uint8_t idx = 0 ; idx < sizeof(si57x_pn)/sizeof(si57x_pn[0]) ; idx++) {
             if(si57x_pn[idx].iicAddr == si570Address) {
                 r = refInit100MHz(si57x_pn[idx].startupFrequency,
-                                  si57x_pn[idx].targetFrequency,
+                                  SI570_DEFAULT_TARGET_FREQUENCY,
                                   si57x_pn[idx].outputEnablePolarity,
                                   si57x_pn[idx].temperatureStability);
                 r &= refSmallChanges(offsetPPM);
