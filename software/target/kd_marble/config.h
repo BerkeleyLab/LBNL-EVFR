@@ -6,7 +6,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#define KICKER_DRIVER
+#define VERILOG_KICKER_DRIVER
 
 /*
  *  Nominal event receiver clock rate
