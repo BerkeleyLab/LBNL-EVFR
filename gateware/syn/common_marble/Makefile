@@ -5,7 +5,7 @@ COMMUNICATION = gtx
 XILINX_TOOL := VIVADO
 FPGA_VENDOR := xilinx
 FPGA_PLATFORM := 7series
-FPGA_APPLICATION := evfr
+FPGA_APPLICATION ?= evfr
 
 CMD_SEP = ;
 __THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
