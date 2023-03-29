@@ -39,7 +39,7 @@ setReg(int reg, int value)
 
  /**
  Perform small changes in the Si570 output frequency without interrupt the signal. 
- Note: it require to call refInit100MHz() almost once to find iic address, and 
+ Note: it require to call refInit() almost once to find iic address, and 
  @param  offsetPPM the amount of ppm (referring to the current frequency) to be changed.
  */
 static int
@@ -80,7 +80,7 @@ refSmallChanges(int offsetPPM)
  @param  temperatureStability use 1 for 7 ppm type, otherwise set it 0 for  20 ppm and 50 ppm.
 */
 static int
-refInit100MHz(double defaultFrequency, double targetFrequency, uint8_t enablePolarity, uint8_t temperatureStability)
+refInit(double defaultFrequency, double targetFrequency, uint8_t enablePolarity, uint8_t temperatureStability)
 {
     int i;
     uint8_t buf[6], U39reg, hsdiv_reg, hsdiv_new=11, n1_reg, n1_new=128;
@@ -171,7 +171,7 @@ userMGTrefClkAdjust(int offsetPPM)
     if (si570Address) {
         for (uint8_t idx = 0 ; idx < sizeof(si57x_pn)/sizeof(si57x_pn[0]) ; idx++) {
             if(si57x_pn[idx].iicAddr == si570Address) {
-                r = refInit100MHz(si57x_pn[idx].startupFrequency,
+                r = refInit(si57x_pn[idx].startupFrequency,
                                   SI570_DEFAULT_TARGET_FREQUENCY,
                                   si57x_pn[idx].outputEnablePolarity,
                                   si57x_pn[idx].temperatureStability);
