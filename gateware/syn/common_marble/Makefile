@@ -51,11 +51,14 @@ UNISIM_CRAP += -e 'GTXE2_CHANNEL|GTXE2_COMMON|MMCME2_ADV|OSERDESE2'
 SYSTEM_TOP_PINS_XDC = $(TARGET)_top_pins.xdc
 SYSTEM_TOP_TIM_XDC = $(TARGET)_top_tim.xdc
 
-SYSTEM_TOP_EVRIO_XDC = evrio.xdc
 CFG_EVRIO = $(shell $(GW_SCRIPTS_DIR)/check_evrio.sh $(SW_TGT_DIR)/$(FPGA_APPLICATION)_$(HARDWARE)/config.h)
 
 ifeq ($(CFG_EVRIO),Y)
-SYSTEM_TOP_PINS_XDC += $(SYSTEM_TOP_EVRIO_XDC)
+SYSTEM_TOP_PINS_XDC += evrio.xdc
+endif
+
+ifeq ($(CFG_EVRIO),N)
+SYSTEM_TOP_PINS_XDC += kd_pins.xdc kd_tim.xdc
 endif
 
 # ip_cores generation scripts/names
