@@ -18,7 +18,7 @@ done
 KICKER_DRIVER_CFG=""
 for f in $CFG_FILES
 do
-    KICKER_DRIVER_CFG=`grep -E '^#define *KICKER_DRIVER *$' $f | awk '{print $2}'`
+    KICKER_DRIVER_CFG=`grep -E '^#define[ \t]*.*KICKER_DRIVER[ \t]*$' $f | awk '{print $2}'`
     [[ ! -z "$KICKER_DRIVER_CFG" ]] && break
 done
 
