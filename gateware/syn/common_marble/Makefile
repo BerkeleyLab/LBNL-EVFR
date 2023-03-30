@@ -45,7 +45,7 @@ VIVADO_SYNTH_EXTRA_TCL = prop.tcl ipcores_repos.tcl prio_xci_files.tcl
 include $(BUILD_DIR)/top_rules.mk
 
 # ignore xilinx primitives
-UNISIM_CRAP += -e 'GTXE2_CHANNEL|GTXE2_COMMON|MMCME2_ADV|OSERDESE2'
+UNISIM_CRAP += -e 'GTXE2_CHANNEL|GTXE2_COMMON|MMCME2_ADV|OSERDESE2|IDELAYCTRL|ODELAYE2'
 
 # Top level files for depedency tracking
 SYSTEM_TOP_PINS_XDC = $(TARGET)_top_pins.xdc
