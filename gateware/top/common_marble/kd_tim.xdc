@@ -1,4 +1,4 @@
-set_false_path -from [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *bd_i/clk_wiz_1/inst/mmcm_adv_inst/CLKOUT0}]] -to [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *kickerDriverClockGenerator/gateDriverMMCM/inst/mmcm_adv_inst/CLKOUT0}]]
+set_false_path -from [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *bd_i*CLKOUT0}]] -to [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *kickerDriverClockGenerator*CLKOUT0}]]
 
 # Associate the ODELAY blocks with their IDELAYCTRL instance.
 # It would be nice if this could be done where the SelectIO blocks are
