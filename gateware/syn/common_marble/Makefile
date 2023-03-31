@@ -58,7 +58,8 @@ SYSTEM_TOP_PINS_XDC += evrio.xdc
 endif
 
 ifeq ($(CFG_EVRIO),N)
-SYSTEM_TOP_PINS_XDC += kd_pins.xdc kd_tim.xdc
+SYSTEM_TOP_PINS_XDC += kd_pins.xdc
+SYSTEM_TOP_TIM_XDC += kd_tim.xdc
 endif
 
 # ip_cores generation scripts/names
