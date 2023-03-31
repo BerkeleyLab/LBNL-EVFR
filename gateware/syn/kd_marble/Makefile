@@ -1,5 +1,5 @@
 # Top level design name
-TARGET ?= evfr_marble
-FPGA_APPLICATION ?= evfr
+TARGET ?= kd_marble
+FPGA_APPLICATION ?= kd
 
 include ../common_marble/Makefile
