@@ -14,6 +14,7 @@
 #define CSR_WRITE_ENABLE    (1UL << 31)
 #define CSR_ADDR_SHIFT      8
 #define CSR_DATA_MASK       0xFF
+#define CSR_ACK_MASK       0xAA
 
 /*
  * Mailboxes
@@ -86,7 +87,7 @@ mmcMailboxWriteAndWait(unsigned int address, int value)
     uint32_t then;
     mmcMailboxWrite(address, value);
     then = MICROSECONDS_SINCE_BOOT();
-    while ((GPIO_READ(GPIO_IDX_MMC_MAILBOX) & CSR_DATA_MASK) != 0) {
+    while ((GPIO_READ(GPIO_IDX_MMC_MAILBOX) & CSR_ACK_MASK) != 0) {
         if ((MICROSECONDS_SINCE_BOOT() - then) > 5000000) {
             warn("mmcMailboxWriteAndWait(0x%02x) timed out", address);
             return;
