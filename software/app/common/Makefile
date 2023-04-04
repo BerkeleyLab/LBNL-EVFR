@@ -133,12 +133,6 @@ LIB_DIRS = $(BSP_DIR)/lib
 LIB_FLAGS = $(addprefix -L, $(LIB_DIRS))
 LIBS = -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
 
-ifeq ($(TARGET),evfr_marble)
-	USER_FLAGS += -D__TARGET_EVFR_MARBLE__
-else
-	USER_FLAGS += -D__TARGET_NOT_RECOGNIZED__
-endif
-
 INCLUDE_DIRS = \
 	$(SW_SRC_DIR) \
 	$(TARGET_DIR) \
