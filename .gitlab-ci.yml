@@ -57,7 +57,7 @@ sw_evfr_marble:
     - cd software/app/evfr
   stage: software
   script:
-    - make TARGET=evfr_marble clean && PATH=$XILINX_VITIS/bin:$XILINX_VITIS/gnu/microblaze/lin/bin:$PATH time make TARGET=evfr_marble
+    - make APP=evfr PLATFORM=marble clean && PATH=$XILINX_VITIS/bin:$XILINX_VITIS/gnu/microblaze/lin/bin:$PATH time make APP=evfr PLATFORM=marble all
   # Get artifacts from this job, needed to compile the sofware
   needs:
     - job: gw_evfr_marble
@@ -75,7 +75,7 @@ sw_kd_marble:
     - cd software/app/kd
   stage: software
   script:
-    - make TARGET=kd_marble clean && PATH=$XILINX_VITIS/bin:$XILINX_VITIS/gnu/microblaze/lin/bin:$PATH time make TARGET=kd_marble
+    - make APP=kd PLATFORM=marble clean && PATH=$XILINX_VITIS/bin:$XILINX_VITIS/gnu/microblaze/lin/bin:$PATH time make APP=kd PLATFORM=marble all
   # Get artifacts from this job, needed to compile the sofware
   needs:
     - job: gw_kd_marble
