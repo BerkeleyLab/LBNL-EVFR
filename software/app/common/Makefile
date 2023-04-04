@@ -17,7 +17,6 @@ MMI         ?= $(GW_TGT_DIR)/$(TARGET)_top.mmi
 ELF 	    ?= $(THIS_DIR)/$(TARGET).elf
 
 SW_APP_TGT_DIR = $(SW_APP_DIR)/$(APP)
-SW_APP_TGT_SCRIPTS_DIR = $(SW_APP_TGT_DIR)/scripts
 SW_COMMON_SCRIPTS_DIR = $(SW_APP_DIR)/common/scripts
 
 CPU_NAME   = microblaze_0
@@ -120,7 +119,7 @@ HDR_GEN_FILES = $(addprefix $(SW_SRC_DIR)/, $(__HDR_GEN_FILES))
 
 __STP_FILES = \
 	ad9520.stp
-STP_FILES = $(addprefix $(SW_APP_TGT_SCRIPTS_DIR)/, $(__STP_FILES))
+STP_FILES = $(addprefix $(SW_COMMON_SCRIPTS_DIR)/, $(__STP_FILES))
 
 include $(TARGET_DIR)/$(TARGET).mk
 
