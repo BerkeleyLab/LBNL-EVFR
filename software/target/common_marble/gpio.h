@@ -24,7 +24,7 @@
 #define GPIO_IDX_EVR_MGT_STATUS          10 // Additional MGT status (R)
 #define GPIO_IDX_EVR_MONITOR_CSR         11 // EVR control/status
 #define GPIO_IDX_EVR_MONITOR_SECONDS     12 // EVR monitor seconds (POSIX)
-#define GPIO_IDX_EVR_MONITOR_TICKS       13 // EVR monitor ticjs (RF/4)
+#define GPIO_IDX_EVR_MONITOR_TICKS       13 // EVR monitor ticks (RF/4)
 #define GPIO_IDX_EVR_SECONDS             14 // EVR time of day (POSIX)
 #define GPIO_IDX_EVR_LOG_CSR             15 // EVR log
 #define GPIO_IDX_FMC1_FIREFLY            16 // Firefly reset/enable
