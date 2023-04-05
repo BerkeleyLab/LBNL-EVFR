@@ -14,7 +14,7 @@
 #define CSR_WRITE_ENABLE    (1UL << 31)
 #define CSR_ADDR_SHIFT      8
 #define CSR_DATA_MASK       0xFF
-#define CSR_ACK_MASK       0xAA
+#define CSR_MGT_MUX_ACK_MASK       0xAA
 
 /*
  * Mailboxes
@@ -82,12 +82,12 @@ mmcMailboxWrite(unsigned int address, int value)
 }
 
 void
-mmcMailboxWriteAndWait(unsigned int address, int value)
+mmcMailboxWriteAndWait(unsigned int address, int value, uint32_t ackMask)
 {
     uint32_t then;
     mmcMailboxWrite(address, value);
     then = MICROSECONDS_SINCE_BOOT();
-    while ((GPIO_READ(GPIO_IDX_MMC_MAILBOX) & CSR_ACK_MASK) != 0) {
+    while ((GPIO_READ(GPIO_IDX_MMC_MAILBOX) & CSR_DATA_MASK ) & ackMask != 0) {
         if ((MICROSECONDS_SINCE_BOOT() - then) > 5000000) {
             warn("mmcMailboxWriteAndWait(0x%02x) timed out", address);
             return;
@@ -142,7 +142,7 @@ mmcMailboxInit(void)
                                                  : MGT_CONFIG_FMC;
     printf("Event stream from %s.\n", config==MGT_CONFIG_FMC ? "FMC1 DP0"
                                                              : "QSFP2 2/11");
-    mmcMailboxWriteAndWait(MADDR_MGT_CONFIG, config);
+    mmcMailboxWriteAndWait(MADDR_MGT_CONFIG, config, CSR_MGT_MUX_ACK_MASK);
     microsecondSpin(100);
     printf("Microcontroller:\n");
     showLM75temperature(28, MADDR_U28_TEMP);
