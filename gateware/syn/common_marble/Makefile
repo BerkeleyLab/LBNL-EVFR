@@ -230,10 +230,10 @@ $(IP_CORES_TOP_LVL_SRCS): % : $$(basename $$(notdir %)).xci
 	# fix line-continuation between (* *) attribute that iverilog doesn't understand
 	# from: https://catonmat.net/sed-one-liners-explained-part-one,
 	# 39. Append a line to the next if it ends with a backslash "\".
-	TOP_LVL="$*"; if [ "$${TOP_LVL##*.}" = "v" ] || [ "$${TOP_LVL##*.}" = "sv" ]; then sed -i -e :a -e '/\\$$/N; s/\\\n//; ta' $${TOP_LVL}; fi
+	TOP_LVL="$*"; if [ "$${TOP_LVL##*.}" = "v" ] || [ "$${TOP_LVL##*.}" = "sv" ]; then sed -e :a -e '/\\$$/N; s/\\\n//; ta' "$${TOP_LVL}" > $$$$.tmp ; mv $$$$.tmp "$${TOP_LVL}"; fi
 	# convert modules instance names to lowercase so iverilog can match and generate
 	# the depedency file for it
-	(find $($(basename $(notdir $@))_DIR) -not \( -name \*rfs.v \) -name "*.v" -exec sed -i -e 's/\($(basename $(notdir $@))_[A-Za-z0-9_]\+\)/\L\1/' '{}' \; || true)
+	find $($(basename $(notdir $@))_DIR) -not \( -name \*rfs.v \) -name "*.v" -print0 | xargs -0 -n 1 sh -c "sed -e 's/\($(basename $(notdir $@))_[A-Za-z0-9_]\+\)/\L\1/' \"\$$0\" > $$$$.tmp ; mv $$$$.tmp \"\$$0\""
 	# generate iverilog switches
 	rm -f $($(basename $(notdir $@))_VFLAGS_COMMAND_FILE)
 	(find $($(basename $(notdir $@))_DIR)/hdl $($(basename $(notdir $@))_DIR)/synth -mindepth 1 -not \( -name \*rfs.v \) -name "*.v" -exec echo "-l"'{}' \; || true) >> $($(basename $(notdir $@))_VFLAGS_COMMAND_FILE)
