@@ -396,7 +396,7 @@ assign GPIO_IN[GPIO_IDX_FMC1_FIREFLY] = {1'b1,
 (*MARK_DEBUG="false"*) wire evio_iic_sda_i, evio_iic_sda_t;
 (*MARK_DEBUG="false"*) wire [EVIO_FIREFLY_SELECT_WIDTH:0] evio_iic_gpo;
 
-wire [2:0] scl_i, sda_i; scl_t, sda_t;
+wire [2:0] scl_i, sda_i, scl_t, sda_t;
 IOBUF KDMON_1_SCL_IOBUF (.I(1'b0),
                          .IO(PMOD2_0),
                          .O(scl_i[0]),
