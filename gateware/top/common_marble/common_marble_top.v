@@ -83,13 +83,13 @@ module common_marble_top #(
     output PMOD1_6,
     output PMOD1_7,
 
-    // FIXME: Test points (maybe kicker pretrigger someday?)
-    output PMOD2_0,
-    output PMOD2_1,
-    output PMOD2_2,
-    output PMOD2_3,
-    output PMOD2_4,
-    output PMOD2_5,
+    // Kicker driver gate monitors
+    inout  PMOD2_0,
+    inout  PMOD2_1,
+    inout  PMOD2_2,
+    inout  PMOD2_3,
+    inout  PMOD2_4,
+    inout  PMOD2_5,
     input  PMOD2_6,
     input  PMOD2_7,
 
@@ -111,12 +111,6 @@ module common_marble_top #(
 // Static outputs
 assign VCXO_EN = 1'b0;
 assign PHY_RSTN = 1'b1;
-assign PMOD2_0 = 1'b0;
-assign PMOD2_1 = 1'b0;
-assign PMOD2_2 = 1'b0;
-assign PMOD2_3 = 1'b0;
-assign PMOD2_4 = 1'b0;
-assign PMOD2_5 = 1'b0;
 assign UTIO_PWR_EN = 1'b1;
 assign UTIO_LED = 2'h0;
 
@@ -396,6 +390,52 @@ IDELAYCTRL idelayControl2 (
 assign GPIO_IN[GPIO_IDX_FMC1_FIREFLY] = {1'b1,
                                          {32-1-CFG_EVIO_FIREFLY_COUNT{1'b0}},
                                          {CFG_EVIO_FIREFLY_COUNT{1'b1}}};
+
+// Use FMC1 IIC to communicate with gate driver monitors
+(*MARK_DEBUG="false"*) wire evio_iic_scl_i, evio_iic_scl_t;
+(*MARK_DEBUG="false"*) wire evio_iic_sda_i, evio_iic_sda_t;
+(*MARK_DEBUG="false"*) wire [EVIO_FIREFLY_SELECT_WIDTH:0] evio_iic_gpo;
+
+wire [2:0] scl_i, sda_i; scl_t, sda_t;
+IOBUF KDMON_1_SCL_IOBUF (.I(1'b0),
+                         .IO(PMOD2_0),
+                         .O(scl_i[0]),
+                         .T(scl_t[0]));
+IOBUF KDMON_1_SDA_IOBUF (.I(1'b0),
+                         .IO(PMOD2_1),
+                         .O(sda_i[0]),
+                         .T(sda_t[0]));
+IOBUF KDMON_2_SCL_IOBUF (.I(1'b0),
+                         .IO(PMOD2_2),
+                         .O(scl_i[1]),
+                         .T(scl_t[1]));
+IOBUF KDMON_2_SDA_IOBUF (.I(1'b0),
+                         .IO(PMOD2_3),
+                         .O(sda_i[1]),
+                         .T(sda_t[1]));
+IOBUF KDMON_3_SCL_IOBUF (.I(1'b0),
+                         .IO(PMOD2_4),
+                         .O(scl_i[2]),
+                         .T(scl_t[2]));
+IOBUF KDMON_3_SDA_IOBUF (.I(1'b0),
+                         .IO(PMOD2_5),
+                         .O(sda_i[2]),
+                         .T(sda_t[2]));
+generate
+for (i = 0 ; i < 3 ; i = i + 1) begin
+    assign scl_t[i] = evio_iic_scl_t | !evio_iic_gpo[i];
+    assign sda_t[i] = evio_iic_sda_t | !evio_iic_gpo[i];
+end
+endgenerate
+assign evio_iic_scl_i = (scl_i[0] & evio_iic_gpo[0]) |
+                        (scl_i[1] & evio_iic_gpo[1]) |
+                        (scl_i[2] & evio_iic_gpo[2]) |
+                        (evio_iic_gpo == 0);
+assign evio_iic_sda_i = (sda_i[0] & evio_iic_gpo[0]) |
+                        (sda_i[1] & evio_iic_gpo[1]) |
+                        (sda_i[2] & evio_iic_gpo[2]) |
+                        (evio_iic_gpo == 0);
+
 
 `else
 ///////////////////////////////////////////////////////////////////////////////

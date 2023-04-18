@@ -214,15 +214,34 @@ handleCommand(int commandArgCount, struct evfPacket *cmdp,
         break;
 
     case EVF_PROTOCOL_CMD_HI_KICKER_DRIVER:
-        if ((hwConfig & HWCONFIG_HAS_KICKER_DRIVER)
-         && (lo == EVF_PROTOCOL_CMD_LO_KICKER_DRIVER)
-         && (idx == EVF_PROTOCOL_CMD_KICKER_DRIVER_IDX_SET_GROUP_DELAY)) {
-            kdGateDriverUpdate(cmdp->args);
-            break;
-        }
-        else {
+        if (!(hwConfig & HWCONFIG_HAS_KICKER_DRIVER)) {
             return -1;
         }
+        switch (lo) {
+        case EVF_PROTOCOL_CMD_LO_KICKER_DRIVER:
+            if (idx == EVF_PROTOCOL_CMD_KICKER_DRIVER_IDX_SET_GROUP_DELAY) {
+                kdGateDriverUpdate(cmdp->args);
+                break;
+            }
+            return -1;
+
+        case EVF_PROTOCOL_CMD_LO_KICKER_DRIVER_MONITOR:
+            switch (idx) {
+            case EVF_PROTOCOL_CMD_KICKER_DRIVER_MONITOR_IDX_INIT:
+                kdGateDriverInitMonitorStatus();
+                break;
+                
+            case EVF_PROTOCOL_CMD_KICKER_DRIVER_MONITOR_IDX_READ:
+                replyArgCount = kdGateDriverGetMonitorStatus(replyp->args);
+                break;
+
+            default: return -1;
+            }
+            break;
+
+        default: return -1;
+        }
+        break;
 
     default: return -1;
     }

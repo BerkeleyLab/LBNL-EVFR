@@ -36,5 +36,7 @@
 #define _KD_GATE_DRIVER_H_
 
 void kdGateDriverUpdate(uint32_t *driverControl);
+int kdGateDriverGetMonitorStatus(uint32_t *driverStatus);
+void kdGateDriverInitMonitorStatus(void);
 
 #endif /* _KD_GATE_DRIVER_H_ */
