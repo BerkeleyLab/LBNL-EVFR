@@ -150,17 +150,18 @@ kdGateDriverGetMonitorStatus(uint32_t *driverStatus)
 void
 kdGateDriverInitMonitorStatus(void)
 {
-    unsigned char c = 0x01;
+    unsigned char c;
     /*
      * Send general call to all brances -- initializes all gate driver monitors
      */
+    c = 0x01;
     iicEVIOsetGPO(0x7);
     iicEVIOsend(0, -1, &c, 1);
 
     /*
      * Remove general call from all branches -- activates all monitors
      */
-    c = 0;
-    iicEVIOsend(2, -1, &c, 1);
+    c = 0x08;
+    iicEVIOsend(0, -1, &c, 1);
     iicEVIOsetGPO(0x1);
 }
