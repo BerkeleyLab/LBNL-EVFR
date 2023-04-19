@@ -409,12 +409,12 @@ for (i = 0 ; i < 3 ; i = i + 1) begin
     assign sda_t[i] = evio_iic_sda_t | !evio_iic_gpo[i];
 end
 endgenerate
-assign evio_iic_scl_i = (scl_i[0] | !evio_iic_gpo[0]) &
-                        (scl_i[1] | !evio_iic_gpo[1]) &
-                        (scl_i[2] | !evio_iic_gpo[2]);
-assign evio_iic_sda_i = (sda_i[0] | !evio_iic_gpo[0]) &
-                        (sda_i[1] | !evio_iic_gpo[1]) &
-                        (sda_i[2] | !evio_iic_gpo[2]);
+assign evio_iic_scl_i = ~((~scl_i[0] & evio_iic_gpo[0]) |
+                          (~scl_i[1] & evio_iic_gpo[1]) |
+                          (~scl_i[2] & evio_iic_gpo[2]));
+assign evio_iic_sda_i = ~((~sda_i[0] & evio_iic_gpo[0]) |
+                          (~sda_i[1] & evio_iic_gpo[1]) |
+                          (~sda_i[2] & evio_iic_gpo[2]));
 
 `else
 ///////////////////////////////////////////////////////////////////////////////
