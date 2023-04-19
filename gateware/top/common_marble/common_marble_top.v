@@ -270,6 +270,7 @@ evrLogger #(.DEBUG("false"))
 wire [2:0] sda_drive, sda_sense;
 wire [3:0] iic_proc_o;
 wire [1:0] sclUnused;
+wire       scl0;
 i2cHandler #(.CLK_RATE(SYSCLK_FREQUENCY),
              .CHANNEL_COUNT(3),
              .DEBUG("false"))
