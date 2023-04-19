@@ -397,30 +397,12 @@ assign GPIO_IN[GPIO_IDX_FMC1_FIREFLY] = {1'b1,
 (*MARK_DEBUG="false"*) wire [EVIO_FIREFLY_SELECT_WIDTH:0] evio_iic_gpo;
 
 wire [2:0] scl_i, sda_i, scl_t, sda_t;
-IOBUF KDMON_1_SCL_IOBUF (.I(1'b0),
-                         .IO(PMOD2_0),
-                         .O(scl_i[0]),
-                         .T(scl_t[0]));
-IOBUF KDMON_1_SDA_IOBUF (.I(1'b0),
-                         .IO(PMOD2_1),
-                         .O(sda_i[0]),
-                         .T(sda_t[0]));
-IOBUF KDMON_2_SCL_IOBUF (.I(1'b0),
-                         .IO(PMOD2_2),
-                         .O(scl_i[1]),
-                         .T(scl_t[1]));
-IOBUF KDMON_2_SDA_IOBUF (.I(1'b0),
-                         .IO(PMOD2_3),
-                         .O(sda_i[1]),
-                         .T(sda_t[1]));
-IOBUF KDMON_3_SCL_IOBUF (.I(1'b0),
-                         .IO(PMOD2_4),
-                         .O(scl_i[2]),
-                         .T(scl_t[2]));
-IOBUF KDMON_3_SDA_IOBUF (.I(1'b0),
-                         .IO(PMOD2_5),
-                         .O(sda_i[2]),
-                         .T(sda_t[2]));
+IOBUF KDMON_1_SCL_IOBUF (.I(1'b0), .IO(PMOD2_0), .O(scl_i[0]), .T(scl_t[0]));
+IOBUF KDMON_1_SDA_IOBUF (.I(1'b0), .IO(PMOD2_1), .O(sda_i[0]), .T(sda_t[0]));
+IOBUF KDMON_2_SCL_IOBUF (.I(1'b0), .IO(PMOD2_2), .O(scl_i[1]), .T(scl_t[1]));
+IOBUF KDMON_2_SDA_IOBUF (.I(1'b0), .IO(PMOD2_3), .O(sda_i[1]), .T(sda_t[1]));
+IOBUF KDMON_3_SCL_IOBUF (.I(1'b0), .IO(PMOD2_4), .O(scl_i[2]), .T(scl_t[2]));
+IOBUF KDMON_3_SDA_IOBUF (.I(1'b0), .IO(PMOD2_5), .O(sda_i[2]), .T(sda_t[2]));
 generate
 for (i = 0 ; i < 3 ; i = i + 1) begin
     assign scl_t[i] = evio_iic_scl_t | !evio_iic_gpo[i];
