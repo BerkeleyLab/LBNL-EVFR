@@ -478,7 +478,7 @@ cmdShowEVIO(int argc, char **argv)
     if (oldValue != newValue) {
         int i, b = 0x1;
         oldValue = newValue;
-        print("\rTRIG:");
+        printf("\rTRIG:");
         for (i = 0 ; i < CFG_EVIO_HARDWARE_TRIGGER_COUNT ; i++, b <<= 1) {
             printf("%c", newValue & b ? '1'+i : '.');
         }
