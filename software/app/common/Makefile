@@ -46,7 +46,6 @@ __SRC_FILES = \
 	mgtClkSwitch.c \
 	mmcMailbox.c \
 	platform.c \
-	ssd1331.c \
 	systemParameters.c \
 	tftp.c \
 	user_mgt_refclk.c \
@@ -78,7 +77,6 @@ __HDR_FILES = \
 	mmcMailbox.h \
 	platform_config.h \
 	platform.h \
-	ssd1331.h \
 	systemParameters.h \
 	tftp.h \
 	user_mgt_refclk.h \
@@ -121,6 +119,19 @@ __STP_FILES = \
 	ad9520.stp
 STP_FILES = $(addprefix $(SW_COMMON_SCRIPTS_DIR)/, $(__STP_FILES))
 
+ST7789V_DIR = $(SW_LIBS_DIR)/st7789v
+__ST7789V_SRC_FILES = \
+	systemFont.c \
+	st7789v.c
+__ST7789V_HDR_FILES =\
+	lv_font.h \
+	st7789v.h
+
+ST7789V_SRC_FILES = $(addprefix $(ST7789V_DIR)/, $(__ST7789V_SRC_FILES))
+ST7789V_HDR_FILES = $(addprefix $(ST7789V_DIR)/, $(__ST7789V_HDR_FILES))
+SRC_FILES += $(ST7789V_SRC_FILES)
+HDR_FILES += $(ST7789V_HDR_FILES)
+
 include $(TARGET_DIR)/$(TARGET).mk
 
 OBJ_FILES = $(SRC_FILES:.c=.o)
@@ -138,14 +149,15 @@ INCLUDE_DIRS = \
 	$(TARGET_DIR) \
 	$(SW_SPIFLASHDRIVER_DIR) \
 	$(BANTAMWEIGHT_DIR) \
-	$(BSP_DIR)/include
+	$(BSP_DIR)/include \
+	$(ST7789V_DIR)
 INCLUDE_FLAGS = $(addprefix -I, $(INCLUDE_DIRS))
 
 .PHONY: all clean bsp
 
-vpath *.c $(SW_SRC_DIR) $(TARGET_DIR)
-vpath *.h $(SW_SRC_DIR) $(TARGET_DIR)
-vpath *.o $(SW_SRC_DIR)
+vpath *.c $(SW_SRC_DIR) $(TARGET_DIR) $(ST7789V_DIR)
+vpath *.h $(SW_SRC_DIR) $(TARGET_DIR) $(ST7789V_DIR)
+vpath *.o $(SW_SRC_DIR) $(ST7789V_DIR)
 vpath *.mmi $(GW_TGT_DIR)
 
 %softwareBuildDate.h: $(SRC_FILES) $(HDR_FILES)

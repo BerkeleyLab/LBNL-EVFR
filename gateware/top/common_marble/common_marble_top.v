@@ -75,13 +75,13 @@ module common_marble_top #(
 
     // Front panel display and switches
     output PMOD1_0,
-    output PMOD1_1,
-    input  PMOD1_2,
-    input  PMOD1_3,
-    output PMOD1_4,
-    output PMOD1_5,
-    output PMOD1_6,
-    output PMOD1_7,
+    inout  PMOD1_1, // SDA (Bidirectional data transfer)
+    output PMOD1_2, // Enable display backlight driver
+    output PMOD1_3, // SCLK
+    output PMOD1_4, // RESET
+    output PMOD1_5, // D/C
+    input  PMOD1_6, // Reset button
+    input  PMOD1_7, // Display button
 
     // FIXME: Test points (maybe kicker pretrigger someday?)
     output PMOD2_0,
@@ -164,24 +164,34 @@ frontPanelSwitches #(
     .clk(sysClk),
     .GPIO_OUT(GPIO_OUT),
     .status(GPIO_IN[GPIO_IDX_USER_GPIO_CSR]),
-    .displaySwitch_n(PMOD1_3),
-    .resetSwitch_n(PMOD1_2));
+    .displaySwitch_n(PMOD1_7),
+    .resetSwitch_n(PMOD1_6));
 
 /////////////////////////////////////////////////////////////////////////////
 // Display
-ssd1331 #(.CLK_RATE(SYSCLK_FREQUENCY),
-          .DEBUG("false"))
-  ssd1331 (
-    .clk(sysClk),
-    .GPIO_OUT(GPIO_OUT),
-    .csrStrobe(GPIO_STROBES[GPIO_IDX_DISPLAY]),
-    .status(GPIO_IN[GPIO_IDX_DISPLAY]),
-    .SPI_CLK(PMOD1_7),
-    .SPI_CSN(PMOD1_4),
-    .SPI_D_CN(PMOD1_1),
-    .SPI_DOUT(PMOD1_5),
-    .VP_ENABLE(PMOD1_6),
-    .RESETN(PMOD1_0));
+    wire DISPLAY_SPI_SDA_O, DISPLAY_SPI_SDA_T, DISPLAY_SPI_SDA_I;
+    IOBUF DISPLAY_MOSI_Buf(.IO(PMOD1_1),
+                            .I(DISPLAY_SPI_SDA_O),
+                            .T(DISPLAY_SPI_SDA_T),
+                            .O(DISPLAY_SPI_SDA_I));
+    st7789v #(.CLK_RATE(SYSCLK_FREQUENCY),
+                .COMMAND_QUEUE_ADDRESS_WIDTH(11),
+                .DEBUG("false"))
+    
+        st7789v (.clk(sysClk),
+            .csrStrobe(GPIO_STROBES[GPIO_IDX_DISPLAY_CSR]),
+            .dataStrobe(GPIO_STROBES[GPIO_IDX_DISPLAY_DATA]),
+            .gpioOut(GPIO_OUT),
+            .status(GPIO_IN[GPIO_IDX_DISPLAY_CSR]),
+            .readData(GPIO_IN[GPIO_IDX_DISPLAY_DATA]),
+            .DISPLAY_BACKLIGHT_ENABLE(PMOD1_2),
+            .DISPLAY_RESET_N(PMOD1_4),
+            .DISPLAY_CMD_N(PMOD1_5),
+            .DISPLAY_CLK(PMOD1_3),
+            .DISPLAY_CS_N(PMOD1_0),
+            .DISPLAY_SDA_O(DISPLAY_SPI_SDA_O),
+            .DISPLAY_SDA_T(DISPLAY_SPI_SDA_T),
+            .DISPLAY_SDA_I(DISPLAY_SPI_SDA_I));
 
 //////////////////////////////////////////////////////////////////////////////
 // Timekeeping
