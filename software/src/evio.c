@@ -8,16 +8,11 @@
  */
 
 #include <stdio.h>
-#include <stdint.h>
-#include <xparameters.h>
 #include "evio.h"
 #include "iicEVIO.h"
 #include "iicProc.h"
 #include "gpio.h"
 #include "util.h"
-
-#define EVIO_XCVR_COUNT         3
-#define CHANNELS_PER_FIREFLY    12
 
 /*
  * Crosspoint switch port assignments
@@ -466,4 +461,36 @@ evioShowCrosspointRegisters(void)
                                                 fireflyStatus[i][1].rxLowPower);
         }
     }
+}
+
+/* 
+ * Everytimes is called returns a different temperature value, starting from TX0 
+ */
+int
+getFireflyTemperature(void) {
+    static uint8_t fireflyNumber = 0; 
+    static uint8_t rxtx_index = 0;
+    return 10*fireflyStatus[((rxtx_index%2)? 
+                                fireflyNumber++:
+                                fireflyNumber)%EVIO_XCVR_COUNT]
+                         [(rxtx_index++)%2].temperature;
+}
+
+/* return variable bit organization:
+ *  | 5th  | 4th  | 3th  | 2th  | 1th  | 0th  |
+ *  | bit  | bit  | bit  | bit  | bit  | bit  |
+ *  |[0][0]|[0][1]|[1][0]|[1][1]|[2][0]|[2][1]|
+ */
+uint16_t
+getFireflyPresence(void) {
+    uint16_t presence = 0;
+    for(uint8_t i=0; i<2*EVIO_XCVR_COUNT; i++) {
+        presence |= (fireflyStatus[i>>1][i&0x1].isPresent) << i;
+    }
+    return presence;
+}
+
+uint16_t
+getFireflyRxLowPower(uint8_t index) {
+    return fireflyStatus[index%EVIO_XCVR_COUNT][1].rxLowPower;
 }

@@ -41,6 +41,13 @@
  */
 #define ST7789V_COLOUR(r,g,b) (((r)<<11)|((g)<<6)|(b))
 
+#include "lv_font.h"
+extern const lv_font_t systemFont;
+#define COL_COUNT   320
+#define ROW_COUNT   240
+#define ST7789V_CHARACTER_WIDTH systemFont.monospace
+#define ST7789V_CHARACTER_HEIGHT systemFont.h_px
+
 #define ST7789V_RED     ST7789V_COLOUR(31,0,0)
 #define ST7789V_GREEN   ST7789V_COLOUR(0,31,0)
 #define ST7789V_BLUE    ST7789V_COLOUR(0,0,31)
@@ -49,6 +56,7 @@
 #define ST7789V_YELLOW  ST7789V_COLOUR(31,31,0)
 #define ST7789V_BLACK   ST7789V_COLOUR(0,0,0)
 #define ST7789V_WHITE   ST7789V_COLOUR(31,31,31)
+#define ST7789V_GREY    ST7789V_COLOUR(2,2,2)
 
 #define ST7789V_ORANGE  ST7789V_COLOUR(31,15,0)
 #define ST7789V_PURPLE  ST7789V_COLOUR(16,0,16)
