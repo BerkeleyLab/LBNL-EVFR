@@ -69,7 +69,7 @@ struct fileInfo {
 /* Assume that largest sector in flash is no larger than 64 KiB. */
 static const struct fileInfo fileTable[] = {
     { "EVCLIENT_A.bit",         MiB(0),              MiB(7),   0   },
-    { "EVCLIENT_B.bit",         MiB(7),              MiB(7),   0   },
+    { "EVCLIENT_B.bit",         MiB(8),              MiB(7),   0   },
     { SYSTEM_PARAMETERS_NAME,   MiB(15)+KiB(0),      KiB(4),   0   },
     { "FullFlash.bin",          MiB(0),              MiB(16),  0   },
     { "FMC1_EEPROM.bin",        FMC_EEPROM_SELECT+0, 256,      0   },
