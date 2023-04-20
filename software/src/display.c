@@ -366,7 +366,7 @@ drawVoltage(int redraw) {
 
     if(redraw || vccINT != vccINT_old) {
     sprintf(cbuf,"%4lu", vccINT );
-    st7789vShowString(VOLTAGE_HOFF + 5*ST7789V_CHARACTER_WIDTH, 
+    st7789vShowString(VOLTAGE_HOFF + 6*ST7789V_CHARACTER_WIDTH, 
                       VOLTAGE_VOFF + ST7789V_CHARACTER_HEIGHT, cbuf);
     }
 
