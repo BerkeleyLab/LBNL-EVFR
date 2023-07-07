@@ -2,9 +2,9 @@
  * Front panel display
  *  The code is structured in screens and display button allows to switch
  *  among them. The top level is displayCrank() periodically called. The
- *  screens share a common bottom area showing timestamp, IP and icons. 
- *      Startup screen is event display (screen0)
- *      Second one shows diagnostic parameters (screen1)
+ *  screens share a common bottom area showing timestamp, IP and icons.
+ *      Startup screen is diagnostic display (screen0)
+ *      Second one shows incoming events (screen1)
  *      Last screen allows to check optical lowPower status (screen2)
  */
 
@@ -588,13 +588,13 @@ bottomLine(int redraw) {
 }
 
 static void
-screen0(int redraw) {
+screen1(int redraw) {
     bottomLine(redraw);
     drawEventLog(redraw);
 }
 
 static void
-screen1(int redraw) {
+screen0(int redraw) {
     uint32_t now = MICROSECONDS_SINCE_BOOT();
     static uint32_t whenDrawn;
 
