@@ -30,27 +30,27 @@
 #define LINE_FROM_TOP(n)                    ((n)*ST7789V_CHARACTER_HEIGHT)
 #define LINE_FROM_BOTTOM(n) (ROW_COUNT - ((n+1)*ST7789V_CHARACTER_HEIGHT))
 #define ICON_VERT_OFFSET                                                 0 // pixel from the bottom
-#define HEARTHBEAT_HOFF                                                  0 // pixel from right edge 
-#define FLASH_HOFF                             2 * ST7789V_CHARACTER_WIDTH // pixel from right edge 
+#define HEARTHBEAT_HOFF                                                  0 // pixel from right edge
+#define FLASH_HOFF                             2 * ST7789V_CHARACTER_WIDTH // pixel from right edge
 #define TEMP_SENSOR_NUM                                                  9 // temperature sensor num
 #define TEMP_DESC_LENGTH                                                 4 // sensor name length
 #define TEMP_STR_LEN                                                    11 // char number per indicator
 #define TEMP_STR_VOFF                                                    8 // lines from bottom
-#define MAC_STR_VOFF                                   LINE_FROM_BOTTOM(2) 
-#define MAC_STR_HOFF                                     CHAR_FROM_LEFT(0) 
-#define MMC_STR_VOFF                                          MAC_STR_VOFF 
-#define MMC_STR_HOFF                                    CHAR_FROM_LEFT(18) 
+#define MAC_STR_VOFF                                   LINE_FROM_BOTTOM(2)
+#define MAC_STR_HOFF                                     CHAR_FROM_LEFT(0)
+#define MMC_STR_VOFF                                          MAC_STR_VOFF
+#define MMC_STR_HOFF                                    CHAR_FROM_LEFT(18)
 #define FREQ_STR_VOFF                                                   14 // lines from bottom (header)
 #define VOLTAGE_HOFF                                     CHAR_FROM_LEFT(0) // header
 #define VOLTAGE_VOFF                                   LINE_FROM_BOTTOM(4) // header
 #define FIREFLY_HOFF                                                     9 // pixel from  left
-#define FIREFLY_VOFF                                      LINE_FROM_TOP(1) 
+#define FIREFLY_VOFF                                      LINE_FROM_TOP(1)
 #define BOX_WIDTH                                                       24 // pixel
 #define BOX_OFFSET_X(j)                       FIREFLY_HOFF+j*(BOX_WIDTH+1)
 #define BOX_OFFSET_Y(i)                      (2+i%2+(i>>1)*4)*FIREFLY_VOFF
 #define EVIO_BOOT_DELAY                                           10000000 // us
 
-/* 
+/*
     * Temperature sensors wrapper variable
     *   order:  [FPGA, U28, U29, 6x Firefly]
     */
@@ -84,9 +84,9 @@ static struct tempInfo_t {
                                 10, TEMP_STR_LEN*10, 2*TEMP_STR_LEN*10,// line 2
                                 10, TEMP_STR_LEN*10, 2*TEMP_STR_LEN*10,// line 3
                                 },
-                .y_position = {ROW_COUNT- (TEMP_STR_VOFF-0)*16, // line 1  
-                                ROW_COUNT- (TEMP_STR_VOFF-0)*16, // line 1 
-                                ROW_COUNT- (TEMP_STR_VOFF-0)*16, // line 1 
+                .y_position = {ROW_COUNT- (TEMP_STR_VOFF-0)*16, // line 1
+                                ROW_COUNT- (TEMP_STR_VOFF-0)*16, // line 1
+                                ROW_COUNT- (TEMP_STR_VOFF-0)*16, // line 1
                                 ROW_COUNT- (TEMP_STR_VOFF-1)*16, // line 2
                                 ROW_COUNT- (TEMP_STR_VOFF-1)*16, // line 2
                                 ROW_COUNT- (TEMP_STR_VOFF-1)*16, // line 2
@@ -97,7 +97,7 @@ static struct tempInfo_t {
                 };
 
 /*
- * Draw hearbeat marker 
+ * Draw hearbeat marker
  */
 static void
 drawHeartbeatIndicator(void)
@@ -146,7 +146,7 @@ drawHeartbeatIndicator(void)
         const int cols = sizeof heart[0] / sizeof heart[0][0];
         const int xs = COL_COUNT - cols - HEARTHBEAT_HOFF;
         const int ys = ROW_COUNT - rows - ICON_VERT_OFFSET;
-        if(hb) 
+        if(hb)
             st7789vDrawRectangle(xs, ys, cols, rows, &heart[0][0]);
         else
             st7789vFlood(xs, ys, cols, rows, ST7789V_BLACK);
@@ -290,7 +290,7 @@ drawMMCfirmware(int redraw) {
     if(redraw) {
         char cbuf [23];
         sprintf(cbuf, "- MMC=%8X", getMMCfirmware());
-        st7789vShowString(MMC_STR_HOFF, 
+        st7789vShowString(MMC_STR_HOFF,
                           MMC_STR_VOFF, cbuf);
     }
 }
@@ -308,12 +308,12 @@ drawFMON(int redraw)
                                    "Ethernet Tx",
                                    "Ethernet Rx" };
     if(redraw) {
-        st7789vShowString(0, LINE_FROM_BOTTOM(FREQ_STR_VOFF), 
+        st7789vShowString(0, LINE_FROM_BOTTOM(FREQ_STR_VOFF),
                             "Frequencies [MHz]:______________");
         for(uint8_t j=0; j<sizeof names / sizeof names[0]; j++) {
             char cbuf[20];
             sprintf(cbuf, "%16s : ", names[j]);
-            st7789vShowString(st7789vCharWidth, 
+            st7789vShowString(st7789vCharWidth,
                               LINE_FROM_BOTTOM(FREQ_STR_VOFF-1-j), cbuf);
         }
     }
@@ -323,20 +323,20 @@ drawFMON(int redraw)
         uint32_t csr = GPIO_READ(GPIO_IDX_FREQ_MONITOR_CSR);
         uint32_t rate = csr & 0xc3FFFFFFF;
         if (csr & 0x80000000) {
-            sprintf(cbuf, "%3lu.%03lu", rate / 1000000, 
+            sprintf(cbuf, "%3lu.%03lu", rate / 1000000,
                                         (rate / 1000) % 1000);
         }
         else {
             sprintf(cbuf, "%3lu.%06lu", rate / 1000000, rate % 1000000);
         }
-        st7789vShowString(20*st7789vCharWidth, 
+        st7789vShowString(20*st7789vCharWidth,
                           LINE_FROM_BOTTOM(FREQ_STR_VOFF-1-i), cbuf);
     }
     return 0;
 }
 
 /*
- * Draw FPGA voltages (miss some voltages) 
+ * Draw FPGA voltages (miss some voltages)
  * TODO: include INA219 values
  */
 static void
@@ -344,47 +344,47 @@ drawVoltage(int redraw) {
     /*
      *  ________________________________
      *  VOLTAGES [mV]:
-     *  vINT: XXX vAUX: XXXX vBRAM: XXX  
+     *  vINT: XXX vAUX: XXXX vBRAM: XXX
      *  ________________________________
      */
     uint32_t xadc_values [2];
     xadcUpdate(xadc_values);
     char cbuf[30];
     static uint32_t vccINT_old, vccAUX_old, vBRAM_old;
-    
+
     if(redraw) {
-        st7789vShowString(VOLTAGE_HOFF, VOLTAGE_VOFF, 
+        st7789vShowString(VOLTAGE_HOFF, VOLTAGE_VOFF,
                           "Voltages [mV]:__________________");
-        st7789vShowString(VOLTAGE_HOFF + ST7789V_CHARACTER_WIDTH, 
-                          VOLTAGE_VOFF + ST7789V_CHARACTER_HEIGHT, 
+        st7789vShowString(VOLTAGE_HOFF + ST7789V_CHARACTER_WIDTH,
+                          VOLTAGE_VOFF + ST7789V_CHARACTER_HEIGHT,
                           "vINT:     vAUX:      vBRAM:   ");
     }
 
-    uint32_t vccINT = 3000 * (xadc_values[0]>>20) / 4096.0, 
+    uint32_t vccINT = 3000 * (xadc_values[0]>>20) / 4096.0,
              vccAUX = 3000 * ((xadc_values[1]&0xFFFF)>> 4) / 4096.0,
              vBRAM  = 3000 * (xadc_values[1]>>20) / 4096.0;
 
     if(redraw || vccINT != vccINT_old) {
     sprintf(cbuf,"%4lu", vccINT );
-    st7789vShowString(VOLTAGE_HOFF + 6*ST7789V_CHARACTER_WIDTH, 
+    st7789vShowString(VOLTAGE_HOFF + 6*ST7789V_CHARACTER_WIDTH,
                       VOLTAGE_VOFF + ST7789V_CHARACTER_HEIGHT, cbuf);
     }
 
     if(redraw || vccAUX != vccAUX_old) {
     sprintf(cbuf,"%4lu", vccAUX );
-    st7789vShowString(VOLTAGE_HOFF + 17*ST7789V_CHARACTER_WIDTH, 
+    st7789vShowString(VOLTAGE_HOFF + 17*ST7789V_CHARACTER_WIDTH,
                       VOLTAGE_VOFF + ST7789V_CHARACTER_HEIGHT, cbuf);
     }
 
     if(redraw || vBRAM != vBRAM_old) {
     sprintf(cbuf,"%4lu", vBRAM );
-    st7789vShowString(VOLTAGE_HOFF + 28*ST7789V_CHARACTER_WIDTH, 
+    st7789vShowString(VOLTAGE_HOFF + 28*ST7789V_CHARACTER_WIDTH,
                       VOLTAGE_VOFF + ST7789V_CHARACTER_HEIGHT, cbuf);
     }
 }
 
 /*
- * Draw temperature defined in tempInfo struct. 
+ * Draw temperature defined in tempInfo struct.
  * Text color changes in case of threshold exceeding.
  *  ________________________________
  *  TEMPERATURES [C]:
@@ -397,7 +397,7 @@ static void
 drawAllTemperature(int redraw )
 {
     /* HEADER */
-    if(redraw) { 
+    if(redraw) {
         st7789vSetCharacterRGB(ST7789V_WHITE, ST7789V_BLACK);
         st7789vShowString(0, LINE_FROM_BOTTOM(TEMP_STR_VOFF),
                             "Temperatures [C]:_______________");
@@ -447,7 +447,7 @@ drawAllTemperature(int redraw )
             sprintf(cbuf, "%2d.%d ", temp / 10, temp % 10);
             st7789vShowString(tempInfo.x_position[i]+(1+TEMP_DESC_LENGTH)*st7789vCharWidth,
                               tempInfo.y_position[i], cbuf);
-            
+
         }
         tempInfo.tempVal[i] = temp;
     }
@@ -521,7 +521,7 @@ drawFlashProtection(int redraw ) {
                 if( i < rows-2) {
                     flashIcon[i][i+1] = ST7789V_RED;
                     flashIcon[i][i+2] = ST7789V_RED;
-                } 
+                }
             }
         }
         st7789vDrawRectangle(xs, ys, cols, rows, &flashIcon[0][0]);
@@ -540,7 +540,7 @@ drawFireflyStatus(int redraw) {
         presence = getFireflyPresence();
         for(uint8_t i=0; i<2*EVIO_XCVR_COUNT; i++) {
             if(i%2) {
-                st7789vShowString(0, LINE_FROM_TOP(1+4*(i>>1)), 
+                st7789vShowString(0, LINE_FROM_TOP(1+4*(i>>1)),
                                         "  1      4         8         12");
             }
             st7789vFlood(FIREFLY_HOFF, BOX_OFFSET_Y(i), // upline
@@ -549,7 +549,7 @@ drawFireflyStatus(int redraw) {
             st7789vFlood(FIREFLY_HOFF, BOX_OFFSET_Y(i)+FIREFLY_VOFF, // downline
                         COL_COUNT-2*FIREFLY_HOFF-1, 1,
                         ((presence>>(5-i))&1) ? ST7789V_WHITE : ST7789V_RED);
-            for(uint8_t j=0; j<=CHANNELS_PER_FIREFLY; j++) { 
+            for(uint8_t j=0; j<=CHANNELS_PER_FIREFLY; j++) {
                 // horizontal box edges
                 st7789vFlood(BOX_OFFSET_X(j), BOX_OFFSET_Y(i),
                         1, ST7789V_CHARACTER_HEIGHT,
@@ -565,7 +565,7 @@ drawFireflyStatus(int redraw) {
             }
             st7789vFlood(BOX_OFFSET_X(j)+1,
                          BOX_OFFSET_Y(2*i)+ST7789V_CHARACTER_HEIGHT+1,
-                         BOX_WIDTH, ST7789V_CHARACTER_HEIGHT-1, 
+                         BOX_WIDTH, ST7789V_CHARACTER_HEIGHT-1,
                         ((rxLowPower>>j)&0x1) ? ST7789V_RED : ST7789V_GREEN);
         }
     }
