@@ -468,38 +468,45 @@ evioShowCrosspointRegisters(void)
  * Indexes are trimmed to avoid size excess.
  */
 int
-getFireflyTemperature(uint8_t fireflyNumber, uint8_t rxtx_index) {
+getFireflyTemperature(uint8_t fireflyNumber, uint8_t rxtx_index)
+{
     return fireflyStatus[fireflyNumber%EVIO_XCVR_COUNT]
                         [rxtx_index%2].temperature;
 }
 
 // temperature getter for Firefly 0 - TX
-int getFireflyTX0temperature(void) {
+int getFireflyTX0temperature(void)
+{
     return 10*getFireflyTemperature(0, 0);
 }
 
 // temperature getter for Firefly 0 - RX
-int getFireflyRX0temperature(void) {
+int getFireflyRX0temperature(void)
+{
     return 10*getFireflyTemperature(0, 1);
 }
 
 // temperature getter for Firefly 1 - TX
-int getFireflyTX1temperature(void) {
+int getFireflyTX1temperature(void)
+{
     return 10*getFireflyTemperature(1, 0);
 }
 
 // temperature getter for Firefly 1 - RX
-int getFireflyRX1temperature(void) {
+int getFireflyRX1temperature(void)
+{
     return 10*getFireflyTemperature(1, 1);
 }
 
 // temperature getter for Firefly 2 - TX
-int getFireflyTX2temperature(void) {
+int getFireflyTX2temperature(void)
+{
     return 10*getFireflyTemperature(2, 0);
 }
 
 // temperature getter for Firefly 2 - RX
-int getFireflyRX2temperature(void) {
+int getFireflyRX2temperature(void)
+{
     return 10*getFireflyTemperature(2, 1);
 }
 
@@ -512,7 +519,8 @@ int getFireflyRX2temperature(void) {
  *  |[0][0]|[0][1]|[1][0]|[1][1]|[2][0]|[2][1]|
  */
 uint16_t
-getFireflyPresence(void) {
+getFireflyPresence(void)
+{
     uint16_t presence = 0;
     for(uint8_t i=0; i<2*EVIO_XCVR_COUNT; i++) {
         presence |= (fireflyStatus[i>>1][i&0x1].isPresent) << i;
@@ -521,6 +529,7 @@ getFireflyPresence(void) {
 }
 
 uint16_t
-getFireflyRxLowPower(uint8_t index) {
+getFireflyRxLowPower(uint8_t index)
+{
     return fireflyStatus[index%EVIO_XCVR_COUNT][1].rxLowPower;
 }
