@@ -503,9 +503,12 @@ int getFireflyRX2temperature(void) {
     return 10*getFireflyTemperature(2, 1);
 }
 
-/* return variable bit organization:
+/* In brief:
+ *  Provide presence bool value for each firefly, alternating TX and RX
+ * Returned variable bit organization:
  *  | 5th  | 4th  | 3th  | 2th  | 1th  | 0th  |
  *  | bit  | bit  | bit  | bit  | bit  | bit  |
+ * equivalent fireflyStatus indexing: (column allined)
  *  |[0][0]|[0][1]|[1][0]|[1][1]|[2][0]|[2][1]|
  */
 uint16_t
