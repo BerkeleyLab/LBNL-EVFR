@@ -463,17 +463,44 @@ evioShowCrosspointRegisters(void)
     }
 }
 
-/* 
- * Everytimes is called returns a different temperature value, starting from TX0 
+/*
+ * Safe getter function for firefly temperature.
+ * Indexes are trimmed to avoid size excess.
  */
 int
-getFireflyTemperature(void) {
-    static uint8_t fireflyNumber = 0; 
-    static uint8_t rxtx_index = 0;
-    return 10*fireflyStatus[((rxtx_index%2)? 
-                                fireflyNumber++:
-                                fireflyNumber)%EVIO_XCVR_COUNT]
-                         [(rxtx_index++)%2].temperature;
+getFireflyTemperature(uint8_t fireflyNumber, uint8_t rxtx_index) {
+    return fireflyStatus[fireflyNumber%EVIO_XCVR_COUNT]
+                        [rxtx_index%2].temperature;
+}
+
+// temperature getter for Firefly 0 - TX
+int getFireflyTX0temperature(void) {
+    return 10*getFireflyTemperature(0, 0);
+}
+
+// temperature getter for Firefly 0 - RX
+int getFireflyRX0temperature(void) {
+    return 10*getFireflyTemperature(0, 1);
+}
+
+// temperature getter for Firefly 1 - TX
+int getFireflyTX1temperature(void) {
+    return 10*getFireflyTemperature(1, 0);
+}
+
+// temperature getter for Firefly 1 - RX
+int getFireflyRX1temperature(void) {
+    return 10*getFireflyTemperature(1, 1);
+}
+
+// temperature getter for Firefly 2 - TX
+int getFireflyTX2temperature(void) {
+    return 10*getFireflyTemperature(2, 0);
+}
+
+// temperature getter for Firefly 2 - RX
+int getFireflyRX2temperature(void) {
+    return 10*getFireflyTemperature(2, 1);
 }
 
 /* return variable bit organization:
