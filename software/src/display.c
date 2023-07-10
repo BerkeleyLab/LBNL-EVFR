@@ -444,7 +444,13 @@ drawAllTemperature(int redraw )
             if (temp < 0) {
                 temp = 0;
             }
-            sprintf(cbuf, "%2d.%d ", temp / 10, temp % 10);
+            if (temp <= 0) {
+                st7789vSetCharacterRGB(ST7789V_YELLOW, ST7789V_BLACK);
+                sprintf(cbuf, " INV");
+            }
+            else {
+                sprintf(cbuf, "%2d.%d ", temp / 10, temp % 10);
+            }
             st7789vShowString(tempInfo.x_position[i]+(1+TEMP_DESC_LENGTH)*st7789vCharWidth,
                               tempInfo.y_position[i], cbuf);
 

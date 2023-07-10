@@ -470,8 +470,13 @@ evioShowCrosspointRegisters(void)
 int
 getFireflyTemperature(uint8_t fireflyNumber, uint8_t rxtx_index)
 {
-    return fireflyStatus[fireflyNumber%EVIO_XCVR_COUNT]
-                        [rxtx_index%2].temperature;
+    if(fireflyNumber >= EVIO_XCVR_COUNT || rxtx_index >= 2) {
+        return (int8_t) -99;
+    }
+    else {
+        return fireflyStatus[fireflyNumber%EVIO_XCVR_COUNT]
+                            [rxtx_index%2].temperature;
+    }
 }
 
 // temperature getter for Firefly 0 - TX
