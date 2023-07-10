@@ -73,25 +73,25 @@ module common_marble_top #(
     input  FPGA_MOSI,
     output FPGA_MISO,
 
-    // Front panel display and switches
-    output PMOD1_0,
-    inout  PMOD1_1, // SDA (Bidirectional data transfer)
-    output PMOD1_2, // Enable display backlight driver
-    output PMOD1_3, // SCLK
-    output PMOD1_4, // RESET
-    output PMOD1_5, // D/C
-    input  PMOD1_6, // Reset button
-    input  PMOD1_7, // Display button
-
     // FIXME: Test points (maybe kicker pretrigger someday?)
-    output PMOD2_0,
-    output PMOD2_1,
-    output PMOD2_2,
-    output PMOD2_3,
-    output PMOD2_4,
-    output PMOD2_5,
-    input  PMOD2_6,
-    input  PMOD2_7,
+    output PMOD1_0,
+    output PMOD1_1,
+    output PMOD1_2,
+    output PMOD1_3,
+    output PMOD1_4,
+    output PMOD1_5,
+    input  PMOD1_6,
+    input  PMOD1_7,
+
+    // Front panel display and switches
+    output PMOD2_0, // Case select
+    inout  PMOD2_1, // SDA (Bidirectional data transfer)
+    output PMOD2_2, // Enable display backlight driver
+    output PMOD2_3, // SCLK
+    output PMOD2_4, // RESET
+    output PMOD2_5, // D/C
+    input  PMOD2_6, // Reset button
+    input  PMOD2_7, // Display button
 
     // Test points -- FIXME: THESE ARE FOR THE FMC-DBG FOR TEMPORARY TESTING
     output FMC1_CLK1_M2C_P,
@@ -111,12 +111,12 @@ module common_marble_top #(
 // Static outputs
 assign VCXO_EN = 1'b0;
 assign PHY_RSTN = 1'b1;
-assign PMOD2_0 = 1'b0;
-assign PMOD2_1 = 1'b0;
-assign PMOD2_2 = 1'b0;
-assign PMOD2_3 = 1'b0;
-assign PMOD2_4 = 1'b0;
-assign PMOD2_5 = 1'b0;
+assign PMOD1_0 = 1'b0;
+assign PMOD1_1 = 1'b0;
+assign PMOD1_2 = 1'b0;
+assign PMOD1_3 = 1'b0;
+assign PMOD1_4 = 1'b0;
+assign PMOD1_5 = 1'b0;
 assign UTIO_PWR_EN = 1'b1;
 assign UTIO_LED = 2'h0;
 
@@ -164,31 +164,31 @@ frontPanelSwitches #(
     .clk(sysClk),
     .GPIO_OUT(GPIO_OUT),
     .status(GPIO_IN[GPIO_IDX_USER_GPIO_CSR]),
-    .displaySwitch_n(PMOD1_7),
-    .resetSwitch_n(PMOD1_6));
+    .displaySwitch_n(PMOD2_7),
+    .resetSwitch_n(PMOD2_6));
 
 /////////////////////////////////////////////////////////////////////////////
 // Display
     wire DISPLAY_SPI_SDA_O, DISPLAY_SPI_SDA_T, DISPLAY_SPI_SDA_I;
-    IOBUF DISPLAY_MOSI_Buf(.IO(PMOD1_1),
+    IOBUF DISPLAY_MOSI_Buf(.IO(PMOD2_1),
                             .I(DISPLAY_SPI_SDA_O),
                             .T(DISPLAY_SPI_SDA_T),
                             .O(DISPLAY_SPI_SDA_I));
     st7789v #(.CLK_RATE(SYSCLK_FREQUENCY),
                 .COMMAND_QUEUE_ADDRESS_WIDTH(11),
                 .DEBUG("false"))
-    
+
         st7789v (.clk(sysClk),
             .csrStrobe(GPIO_STROBES[GPIO_IDX_DISPLAY_CSR]),
             .dataStrobe(GPIO_STROBES[GPIO_IDX_DISPLAY_DATA]),
             .gpioOut(GPIO_OUT),
             .status(GPIO_IN[GPIO_IDX_DISPLAY_CSR]),
             .readData(GPIO_IN[GPIO_IDX_DISPLAY_DATA]),
-            .DISPLAY_BACKLIGHT_ENABLE(PMOD1_2),
-            .DISPLAY_RESET_N(PMOD1_4),
-            .DISPLAY_CMD_N(PMOD1_5),
-            .DISPLAY_CLK(PMOD1_3),
-            .DISPLAY_CS_N(PMOD1_0),
+            .DISPLAY_BACKLIGHT_ENABLE(PMOD2_2),
+            .DISPLAY_RESET_N(PMOD2_4),
+            .DISPLAY_CMD_N(PMOD2_5),
+            .DISPLAY_CLK(PMOD2_3),
+            .DISPLAY_CS_N(PMOD2_0),
             .DISPLAY_SDA_O(DISPLAY_SPI_SDA_O),
             .DISPLAY_SDA_T(DISPLAY_SPI_SDA_T),
             .DISPLAY_SDA_I(DISPLAY_SPI_SDA_I));
