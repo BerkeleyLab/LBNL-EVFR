@@ -465,17 +465,16 @@ evioShowCrosspointRegisters(void)
 
 /*
  * Safe getter function for firefly temperature.
- * Indexes are trimmed to avoid size excess.
+ * It returns -99 in case of index size excess.
  */
 int
 getFireflyTemperature(uint8_t fireflyNumber, uint8_t rxtx_index)
 {
     if(fireflyNumber >= EVIO_XCVR_COUNT || rxtx_index >= 2) {
-        return (int8_t) -99;
+        return -99; // index excess error value
     }
     else {
-        return fireflyStatus[fireflyNumber%EVIO_XCVR_COUNT]
-                            [rxtx_index%2].temperature;
+        return fireflyStatus[fireflyNumber][rxtx_index].temperature;
     }
 }
 
