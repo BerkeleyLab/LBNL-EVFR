@@ -8,16 +8,11 @@
  */
 
 #include <stdio.h>
-#include <stdint.h>
-#include <xparameters.h>
 #include "evio.h"
 #include "iicEVIO.h"
 #include "iicProc.h"
 #include "gpio.h"
 #include "util.h"
-
-#define EVIO_XCVR_COUNT         3
-#define CHANNELS_PER_FIREFLY    12
 
 /*
  * Crosspoint switch port assignments
@@ -466,4 +461,79 @@ evioShowCrosspointRegisters(void)
                                                 fireflyStatus[i][1].rxLowPower);
         }
     }
+}
+
+/*
+ * Safe getter function for firefly temperature.
+ * It returns -99 in case of index size excess.
+ */
+int
+getFireflyTemperature(uint8_t fireflyNumber, uint8_t rxtx_index)
+{
+    if(fireflyNumber >= EVIO_XCVR_COUNT || rxtx_index >= 2) {
+        return -99; // index excess error value
+    }
+    else {
+        return fireflyStatus[fireflyNumber][rxtx_index].temperature;
+    }
+}
+
+// temperature getter for Firefly 0 - TX
+int getFireflyTX0temperature(void)
+{
+    return 10*getFireflyTemperature(0, 0);
+}
+
+// temperature getter for Firefly 0 - RX
+int getFireflyRX0temperature(void)
+{
+    return 10*getFireflyTemperature(0, 1);
+}
+
+// temperature getter for Firefly 1 - TX
+int getFireflyTX1temperature(void)
+{
+    return 10*getFireflyTemperature(1, 0);
+}
+
+// temperature getter for Firefly 1 - RX
+int getFireflyRX1temperature(void)
+{
+    return 10*getFireflyTemperature(1, 1);
+}
+
+// temperature getter for Firefly 2 - TX
+int getFireflyTX2temperature(void)
+{
+    return 10*getFireflyTemperature(2, 0);
+}
+
+// temperature getter for Firefly 2 - RX
+int getFireflyRX2temperature(void)
+{
+    return 10*getFireflyTemperature(2, 1);
+}
+
+/* In brief:
+ *  Provide presence bool value for each firefly, alternating TX and RX
+ * Returned variable bit organization:
+ *  | 5th  | 4th  | 3th  | 2th  | 1th  | 0th  |
+ *  | bit  | bit  | bit  | bit  | bit  | bit  |
+ * equivalent fireflyStatus indexing: (column allined)
+ *  |[0][0]|[0][1]|[1][0]|[1][1]|[2][0]|[2][1]|
+ */
+uint16_t
+getFireflyPresence(void)
+{
+    uint16_t presence = 0;
+    for(uint8_t i=0; i<2*EVIO_XCVR_COUNT; i++) {
+        presence |= (fireflyStatus[i>>1][i&0x1].isPresent) << i;
+    }
+    return presence;
+}
+
+uint16_t
+getFireflyRxLowPower(uint8_t index)
+{
+    return fireflyStatus[index%EVIO_XCVR_COUNT][1].rxLowPower;
 }

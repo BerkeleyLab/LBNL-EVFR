@@ -33,7 +33,7 @@
 #include <string.h>
 #include "console.h"
 #include "gpio.h"
-#include "ssd1331.h"
+#include "st7789v.h"
 #include "util.h"
 
 int debugFlags;
@@ -127,7 +127,7 @@ void
 resetFPGA(int bootAlternateImage)
 {
     printf("====== FPGA REBOOT ======\n\n");
-    ssd1331Enable(0);
+    st7789vBacklightEnable(0);
     microsecondSpin(50000);
     writeICAP(0xFFFFFFFF); /* Dummy word */
     writeICAP(0xAA995566); /* Sync word */

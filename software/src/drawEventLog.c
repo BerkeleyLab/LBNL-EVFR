@@ -5,9 +5,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "drawEventLog.h"
-#include "evio.h"
 #include "gpio.h"
-#include "ssd1331.h"
+#include "st7789v.h"
 #include "util.h"
 
 /* FIXME: Should this be settable?  System parameter?  EPICS PV? */
@@ -22,7 +21,7 @@
  *  Event code 0x6F (111 decimal) is at the bottom line of the display which
  *  explains why the status line is right justified.
  */
-#define MAX_EVENT_CODE      0x6F
+#define MAX_EVENT_CODE      0x7F
 
 #define CSR_R_EVCODE_MASK   0xFF
 #define CSR_R_FIFO_EMPTY    0x100
@@ -32,14 +31,19 @@
 #define EV_CHARS_WIDTH  7
 #define EV_CHARS_HEIGHT 5
 
+#define EVCODES_PER_LINE    10
+#define CHARS_PER_EVCODE    3
+
 struct evInfo {
     struct evInfo *forw;
     struct evInfo *back;
+    int16_t        xBase;
+    int16_t        yBase;
+    uint8_t        c0;
+    uint8_t        c1;
+    uint8_t        c2;
+    uint8_t        floodWidth;
     uint32_t       whenOn;
-    uint32_t       bitmap;
-    uint8_t        left;
-    uint8_t        upper;
-    uint8_t        color;
 };
 
 void
@@ -52,75 +56,61 @@ drawEventLog(int redrawAll)
     static struct evInfo evTable[MAX_EVENT_CODE];
     static struct evInfo *displayHead, *displayTail;
     static int beenHere;
+    static int csrIdx;
 
     if (!beenHere) {
         /* Initialize table */
-        int i, j;
-        int left, upper;
-        static const uint32_t digits[10] = { 0705050507,
-                                             0101010101,
-                                             0701070407,
-                                             0701070107,
-                                             0505070101,
-                                             0704070107,
-                                             0704070507,
-                                             0701010101,
-                                             0705070507,
-                                             0705070107 };
-        evCode = 1;
-        for (i = 0, upper = 0 ; i <= 12 ; i++, upper += 5) {
-            for (j = 1, left = 0 ; j <= 10 ; j++, evCode++) {
-                if (evCode > MAX_EVENT_CODE) {
-                    break;
-                }
-                evp = &evTable[evCode - 1];
-                evp->bitmap = digits[j % 10];
-                if ((i != 0) || (j == 10)) {
-                    int t = (i + (j == 10)) % 10;
-                    evp->bitmap |= digits[t] << 3;
-                }
-                evp->left = left;
-                evp->upper = upper;
-                /*
-                 * Provide a little color change between adjacent rows
-                 * Eight bit color: RRR GGG BB
-                 */
-
-                evp->color = (i & 01) ? 0xFF : 0xFE;
-                left += EV_CHARS_WIDTH + 2;
-            }
-        }
         beenHere = 1;
-        redrawAll = 1;
+        for (evCode = 1 ; evCode <= MAX_EVENT_CODE ; evCode++) {
+            evp = &evTable[evCode-1];
+            evp->xBase = (evCode % EVCODES_PER_LINE) * CHARS_PER_EVCODE *
+                                                               st7789vCharWidth;
+            evp->yBase = (evCode / EVCODES_PER_LINE) * st7789vCharHeight;
+            if (evCode < 10) {
+                evp->xBase += st7789vCharWidth;
+                evp->floodWidth = st7789vCharWidth;
+            }
+            else if (evCode < 100) {
+                evp->xBase += st7789vCharWidth / 2;
+                evp->floodWidth = 2 * st7789vCharWidth;
+            }
+            else {
+                evp->floodWidth = 3 * st7789vCharWidth;
+            }
+            evp->c0 = (evCode % 10) + '0';
+            if (evCode >= 10) evp->c1 = ((evCode / 10) % 10) + '0';
+            if (evCode >= 100) evp->c2 = ((evCode / 100) % 10) + '0';
+        }
     }
     if (redrawAll) {
-        /* Start fresh */
+        int lines = (MAX_EVENT_CODE + EVCODES_PER_LINE - 1) / EVCODES_PER_LINE;
+        st7789vFlood(0, 0, EVCODES_PER_LINE*st7789vCharWidth,
+                                        lines*st7789vCharHeight, ST7789V_BLACK);
+        st7789vSetCharacterRGB(ST7789V_BLACK, ST7789V_WHITE);
+        st7789vShowString(0, 0, "EVFR");
+        st7789vSetCharacterRGB(ST7789V_WHITE, ST7789V_BLACK);
         while (displayHead) {
             displayHead->whenOn = 0;
             displayHead = displayHead->forw;
         }
         displayTail = NULL;
-        GPIO_WRITE(GPIO_IDX_EVR_LOG_CSR, CSR_RW_RESET);
+        csrIdx = GPIO_IDX_EVR_LOG_CSR; // evgIdx ? GPIO_IDX_EVG_2_LOG_CSR : GPIO_IDX_EVG_1_LOG_CSR;
+        GPIO_WRITE(csrIdx, CSR_RW_RESET);
         microsecondSpin(1);
-        GPIO_WRITE(GPIO_IDX_EVR_LOG_CSR, 0);
+        GPIO_WRITE(csrIdx, 0);
     }
-    while (!((csr = GPIO_READ(GPIO_IDX_EVR_LOG_CSR)) & CSR_R_FIFO_EMPTY)) {
-        GPIO_WRITE(GPIO_IDX_EVR_LOG_CSR, CSR_W_READ_FIFO);
+    if (!csrIdx) return;
+    while (!((csr = GPIO_READ(csrIdx)) & CSR_R_FIFO_EMPTY)) {
+        GPIO_WRITE(csrIdx, CSR_W_READ_FIFO);
         evCode = csr & CSR_R_EVCODE_MASK;
         if ((evCode <= 0) || (evCode > MAX_EVENT_CODE)) {
             continue;
-        }
-        if (debugFlags & DEBUGFLAG_SHOW_EVENT_LOG) {
-            printf("%d\n", evCode);
         }
         evp = &evTable[evCode-1];
         now = MICROSECONDS_SINCE_BOOT();
         if (now == 0) now = 1;
         if (evp->whenOn) {
-            /* 
-             * Already on display (and list) so no need to draw event code.
-             * Mark up to date by removing from list and relinking at end.
-             */
+            /* Already on display (and list) so remove from list */
             if (evp->forw) {
                 evp->forw->back = evp->back;
             }
@@ -136,17 +126,16 @@ drawEventLog(int redrawAll)
         }
         else {
             /* Display event code */
-            uint32_t b               = 04000000000;
-            const uint32_t padAfter  = 01010101010;
-            ssd1331SetDrawingRange(evp->left, evp->upper,
-                                               EV_CHARS_WIDTH, EV_CHARS_HEIGHT);
-            do {
-                ssd1331WriteData((b&evp->bitmap) ? evp->color : SSD1331_BLACK);
-                if (b & padAfter) {
-                    ssd1331WriteData(SSD1331_BLACK);
-                }
-                b >>= 1;
-            } while (b);
+            int xBase = evp->xBase;
+            if (evp->c2) {
+                st7789vDrawChar(xBase, evp->yBase, evp->c2);
+                xBase += st7789vCharWidth;
+            }
+            if (evp->c1) {
+                st7789vDrawChar(xBase, evp->yBase, evp->c1);
+                xBase += st7789vCharWidth;
+            }
+            st7789vDrawChar(xBase, evp->yBase, evp->c0);
         }
         /* Link on to tail */
         evp->forw = NULL;
@@ -163,9 +152,8 @@ drawEventLog(int redrawAll)
     /* Remove stale events from display and from list */
     now = MICROSECONDS_SINCE_BOOT();
     while (displayHead && ((int32_t)(now-displayHead->whenOn) > DISPLAY_USEC)) {
-        ssd1331FloodRectangle(displayHead->left, displayHead->upper,
-                                                EV_CHARS_WIDTH, EV_CHARS_HEIGHT,
-                                                SSD1331_BLACK);
+        st7789vFlood(displayHead->xBase, displayHead->yBase,
+                     displayHead->floodWidth, st7789vCharHeight, ST7789V_BLACK);
         displayHead->whenOn = 0;
         displayHead = displayHead->forw;
         if (displayHead) {

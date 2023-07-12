@@ -44,7 +44,7 @@
 #include "mgtClkSwitch.h"
 #include "mmcMailbox.h"
 #include "softwareBuildDate.h"
-#include "ssd1331.h"
+#include "st7789v.h"
 #include "systemParameters.h"
 #include "tftp.h"
 #include "util.h"
@@ -120,10 +120,15 @@ main(void)
 {
     /* Set up infrastructure */
     init_platform();
-    ssd1331Init();
+    st7789vInit();
 
     /* Let UART settle down */
     microsecondSpin(20000);
+
+    /* Screen check */
+    st7789vTestPattern();
+    microsecondSpin(0.5 * 1000 * 1000);
+    st7789vFlood(0, 0, COL_COUNT, ROW_COUNT, 0);
 
     /* Announce our presence */
     printf("\nFirmware POSIX seconds: %u\n",

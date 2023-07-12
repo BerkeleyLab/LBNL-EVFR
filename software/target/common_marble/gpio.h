@@ -33,8 +33,9 @@
 #define GPIO_IDX_NET_TX_CSR              19 // Network data transmission
 #define GPIO_IDX_NET_RX_CSR              20 // Network data reception
 #define GPIO_IDX_NET_RX_DATA             21 // Network data reception
-#define GPIO_IDX_DISPLAY                 22 // LCD CSR
-#define GPIO_IDX_EVIO_HW_IN              23 // EVIO hardware inputs
+#define GPIO_IDX_DISPLAY_CSR             22 // LCD CSR
+#define GPIO_IDX_DISPLAY_DATA            23 // LCD Data
+#define GPIO_IDX_EVIO_HW_IN              24 // EVIO hardware inputs
 #define GPIO_IDX_CONFIG_KD_GATE_DRIVER   28 // Configure kicker driver outputs
 #define GPIO_IDX_EVR_SELECT_OUTPUT       29 // Choose EVR output
 #define GPIO_IDX_EVR_CONFIG_OUTPUT       30 // Configure EVR output

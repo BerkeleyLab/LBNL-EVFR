@@ -122,6 +122,27 @@ showLM75temperature(int id, int address)
     printf("  U%d: %d.%d C\n", id, v / 2, (v & 0x1) * 5);
 }
 
+int
+getU28temperature(void) {
+    int t = mmcMailboxRead16(MADDR_U28_TEMP);
+    return t*5 + (t&0x1)*5;
+}
+
+int
+getU29temperature(void) {
+    int t = mmcMailboxRead16(MADDR_U29_TEMP);
+    return t*5 + (t&0x1)*5;
+}
+
+int
+getMMCfirmware(void) {
+    uint32_t c=0;
+    for (uint8_t i = 0 ; i < 4 ; i++) {
+        c |= mmcMailboxRead(MADDR_MMC_BUILD + i)<<(24-8*i);
+    }
+    return c;
+}
+
 static void
 showMMCfirmware(void)
 {

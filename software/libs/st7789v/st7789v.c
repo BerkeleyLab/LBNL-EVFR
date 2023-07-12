@@ -72,9 +72,6 @@
 #define MADCTL_MX       0x40 /* Mirror X */
 #define MADCTL_MV       0x20 /* Exchange X/Y */
 
-#define COL_COUNT   320
-#define ROW_COUNT   240
-
 #define CSR_RESET               0x80000000
 #define CSR_W_READ              0x40000000
 #define CSR_R_BUSY              0x40000000
