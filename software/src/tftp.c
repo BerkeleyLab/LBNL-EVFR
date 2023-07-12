@@ -66,12 +66,13 @@ struct fileInfo {
     uint32_t    length;
     int         isText;
 };
+
 /* Assume that largest sector in flash is no larger than 64 KiB.
  * EVCLIENT_A.bit and EVCLIENT_B.bit size is 7 MiB. EVCLIENT_B.bit was
  * moved to 8 MiB because the first half of flash is write protected.
  */
 static const struct fileInfo fileTable[] = {
-    { "EVCLIENT_A.bit",         MiB(0),              MiB(8),   0   },
+    { "EVCLIENT_A.bit",         MiB(0),              MiB(7),   0   },
     { "EVCLIENT_B.bit",         MiB(8),              MiB(7),   0   },
     { SYSTEM_PARAMETERS_NAME,   MiB(15)+KiB(0),      KiB(4),   0   },
     { "FullFlash.bin",          MiB(0),              MiB(16),  0   },
