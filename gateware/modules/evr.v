@@ -15,7 +15,6 @@ module evr #(
     output [31:0] monitorSeconds,
     output [31:0] monitorTicks,
     output [31:0] todSeconds,
-    input         refClk,
 
     output wire                    evrClk,
     output reg               [7:0] evrCode = 0,
