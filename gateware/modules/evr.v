@@ -18,11 +18,13 @@ module evr #(
 
     output wire                    evrClk,
     output reg               [7:0] evrCode = 0,
+    output reg              [15:0] rawRxCode = 0,
     output reg                     evrCodeValid = 0,
+    output reg               [1:0] evrCharIsK = 0,
     output wire [OUTPUT_COUNT-1:0] evrTriggerBus,
     output wire              [7:0] evrDistributedBus,
     output wire                    evrPPSmarker,
-
+    output reg                     mgtAligned = 0,
     input   mgtRefClk,
     input   MGT_RX_P,
     input   MGT_RX_N,
@@ -31,6 +33,11 @@ module evr #(
 
 (*mark_debug=DEBUG*) wire [15:0] rxData;
 (*mark_debug=DEBUG*) wire [1:0] rxIsK, rxNotInTable;
+always @(posedge evrClk) begin
+    mgtAligned <= rxIsAligned;
+    evrCharIsK <= rxIsK;
+    rawRxCode <= rxData;
+end
 
 //////////////////////////////////////////////////////////////////////////////
 // Receiver alignment detection
