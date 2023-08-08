@@ -278,6 +278,71 @@ evrLogger #(.DEBUG("false"))
     .evrCode(evrCode),
     .evrCodeValid(evrCodeValid));
 
+`ifdef QSFP_FANOUT
+/////////////////////////////////////////////////////////////////////////////
+// Event Fanout
+assign GPIO_IN[GPIO_IDX_MGT_HW_CONFIG] = 1; //{{31{1'b0}},1'b1};
+wire evfClk;
+// I/O MGT Pins
+wire [2:0] rxPpins = {MGT_RX_1_P, MGT_RX_3_P, MGT_RX_4_P};
+wire [2:0] rxNpins = {MGT_RX_1_N, MGT_RX_3_N, MGT_RX_4_N};
+wire [2:0] txPpins;
+assign {MGT_TX_1_P, MGT_TX_3_P, MGT_TX_4_P} = txPpins;
+wire [2:0] txNpins;
+assign {MGT_TX_1_N, MGT_TX_3_N, MGT_TX_4_N} = txNpins;
+// Data & Clocks
+wire [15:0] txCode;
+wire [2:0] evfTxInClks, evfTxOutClks, evfRxInClks, evfRxOutClks, evfReady;
+wire [1:0] evfCharIsK;
+assign evfClk = evfTxOutClks[0];
+assign evfTxInClks = {3{evfClk}}; // loopback TXOUTCLK
+
+generate
+for (i = 0 ; i < 3 ; i = i + 1) begin
+localparam integer rOff = i * GPIO_IDX_PER_MGTWRAPPER;
+evfMgtWrapper #(
+    .DEBUG("false"))
+    evfmgt(
+        .sysClk(sysClk) ,
+        .sysGPIO_OUT(GPIO_OUT),
+        .drpStrobe(GPIO_STROBES[GPIO_IDX_EVF_MGT_DRP_CSR+rOff]),
+        .drpStatus(GPIO_IN[GPIO_IDX_EVF_MGT_DRP_CSR+rOff]),
+        .mgtReady(evfReady[i]),
+        .refClk(mgtRefClk),
+        .txInClk(evfTxInClks[i]),
+        .txOutClk(evfTxOutClks[i]),
+        .rxInClk(evfRxInClks[i]),
+        .rxOutClk(evfRxOutClks[i]),
+        .txCode(txCode),
+        .dataIsK(evfCharIsK),
+        .MGT_TX_P(txPpins[i]),
+        .MGT_TX_N(txNpins[i]),
+        .MGT_RX_P(rxPpins[i]),
+        .MGT_RX_N(rxNpins[i]));
+end
+endgenerate
+
+// FIFO Control signals
+wire [8:0] fifo_wr_count, fifo_rd_count;
+wire fifo_we, fifo_re, fifo_full, fifo_empty;
+assign fifo_we = evrAligned & ~fifo_full;
+assign fifo_re = evfReady==3'b111 & ~fifo_empty;
+
+fifo_2c #(.dw(18))
+    EVFdataFifo (
+    .wr_clk(evrClk),
+    .we(fifo_we),
+    .din({evrCharIsK, rxCode}),
+    .wr_count(fifo_wr_count),
+    .full(fifo_full),
+    .rd_clk(evfClk),
+    .re(fifo_re),
+    .dout({evfCharIsK, txCode}),
+    .rd_count(fifo_rd_count),
+    .empty(fifo_empty));
+`else
+    assign GPIO_IN[GPIO_IDX_MGT_HW_CONFIG] = 0;
+`endif
 //////////////////////////////////////////////////////////////////////////////
 // I2C
 // Three channel version a holdover from Marble Mini layout, but keep
