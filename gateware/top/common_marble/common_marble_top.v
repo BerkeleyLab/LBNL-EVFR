@@ -24,8 +24,18 @@ module common_marble_top #(
     output wire[3:0] RGMII_TXD,
 
     input  MGT_CLK_P, MGT_CLK_N,
-    input  MGT_RX_P, MGT_RX_N,
-    output MGT_TX_P, MGT_TX_N,
+    output MGT_TX_2_P, MGT_TX_2_N,
+    input  MGT_RX_2_P, MGT_RX_2_N,
+
+`ifdef QSFP_FANOUT
+    // Additional MGT used for fannout via QSFP
+    output MGT_TX_1_P, MGT_TX_1_N,
+    input  MGT_RX_1_P, MGT_RX_1_N,
+    output MGT_TX_3_P, MGT_TX_3_N,
+    input  MGT_RX_3_P, MGT_RX_3_N,
+    output MGT_TX_4_P, MGT_TX_4_N,
+    input  MGT_RX_4_P, MGT_RX_4_N,
+`endif
 
 `ifdef KICKER_DRIVER
     output [CFG_KD_OUTPUT_COUNT-1:0] DRIVER_P,
