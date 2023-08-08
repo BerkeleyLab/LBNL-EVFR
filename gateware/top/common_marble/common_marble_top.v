@@ -235,10 +235,13 @@ mmcMailbox #(.DEBUG("false"))
 
 /////////////////////////////////////////////////////////////////////////////
 // Event receiver
-wire evrPPSmarker;
+wire [15:0] rxCode;
+wire [7:0] evrDistributedBus;
+wire       evrPPSmarker;
 wire [CFG_EVR_OUTPUT_COUNT-1:0] evrTriggerBus;
 wire [7:0] evrCode;
-wire       evrCodeValid;
+wire       evrCodeValid, evrAligned;
+wire [1:0] evrCharIsK;
 evr #(.EVR_CLOCK_RATE(CFG_EVR_CLOCK_RATE),
       .OUTPUT_COUNT(CFG_EVR_OUTPUT_COUNT),
       .DEBUG("false"))
@@ -253,18 +256,20 @@ evr #(.EVR_CLOCK_RATE(CFG_EVR_CLOCK_RATE),
     .monitorSeconds(GPIO_IN[GPIO_IDX_EVR_MONITOR_SECONDS]),
     .monitorTicks(GPIO_IN[GPIO_IDX_EVR_MONITOR_TICKS]),
     .todSeconds(GPIO_IN[GPIO_IDX_EVR_SECONDS]),
-    .refClk(refClk200),
     .evrClk(evrClk),
     .evrCode(evrCode),
+    .rawRxCode(rxCode),
     .evrCodeValid(evrCodeValid),
+    .evrCharIsK(evrCharIsK),
     .evrTriggerBus(evrTriggerBus),
-    .evrDistributedBus(),
+    .evrDistributedBus(evrDistributedBus),
     .evrPPSmarker(evrPPSmarker),
+    .mgtAligned(evrAligned),
     .mgtRefClk(mgtRefClk),
-    .MGT_RX_P(MGT_RX_P),
-    .MGT_RX_N(MGT_RX_N),
-    .MGT_TX_P(MGT_TX_P),
-    .MGT_TX_N(MGT_TX_N));
+    .MGT_TX_P(MGT_TX_2_P),
+    .MGT_TX_N(MGT_TX_2_N),
+    .MGT_RX_P(MGT_RX_2_P),
+    .MGT_RX_N(MGT_RX_2_N));
 
 /////////////////////////////////////////////////////////////////////////////
 // Pass events to processor
