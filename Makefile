@@ -3,6 +3,7 @@ include dir_list.mk
 CROSS_COMPILE    ?=
 PLATFORM         ?= marble
 APP              ?= evfr
+TESTING_OPTION 	 ?=
 
 TARGET       = $(APP)_$(PLATFORM)
 GW_TGT_DIR   = $(GW_SYN_DIR)/$(TARGET)
@@ -14,8 +15,8 @@ SW_TGT_DIR   = $(SW_APP_DIR)/$(APP)
 all: bit sw
 
 bit:
-	make -C $(GW_TGT_DIR) TARGET=$(TARGET) $(TARGET)_top.bit
-	make -C $(GW_TGT_DIR) TARGET=$(TARGET) $(TARGET)_top.mmi
+	make -C $(GW_TGT_DIR) TARGET=$(TARGET) $(TARGET)_top.bit TESTING_ARGS_VIVADO=$(TESTING_OPTION)
+	make -C $(GW_TGT_DIR) TARGET=$(TARGET) $(TARGET)_top.mmi TESTING_ARGS_VIVADO=$(TESTING_OPTION)
 
 sw:
 	make -C $(SW_TGT_DIR) TARGET=$(TARGET) BIT=$(BIT) all
