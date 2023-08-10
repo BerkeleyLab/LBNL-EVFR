@@ -55,6 +55,12 @@ ARM_TOOLCHAIN_LOCATION=/media/Xilinx/Vivado/2020.2.2/Vitis/2020.2/gnu/microblaze
 (time make CROSS_COMPILE=${ARM_TOOLCHAIN_LOCATION}/bin/mb- APP=evfr PLATFORM=marble && notify-send 'Compilation SUCCESS' || notify-send 'Compilation ERROR'; date) 2>&1 | tee make_output
 ```
 
+#### Testing features
+
+##### Fanout via QSFP2
+
+Add `TESTING_OPTION=USE_QSFP_FANOUT` to the make command to enable the fanout via QSFP2. Note that it's a testing feature and the fanout latency is not fully deterministic but can vary by approximately one clock period.
+
 ### Deploying
 
 To deploy the gateware and the software we can use a variety of
