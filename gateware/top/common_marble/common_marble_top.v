@@ -28,7 +28,7 @@ module common_marble_top #(
     input  MGT_RX_2_P, MGT_RX_2_N,
 
 `ifdef QSFP_FANOUT
-    // Additional MGT used for fannout via QSFP
+    // Additional MGT used for fanout via QSFP
     output MGT_TX_1_P, MGT_TX_1_N,
     input  MGT_RX_1_P, MGT_RX_1_N,
     output MGT_TX_3_P, MGT_TX_3_N,
