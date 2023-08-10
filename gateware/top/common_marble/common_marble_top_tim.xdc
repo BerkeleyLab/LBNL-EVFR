@@ -18,5 +18,7 @@ set_false_path -from [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *b
 set_false_path -from [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *bd_i/clk_wiz_1/inst/mmcm_adv_inst/CLKOUT1}]] -to [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *bd_i/clk_wiz_1/inst/mmcm_adv_inst/CLKOUT0}]]
 set_false_path -from [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *bd_i/clk_wiz_1/inst/mmcm_adv_inst/CLKOUT0}]] -to [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *bd_i/clk_wiz_1/inst/mmcm_adv_inst/CLKOUT1}]]
 set_false_path -from [get_clocks evr/evrmgt_i/inst/evrmgt_i/gt0_evrmgt_i/gtxe2_i/RXOUTCLK] -to [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *bd_i/clk_wiz_1/inst/mmcm_adv_inst/CLKOUT0}]]
+set_false_path -from [get_clocks evr/evrmgt_i/inst/evrmgt_i/gt0_evrmgt_i/gtxe2_i/TXOUTCLK] -to [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *bd_i/clk_wiz_1/inst/mmcm_adv_inst/CLKOUT0}]]
 set_false_path -from [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *mgtRef/O}]] -to [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *bd_i/clk_wiz_1/inst/mmcm_adv_inst/CLKOUT0}]]
 set_false_path -from [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *bd_i/clk_wiz_1/inst/mmcm_adv_inst/CLKOUT0}]] -to [get_clocks evr/evrmgt_i/inst/evrmgt_i/gt0_evrmgt_i/gtxe2_i/RXOUTCLK]
+set_false_path -from [get_clocks -of_objects [get_pins -hier -filter {NAME =~ *bd_i/clk_wiz_1/inst/mmcm_adv_inst/CLKOUT0}]] -to [get_clocks evr/evrmgt_i/inst/evrmgt_i/gt0_evrmgt_i/gtxe2_i/TXOUTCLK]
