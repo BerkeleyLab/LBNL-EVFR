@@ -93,11 +93,11 @@ set_property PACKAGE_PIN H6 [get_ports MGT_CLK_P]
 set_property PACKAGE_PIN H5 [get_ports MGT_CLK_N]
 
 # Transceiver
-# FMC1-DP0 or QSFP 2:11, Bank 115 MGT 2, X0Y2
-set_property -dict {PACKAGE_PIN K2} [get_ports MGT_TX_P]
-set_property -dict {PACKAGE_PIN K1} [get_ports MGT_TX_N]
-set_property -dict {PACKAGE_PIN L4} [get_ports MGT_RX_P]
-set_property -dict {PACKAGE_PIN L3} [get_ports MGT_RX_N]
+# FMC1-DP0 or QSFP2-2/11, Bank 115 MGT 2, X0Y2
+set_property -dict {PACKAGE_PIN K2} [get_ports MGT_TX_2_P]
+set_property -dict {PACKAGE_PIN K1} [get_ports MGT_TX_2_N]
+set_property -dict {PACKAGE_PIN L4} [get_ports MGT_RX_2_P]
+set_property -dict {PACKAGE_PIN L3} [get_ports MGT_RX_2_N]
 
 # Bank 0 setup
 set_property CFGBVS VCCO [current_design]
