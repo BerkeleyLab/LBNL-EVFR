@@ -87,7 +87,7 @@ mmcMailboxWriteAndWait(unsigned int address, int value, uint32_t ackMask)
     uint32_t then;
     mmcMailboxWrite(address, value);
     then = MICROSECONDS_SINCE_BOOT();
-    while ((GPIO_READ(GPIO_IDX_MMC_MAILBOX) & CSR_DATA_MASK ) & ackMask != 0) {
+    while ((GPIO_READ(GPIO_IDX_MMC_MAILBOX) & CSR_DATA_MASK & ackMask) != 0) {
         if ((MICROSECONDS_SINCE_BOOT() - then) > 5000000) {
             warn("mmcMailboxWriteAndWait(0x%02x) timed out", address);
             return;
