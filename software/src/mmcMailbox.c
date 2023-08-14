@@ -105,6 +105,31 @@ mmcMailboxRead(unsigned int address)
     return -1;
 }
 
+/*
+ * Read MMC mailbox checking if the value actually changes.
+ * It prints a warning in case of timeout
+ */
+int
+mmcMailboxSafeRead(unsigned int address)
+{
+    if (address < MMC_MAILBOX_CAPACITY) {
+        uint32_t then = MICROSECONDS_SINCE_BOOT();
+        uint32_t priorState = GPIO_READ(GPIO_IDX_MMC_MAILBOX) & CSR_DATA_MASK;
+        GPIO_WRITE(GPIO_IDX_MMC_MAILBOX, (address << CSR_ADDR_SHIFT));
+        while (1)
+        {
+            if((GPIO_READ(GPIO_IDX_MMC_MAILBOX) & CSR_DATA_MASK) != priorState) {
+                return GPIO_READ(GPIO_IDX_MMC_MAILBOX) & CSR_DATA_MASK;
+            }
+            if ((MICROSECONDS_SINCE_BOOT() - then) > 5000000) {
+                warn("mmcMailboxSafeRead(0x%02x) timed out", address);
+                return -1;
+            }
+        }
+    }
+    return -1;
+}
+
 static int
 mmcMailboxRead16(unsigned int address)
 {
