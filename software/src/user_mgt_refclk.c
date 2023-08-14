@@ -171,29 +171,23 @@ int
 userMGTrefClkAdjust(int offsetPPM)
 {
     int r = 0;
+    static struct si57x_part_numbers* si57x_pointer = NULL;
     iicProcTakeControl();
-    if (si570Address == 0) {
-        if (iicProcSetMux(IIC_MUX_PORT_PORT_EXPANDER)) {
-            int i;
-            for (i = 0 ; i < sizeof(si57x_pn)/sizeof(si57x_pn[0]) ; i++) {
-                if (iicProcWrite(si57x_pn[i].iicAddr, -1, NULL, 0)) {
-                    si570Address = si57x_pn[i].iicAddr;
-                    break;
-                }
+    if (!si57x_pointer) {
+        uint8_t pcb_version = mmcMailboxSafeRead(MB_PCB_REV_ADDR) & 0xf; // [0:3]=PCB rev
+        printf("PCB version %d detected\n", pcb_version+2);
+        for (uint8_t i=0; i < sizeof(marble_xo)/sizeof(marble_xo[0]); i++) {
+            if (marble_xo[i].pcb_rev == pcb_version) {
+                si57x_pointer = marble_xo[i].si57x_information;
+                si570Address = si57x_pointer->iicAddr;
             }
         }
     }
-    if (si570Address) {
-        for (uint8_t idx = 0 ; idx < sizeof(si57x_pn)/sizeof(si57x_pn[0]) ; idx++) {
-            if(si57x_pn[idx].iicAddr == si570Address) {
-                r = refInit(si57x_pn[idx].startupFrequency,
-                                  SI570_DEFAULT_TARGET_FREQUENCY,
-                                  si57x_pn[idx].outputEnablePolarity,
-                                  si57x_pn[idx].temperatureStability);
-                r &= refSmallChanges(offsetPPM);
-            }
-        }
-    }
+    r = refInit(si57x_pointer->startupFrequency,
+                        SI570_DEFAULT_TARGET_FREQUENCY,
+                        si57x_pointer->outputEnablePolarity,
+                        si57x_pointer->temperatureStability);
+    r &= refSmallChanges(offsetPPM);
     iicProcRelinquishControl();
     if (r) {
         printf("Updated MGT SI570 0x%02X (7-bit address).\n", si570Address);
