@@ -53,8 +53,8 @@ setReg(int reg, int value)
 }
 
  /**
- Perform small changes in the Si570 output frequency without interrupt the signal. 
- Note: it require to call refInit() almost once to find iic address, and 
+ Perform small changes in the Si570 output frequency without interrupt the signal.
+ Note: it require to call refInit() almost once to find iic address, and
  @param  offsetPPM the amount of ppm (referring to the current frequency) to be changed.
  */
 static int
@@ -87,7 +87,7 @@ refSmallChanges(int offsetPPM)
 }
 
  /**
- Set the Si570 target frequency and configure U39 IO0_0 polarity. 
+ Set the Si570 target frequency and configure U39 IO0_0 polarity.
  Note: it require to call iicProcTakeControl() before
  @param  defaultFrequency the initial frequency of the batch.
  @param  targetFrequency desired frequency
