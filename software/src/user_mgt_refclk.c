@@ -52,7 +52,7 @@ static int
 setReg(int reg, int value)
 {
     uint8_t cv = value;
-    return iicProcWrite(si570Address, reg, &cv, 1);
+    return iicProcWrite(si570_parameters.iicAddr, reg, &cv, 1);
 }
 
  /**
@@ -70,7 +70,7 @@ refSmallChanges(int offsetPPM)
     if (offsetPPM > 3500) offsetPPM = 3500;
     else if (offsetPPM < -3500) offsetPPM = -3500;
     if (!iicProcSetMux(IIC_MUX_PORT_PORT_EXPANDER)) return 0;
-    if (!iicProcRead(si570Address, Si570_reg_idx+1, buf, 5)) return 0;
+    if (!iicProcRead(si570_parameters.iicAddr, Si570_reg_idx+1, buf, 5)) return 0;
     rfreq = buf[0] & 0x3F;
     for (i = 1 ; i < 5 ; i++) {
         rfreq = (rfreq << 8) | buf[i];
@@ -83,7 +83,7 @@ refSmallChanges(int offsetPPM)
     buf[0] = (buf[0] & ~0x3F) | (rfreq & 0x3F);
 
     if (!setReg(137, 0x10)) return 0;
-    if (!iicProcWrite(si570Address, Si570_reg_idx+1, buf, 5)) return 0;
+    if (!iicProcWrite(si570_parameters.iicAddr, Si570_reg_idx+1, buf, 5)) return 0;
     if (!setReg(137, 0x00)) return 0;
     if (!setReg(135, 0x40)) return 0;
     return 1;
@@ -121,7 +121,7 @@ refInit(double defaultFrequency, double targetFrequency, uint8_t enablePolarity,
     if (!iicProcWrite(0x21, 2, &U39reg, 1)) return 0; // set IO0 output register
 
     if (!setReg(135, 0x01)) return 0; // Reset the device to initial frequency
-    if (!iicProcRead(si570Address, Si570_reg_idx, buf, 6)) return 0; // read the device registers
+    if (!iicProcRead(si570_parameters.iicAddr, Si570_reg_idx, buf, 6)) return 0; // read the device registers
 
     /*  Buffer structure:
         [0] |HS_DIV[2:0] N1[6:2] |
@@ -163,7 +163,7 @@ refInit(double defaultFrequency, double targetFrequency, uint8_t enablePolarity,
 
     // Command to set new frequency
     if (!setReg(137, 0x10)) return 0; // Freeze the DCO (bit4 - reg137)
-    if (!iicProcWrite(si570Address, Si570_reg_idx, buf, 6)) return 0; // Writing the data registers
+    if (!iicProcWrite(si570_parameters.iicAddr, Si570_reg_idx, buf, 6)) return 0; // Writing the data registers
     if (!setReg(137, 0x00)) return 0; // Unfreeze the DCO (bit4 - reg137)
     if (!setReg(135, 0x40)) return 0; // Trigger new frequency (bit4 - reg135)
     return 1;
@@ -199,7 +199,7 @@ userMGTrefClkAdjust(int offsetPPM)
     }
     iicProcRelinquishControl();
     if (r) {
-        printf("Updated MGT SI570 0x%02X (7-bit address).\n", si570Address);
+        printf("MGT SI570 (0x%02X) successfully updated.\n", si570_parameters.iicAddr);
     }
     else {
         warn("Unable to update MGT SI570");
