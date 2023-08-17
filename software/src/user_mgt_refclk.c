@@ -8,26 +8,44 @@
 #include "user_mgt_refclk.h"
 #include "iicProc.h"
 #include "util.h"
+#include "mmcMailbox.h"
+#include "gpio.h"
 
 /* 
 ** Si57x defines and variables 
 */
+#define MARBLE_v1_2                               0
+#define MARBLE_v1_3                               1
+#define MARBLE_v1_4                               2
+#define MARBLE_v1_5                               3
+#define MB_PCB_REV_ADDR                        0x48
+#define MB_SI570_I2C_ADDR                      0x60
+#define MB_SI570_CONFIG_ADDR                   0x61
+#define MB_SI570_FREQ_ADDR                     0x62
+#define F_DCO_MIN                   4.85*1000000000
+#define F_DCO_MAX                   5.67*1000000000
+#define SI570_DEFAULT_TARGET_FREQUENCY  100000000.0
 struct si57x_part_numbers {
     uint8_t iicAddr;
     double startupFrequency;
     int outputEnablePolarity;
     int temperatureStability;
-};
-#define F_DCO_MIN 4.85*1000000000
-#define F_DCO_MAX 5.67*1000000000
-#define SI570_DEFAULT_TARGET_FREQUENCY 100000000.0
-static uint8_t si570Address = 0; // 7-bit address
-static uint8_t Si570_reg_idx = 13; // internal register address
-static const struct si57x_part_numbers si57x_pn[] = {
+} si57x_pn[] = {
     {0x55, 100000000, 1, 0}, // Part number 570BBC000121DG
     {0x75, 312500000, 1, 0}, // Part number 570BBB000309DG
     {0x77, 125000000, 0, 1}, // Part number 570NCB000933DG
+    {0x55, 270000000, 0, 0}, // Part number 570NBB001808DG
 };
+struct marble_onboard_oscillators {
+    uint8_t pcb_rev;
+    struct si57x_part_numbers *si57x_information[5];
+} marble_ob_xo[] = {
+    {MARBLE_v1_2, {&si57x_pn[0], &si57x_pn[1], NULL}},
+    {MARBLE_v1_3, {&si57x_pn[2], NULL}},
+    {MARBLE_v1_4, {&si57x_pn[3], NULL}},
+};
+struct si57x_part_numbers si570_parameters = {0, 0, 0, 0};
+static uint8_t Si570_reg_idx = 13; // internal register address
 
 
 static int
