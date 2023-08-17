@@ -169,34 +169,79 @@ refInit(double defaultFrequency, double targetFrequency, uint8_t enablePolarity,
     return 1;
 }
 
+int
+readSI570parameterFromPCBrev()
+{
+    uint8_t pcb_version = mmcMailboxRead(MB_PCB_REV_ADDR) & 0xf; // [0:3]=PCB rev
+    printf("PCB version %d detected - using Si570 associated parameters.\n", pcb_version+2);
+    iicProcSetMux(IIC_MUX_PORT_PORT_EXPANDER);
+    for (uint8_t i=0; i < sizeof(marble_ob_xo)/sizeof(marble_ob_xo[0]); i++) {
+        if (marble_ob_xo[i].pcb_rev == pcb_version) {
+            for(uint8_t j=0; j<sizeof(marble_ob_xo[i].si57x_information)/
+                                sizeof(marble_ob_xo[i].si57x_information[0]); j++) {
+                if (iicProcWrite(marble_ob_xo[i].si57x_information[j]->iicAddr, -1, NULL, 0)) { // i2c address matches
+                    si570_parameters.iicAddr = marble_ob_xo[i].si57x_information[j]->iicAddr;
+                    si570_parameters.startupFrequency = marble_ob_xo[i].si57x_information[j]->startupFrequency;
+                    si570_parameters.outputEnablePolarity = marble_ob_xo[i].si57x_information[j]->outputEnablePolarity;
+                    si570_parameters.temperatureStability = marble_ob_xo[i].si57x_information[j]->temperatureStability;
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+int
+readSI570parameterFromMailbox()
+{
+    uint8_t i2c_address = 0;
+    uint32_t then = MICROSECONDS_SINCE_BOOT();
+    while (1) {
+        i2c_address = mmcMailboxRead(MB_SI570_I2C_ADDR);
+        if (i2c_address != 0) {
+            break;
+        }
+        if((MICROSECONDS_SINCE_BOOT() - then) > 5000000) {
+            print("Error - mailbox reading failed.\n");
+            break;
+        }
+
+    }
+    // printf("Time elapsed: %d us \n", MICROSECONDS_SINCE_BOOT() - then);
+    uint32_t initialFrequency = 0;
+    for (uint8_t i = 0; i<4; i++) {
+        initialFrequency +=  mmcMailboxRead(MB_SI570_FREQ_ADDR+i)<<((3-i)*8);
+    }
+    uint8_t config = mmcMailboxRead(MB_SI570_CONFIG_ADDR);
+    if(i2c_address == 0) {
+        return 0; // in case mailbox reading fails
+    }
+    si570_parameters.iicAddr = i2c_address;
+    si570_parameters.startupFrequency = initialFrequency;
+    si570_parameters.temperatureStability = config & 0x1;
+    si570_parameters.outputEnablePolarity = (config & 0x2)>>1;
+    print("Using Si570 parameters stored in mailbox.\n");
+    return 1;
+}
 
 int
 userMGTrefClkAdjust(int offsetPPM)
 {
     int r = 0;
     iicProcTakeControl();
-    if (si570Address == 0) {
-        if (iicProcSetMux(IIC_MUX_PORT_PORT_EXPANDER)) {
-            int i;
-            for (i = 0 ; i < sizeof(si57x_pn)/sizeof(si57x_pn[0]) ; i++) {
-                if (iicProcWrite(si57x_pn[i].iicAddr, -1, NULL, 0)) {
-                    si570Address = si57x_pn[i].iicAddr;
-                    break;
-                }
-            }
+    if (si570_parameters.iicAddr == 0) {
+        // Method 1 - fetching parameter from mailbox
+        if(!readSI570parameterFromMailbox()) {
+            // Method 2 - using PCB rev value
+            readSI570parameterFromPCBrev();
         }
     }
-    if (si570Address) {
-        for (uint8_t idx = 0 ; idx < sizeof(si57x_pn)/sizeof(si57x_pn[0]) ; idx++) {
-            if(si57x_pn[idx].iicAddr == si570Address) {
-                r = refInit(si57x_pn[idx].startupFrequency,
-                                  SI570_DEFAULT_TARGET_FREQUENCY,
-                                  si57x_pn[idx].outputEnablePolarity,
-                                  si57x_pn[idx].temperatureStability);
-                r &= refSmallChanges(offsetPPM);
-            }
-        }
-    }
+    r = refInit(si570_parameters.startupFrequency,
+                SI570_DEFAULT_TARGET_FREQUENCY,
+                si570_parameters.outputEnablePolarity,
+                si570_parameters.temperatureStability);
+    r &= refSmallChanges(offsetPPM);
     iicProcRelinquishControl();
     if (r) {
         printf("MGT SI570 (0x%02X) successfully updated.\n", si570_parameters.iicAddr);
