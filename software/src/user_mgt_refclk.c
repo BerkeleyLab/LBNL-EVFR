@@ -243,6 +243,13 @@ userMGTrefClkAdjust(int offsetPPM)
                 si570_parameters.temperatureStability);
     r &= refSmallChanges(offsetPPM);
     iicProcRelinquishControl();
+    if(debugFlags & DEBUGFLAG_SI570_SETTING) {
+        printf("Si570_parameters:\n");
+        printf("\t*) I2C_address = 0x%2x\n", si570_parameters.iicAddr);
+        printf("\t*) startupFrequency = %d Hz\n", (uint32_t)si570_parameters.startupFrequency);
+        printf("\t*) outputEnablePolarity = %d\n", si570_parameters.outputEnablePolarity);
+        printf("\t*) temperatureStability = %d\n", si570_parameters.temperatureStability);
+    }
     if (r) {
         printf("MGT SI570 (0x%02X) successfully updated.\n", si570_parameters.iicAddr);
     }
