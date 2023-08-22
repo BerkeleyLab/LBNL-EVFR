@@ -236,21 +236,21 @@ ___________________________________________________________________
 | GPIO INDEX  |  HEX VALUE   | MGT INDEX    | MGT CONNECTIONS      |
 |-------------|--------------|--------------|----------------------|
 | GPIO_IN[30] | (0x40000000) | mgtStatus[6] | rxIsAligned          |
-| GPIO_IN[29] | (0x20000000) | mgtStatus[5] | txresetdone          |
-| GPIO_IN[28] | (0x10000000) | mgtStatus[4] | rxresetdone          |
-| GPIO_IN[27] | (0x08000000) | mgtStatus[3] | cplllock             |
-| GPIO_IN[26] | (0x04000000) | mgtStatus[2] | cpllfbclklost        |
-| GPIO_IN[25] | (0x02000000) | mgtStatus[1] | rx_fsm_reset_done    |
-| GPIO_IN[24] | (0x01000000) | mgtStatus[0] | tx_fsm_reset_done    |
+| GPIO_IN[29] | (0x20000000) | mgtStatus[5] | rxresetdone          |
+| GPIO_IN[28] | (0x10000000) | mgtStatus[4] | cplllock             |
+| GPIO_IN[27] | (0x08000000) | mgtStatus[3] | cpllfbclklost        |
+| GPIO_IN[26] | (0x04000000) | mgtStatus[2] | rx_fsm_reset_done    |
+| GPIO_IN[25] | (0x02000000) | mgtStatus[1] | tx_fsm_reset_done    |
+| GPIO_IN[24] | (0x01000000) | mgtStatus[0] | txresetdone          |
 '------------------------------------------------------------------' */
 wire rxIsAligned, txresetdone, rxresetdone, cplllock, cpllfbclklost, rx_fsm_reset_done, tx_fsm_reset_done;
 assign mgtStatus = {rxIsAligned,
-                    txresetdone,
                     rxresetdone,
                     cplllock,
                     cpllfbclklost,
                     rx_fsm_reset_done,
-                    tx_fsm_reset_done};
+                    tx_fsm_reset_done,
+                    txresetdone};
 //=========================================================================================
 
 wire [4:0] rxPhaseMonitor, rxSlipMonitor;
