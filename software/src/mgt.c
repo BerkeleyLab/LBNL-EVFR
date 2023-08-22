@@ -32,6 +32,7 @@
 #include "gpio.h"
 #include "mgt.h"
 #include "util.h"
+#include "config.h"
 
 // MGT CONTROL BITMASK
 #define CSR_W_ENABLE_RESETS     0x80000000
@@ -187,13 +188,13 @@ evfInit(void)
     // reset CPLL
     uint32_t reset_signal = CSR_W_ENABLE_RESETS | CSR_W_GT_TX_RESET |
                       CSR_W_GT_RX_RESET | CSR_W_CPLL_RESET | CSR_W_SOFT_RESET;
-    for (uint8_t i=0; i<3; i++) {
+    for (uint8_t i=0; i<NUM_GTX_QSFP_FANOUT; i++) {
             GPIO_WRITE(GPIO_IDX_EVF_MGT_DRP_CSR+ i*GPIO_IDX_PER_MGTWRAPPER,
                        reset_signal);
     }
     microsecondSpin(25);
     reset_signal &= ~CSR_W_CPLL_RESET;
-    for (uint8_t i=0; i<3; i++) {
+    for (uint8_t i=0; i<NUM_GTX_QSFP_FANOUT; i++) {
             GPIO_WRITE(GPIO_IDX_EVF_MGT_DRP_CSR+ i*GPIO_IDX_PER_MGTWRAPPER,
                        reset_signal);
     }
@@ -214,7 +215,7 @@ evfInit(void)
     }
     // MGT TX reset
     reset_signal = CSR_W_ENABLE_RESETS; //= ~(CSR_W_GT_TX_RESET);
-    for (uint8_t i=0; i<3; i++) {
+    for (uint8_t i=0; i<NUM_GTX_QSFP_FANOUT; i++) {
             GPIO_WRITE(GPIO_IDX_EVF_MGT_DRP_CSR+ i*GPIO_IDX_PER_MGTWRAPPER,
                        reset_signal);
     }
