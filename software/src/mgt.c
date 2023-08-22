@@ -71,7 +71,7 @@ struct rxAligner {
                    S_AWAIT_RESET_COMPLETION, S_POST_RESET_DELAY,
                    S_POST_ALIGNMENT_DELAY } state;
 } rxAligners[1] = {
-    { .csrIdx       = GPIO_IDX_EVR_MGT_DRP_CSR, 
+    { .csrIdx       = GPIO_IDX_EVR_MGT_DRP_CSR,
       .mgtStatusIdx = GPIO_IDX_EVR_MGT_STATUS }
 };
 
@@ -272,7 +272,7 @@ mgtInit(void)
             break;
         }
     }
-    if(GPIO_READ(GPIO_IDX_MGT_HW_CONFIG) & QSFP_TEST_ENABLE == QSFP_TEST_ENABLE) {
+    if(GPIO_READ(GPIO_IDX_MGT_HW_CONFIG) & QSFP_TEST_ENABLE) {
         evfInit();
     }
 }
