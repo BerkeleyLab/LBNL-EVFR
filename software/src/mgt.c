@@ -184,7 +184,6 @@ evfInit(void)
     printf("EVF QSFP-MGT init in progress..\n");
     uint32_t then;
     uint8_t reset_status=0; // [2:0] used to contain reset status
-    uint32_t counter=0;
     // reset CPLL
     uint32_t reset_signal = CSR_W_ENABLE_RESETS | CSR_W_GT_TX_RESET |
                       CSR_W_GT_RX_RESET | CSR_W_CPLL_RESET | CSR_W_SOFT_RESET;
@@ -200,18 +199,22 @@ evfInit(void)
     }
     // Check for CPPLlock
     microsecondSpin(25);
+    uint8_t j = 0;
     then = MICROSECONDS_SINCE_BOOT();
     while(reset_status < 7) {
-        uint8_t i = (counter++)%3;
+        if( j >= NUM_GTX_QSFP_FANOUT) {
+            j = 0;
+        }
         if(GPIO_READ(GPIO_IDX_EVF_MGT_DRP_CSR+
-                     i*GPIO_IDX_PER_MGTWRAPPER) & CSR_R_CPLL_LOCKED) {
-            reset_status |= 1<<i;
+                     j*GPIO_IDX_PER_MGTWRAPPER) & CSR_R_CPLL_LOCKED) {
+            reset_status |= 1<<j;
         }
         // timeout
         if ((MICROSECONDS_SINCE_BOOT() - then) > CPLL_LOCK_TIMEOUT_US) {
             warn("[EVF] MGTs CPLL not locked ! Status: %X\n", reset_status);
             break;
         }
+        j++;
     }
     // MGT TX reset
     reset_signal = CSR_W_ENABLE_RESETS; //= ~(CSR_W_GT_TX_RESET);
@@ -223,16 +226,19 @@ evfInit(void)
     then = MICROSECONDS_SINCE_BOOT();
     reset_status = 0;
     while(reset_status < 7) {
-        uint8_t i = (counter++)%3;
+        if( j >= NUM_GTX_QSFP_FANOUT) {
+            j = 0;
+        }
         if(GPIO_READ(GPIO_IDX_EVF_MGT_DRP_CSR+
-                     i*GPIO_IDX_PER_MGTWRAPPER) & CSR_R_TX_RESET_DONE) {
-            reset_status |= 1<<i;
+                     j*GPIO_IDX_PER_MGTWRAPPER) & CSR_R_TX_RESET_DONE) {
+            reset_status |= 1<<j;
         }
         // timeout
         if ((MICROSECONDS_SINCE_BOOT() - then) > CPLL_LOCK_TIMEOUT_US) {
             warn("[EVF] MGTs TX_RESET not completed! Status: %X\n", reset_status);
             break;
         }
+        j++;
     }
     printf("EVF QSFP-MGT init done.\n");
 }
