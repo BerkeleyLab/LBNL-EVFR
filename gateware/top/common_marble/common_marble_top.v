@@ -300,10 +300,10 @@ wire [15:0] txCode;
 wire [2:0] evfTxInClks, evfTxOutClks, evfRxInClks, evfRxOutClks, evfReady;
 wire [1:0] evfCharIsK;
 assign evfClk = evfTxOutClks[0];
-assign evfTxInClks = {3{evfClk}}; // loopback TXOUTCLK
+assign evfTxInClks = {NUM_GTX_QSFP_FANOUT{evfClk}}; // loopback TXOUTCLK
 
 generate
-for (i = 0 ; i < 3 ; i = i + 1) begin
+for (i = 0 ; i < NUM_GTX_QSFP_FANOUT; i = i + 1) begin
 localparam integer rOff = i * GPIO_IDX_PER_MGTWRAPPER;
 evfMgtWrapper #(
     .DEBUG("false"))
@@ -331,7 +331,7 @@ endgenerate
 wire [8:0] fifo_wr_count, fifo_rd_count;
 wire fifo_we, fifo_re, fifo_full, fifo_empty;
 assign fifo_we = evrAligned & ~fifo_full;
-assign fifo_re = evfReady==3'b111 & ~fifo_empty;
+assign fifo_re = evfReady=={NUM_GTX_QSFP_FANOUT{1'b1}} & ~fifo_empty;
 
 fifo_2c #(.dw(18))
     EVFdataFifo (
