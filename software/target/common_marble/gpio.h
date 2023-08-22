@@ -38,8 +38,10 @@
 #define GPIO_IDX_CONFIG_KD_GATE_DRIVER   28 // Configure kicker driver outputs
 #define GPIO_IDX_EVR_SELECT_OUTPUT       29 // Choose EVR output
 #define GPIO_IDX_EVR_CONFIG_OUTPUT       30 // Configure EVR output
-#define GPIO_IDX_MGT_HW_CONFIG           31 // MGT hardware configuration
-#define GPIO_IDX_EVF_MGT_DRP_CSR         32 // EVF MGT control/status
+
+// QSFP Fanout
+#define GPIO_IDX_MGT_HW_CONFIG           50 // MGT hardware configuration
+#define GPIO_IDX_EVF_MGT_DRP_CSR         51 // EVF MGT control/status
 #define GPIO_IDX_PER_MGTWRAPPER           1 // EVF MGT register offset
 
 #include <xil_io.h>
