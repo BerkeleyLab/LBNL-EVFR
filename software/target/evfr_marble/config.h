@@ -42,6 +42,6 @@
 /*
  * QSFP Fanout for testing
  */
-#define NUM_GTX_QSFP_FANOUT                 3
+#define CFG_NUM_GTX_QSFP_FANOUT      3
 
 #endif /* _CONFIG_H_ */

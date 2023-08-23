@@ -187,13 +187,13 @@ evfInit(void)
     // reset CPLL
     uint32_t reset_signal = CSR_W_ENABLE_RESETS | CSR_W_GT_TX_RESET |
                       CSR_W_GT_RX_RESET | CSR_W_CPLL_RESET | CSR_W_SOFT_RESET;
-    for (uint8_t i=0; i<NUM_GTX_QSFP_FANOUT; i++) {
+    for (uint8_t i=0; i<CFG_NUM_GTX_QSFP_FANOUT; i++) {
             GPIO_WRITE(GPIO_IDX_EVF_MGT_DRP_CSR+ i*GPIO_IDX_PER_MGTWRAPPER,
                        reset_signal);
     }
     microsecondSpin(25);
     reset_signal &= ~CSR_W_CPLL_RESET;
-    for (uint8_t i=0; i<NUM_GTX_QSFP_FANOUT; i++) {
+    for (uint8_t i=0; i<CFG_NUM_GTX_QSFP_FANOUT; i++) {
             GPIO_WRITE(GPIO_IDX_EVF_MGT_DRP_CSR+ i*GPIO_IDX_PER_MGTWRAPPER,
                        reset_signal);
     }
@@ -202,7 +202,7 @@ evfInit(void)
     uint8_t j = 0;
     then = MICROSECONDS_SINCE_BOOT();
     while(reset_status < 7) {
-        if( j >= NUM_GTX_QSFP_FANOUT) {
+        if( j >= CFG_NUM_GTX_QSFP_FANOUT) {
             j = 0;
         }
         if(GPIO_READ(GPIO_IDX_EVF_MGT_DRP_CSR+
@@ -218,7 +218,7 @@ evfInit(void)
     }
     // MGT TX reset
     reset_signal = CSR_W_ENABLE_RESETS; //= ~(CSR_W_GT_TX_RESET);
-    for (uint8_t i=0; i<NUM_GTX_QSFP_FANOUT; i++) {
+    for (uint8_t i=0; i<CFG_NUM_GTX_QSFP_FANOUT; i++) {
             GPIO_WRITE(GPIO_IDX_EVF_MGT_DRP_CSR+ i*GPIO_IDX_PER_MGTWRAPPER,
                        reset_signal);
     }
@@ -226,7 +226,7 @@ evfInit(void)
     then = MICROSECONDS_SINCE_BOOT();
     reset_status = 0;
     while(reset_status < 7) {
-        if( j >= NUM_GTX_QSFP_FANOUT) {
+        if( j >= CFG_NUM_GTX_QSFP_FANOUT) {
             j = 0;
         }
         if(GPIO_READ(GPIO_IDX_EVF_MGT_DRP_CSR+
