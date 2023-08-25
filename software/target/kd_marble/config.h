@@ -41,4 +41,5 @@
  */
 #define CFG_KD_OUTPUT_COUNT                 145
 
+#define CFG_NUM_GTX_QSFP_FANOUT      3
 #endif /* _CONFIG_H_ */
