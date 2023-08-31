@@ -6,6 +6,7 @@ XILINX_TOOL := VIVADO
 FPGA_VENDOR := xilinx
 FPGA_PLATFORM := 7series
 FPGA_APPLICATION ?= evfr
+TESTING_ARGS_VIVADO ?= none
 
 CMD_SEP = ;
 __THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
@@ -31,6 +32,7 @@ vpath %.v $(PERIPH_DRIVERS_DIR)
 vpath %.v $(PERIPH_DRIVERS_DIR)/i2cbridge
 
 TOP_LVL_DIR = ../../top/$(TARGET)
+COMMON_TOP_LVL_DIR = ../../top/common_marble
 
 # top-level files go here
 vpath %.v $(TOP_LVL_DIR)
@@ -60,6 +62,12 @@ endif
 ifeq ($(CFG_EVRIO),N)
 SYSTEM_TOP_PINS_XDC += kd_pins.xdc
 SYSTEM_TOP_TIM_XDC += kd_tim.xdc
+endif
+
+ifeq ($(TESTING_ARGS_VIVADO),USE_QSFP_FANOUT)
+SYNTH_OPT += QSFP_FANOUT
+VFLAGS_DEP += -DQSFP_FANOUT
+SYSTEM_TOP_PINS_XDC += $(COMMON_TOP_LVL_DIR)/qsfp_fanout_pins.xdc
 endif
 
 # ip_cores generation scripts/names

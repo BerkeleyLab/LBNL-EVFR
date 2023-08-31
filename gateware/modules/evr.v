@@ -15,15 +15,16 @@ module evr #(
     output [31:0] monitorSeconds,
     output [31:0] monitorTicks,
     output [31:0] todSeconds,
-    input         refClk,
 
     output wire                    evrClk,
     output reg               [7:0] evrCode = 0,
+    output wire              [15:0] rawRxCode,
     output reg                     evrCodeValid = 0,
+    output wire               [1:0] evrCharIsK,
     output wire [OUTPUT_COUNT-1:0] evrTriggerBus,
     output wire              [7:0] evrDistributedBus,
     output wire                    evrPPSmarker,
-
+    output wire                     mgtAligned,
     input   mgtRefClk,
     input   MGT_RX_P,
     input   MGT_RX_N,
@@ -32,6 +33,9 @@ module evr #(
 
 (*mark_debug=DEBUG*) wire [15:0] rxData;
 (*mark_debug=DEBUG*) wire [1:0] rxIsK, rxNotInTable;
+assign mgtAligned = rxIsAligned;
+assign evrCharIsK = rxIsK;
+assign rawRxCode = rxData;
 
 //////////////////////////////////////////////////////////////////////////////
 // Receiver alignment detection
@@ -173,14 +177,12 @@ end
 localparam DRP_DATA_WIDTH          = 16;
 localparam DRP_ADDR_WIDTH          = 9;
 localparam DRP_RESET_CONTROL_WIDTH = 6;
-localparam DRP_RESET_STATUS_WIDTH  = 6;
+localparam DRP_RESET_STATUS_WIDTH  = 7;
 wire                               drp_en, drp_we, drp_rdy;
 wire          [DRP_ADDR_WIDTH-1:0] drp_addr;
 wire          [DRP_DATA_WIDTH-1:0] drp_di, drp_do;
 (*mark_debug=DEBUG*) wire [DRP_RESET_CONTROL_WIDTH-1:0] mgtControl;
 (*mark_debug=DEBUG*) wire  [DRP_RESET_STATUS_WIDTH-1:0] mgtStatus;
-assign sysSlideRequest = mgtControl[5];
-assign mgtStatus[5] = rxIsAligned;
 drpControl #(
     .DRP_DATA_WIDTH(DRP_DATA_WIDTH),
     .DRP_ADDR_WIDTH(DRP_ADDR_WIDTH),
@@ -207,6 +209,47 @@ wire rxoutclk;
 BUFG evrClkBUFG (.I(rxoutclk), .O(evrClk));
 wire txoutclk, evrTxClk;
 BUFG evrTxClkBUFG (.I(txoutclk), .O(evrTxClk));
+//=========================================================================================
+/* MGT control signals table
+ ___________________________________________________________________
+| GPIO INDEX   |  HEX VALUE   | MGT INDEX     | MGT CONNECTIONS     |
+|--------------|--------------|---------------|---------------------|
+| GPIO_OUT[30] | (0x40000000) | MGTcontrol[5] | sysSlideRequest	    |
+| GPIO_OUT[29] | (0x20000000) | MGTcontrol[4] | gttxreset           |
+| GPIO_OUT[28] | (0x10000000) | MGTcontrol[3] | rxpmareset          |
+| GPIO_OUT[27] | (0x08000000) | MGTcontrol[2] | gtrxreset           |
+| GPIO_OUT[26] | (0x04000000) | MGTcontrol[1] | cpllreset 		    |
+| GPIO_OUT[25] | (0x02000000) | MGTcontrol[0] | soft reset tx / rx  |
+'-------------------------------------------------------------------' */
+wire gttxreset, rxpmareset, gtrxreset, cpllreset, softreset;
+assign {sysSlideRequest,
+        gttxreset,
+        rxpmareset,
+        gtrxreset,
+        cpllreset,
+        softreset} = mgtControl;
+
+/* MGT status signals table
+___________________________________________________________________
+| GPIO INDEX  |  HEX VALUE   | MGT INDEX    | MGT CONNECTIONS      |
+|-------------|--------------|--------------|----------------------|
+| GPIO_IN[30] | (0x40000000) | mgtStatus[6] | rxIsAligned          |
+| GPIO_IN[29] | (0x20000000) | mgtStatus[5] | rxresetdone          |
+| GPIO_IN[28] | (0x10000000) | mgtStatus[4] | cplllock             |
+| GPIO_IN[27] | (0x08000000) | mgtStatus[3] | cpllfbclklost        |
+| GPIO_IN[26] | (0x04000000) | mgtStatus[2] | rx_fsm_reset_done    |
+| GPIO_IN[25] | (0x02000000) | mgtStatus[1] | tx_fsm_reset_done    |
+| GPIO_IN[24] | (0x01000000) | mgtStatus[0] | txresetdone          |
+'------------------------------------------------------------------' */
+wire rxIsAligned, txresetdone, rxresetdone, cplllock, cpllfbclklost, rx_fsm_reset_done, tx_fsm_reset_done;
+assign mgtStatus = {rxIsAligned,
+                    rxresetdone,
+                    cplllock,
+                    cpllfbclklost,
+                    rx_fsm_reset_done,
+                    tx_fsm_reset_done,
+                    txresetdone};
+//=========================================================================================
 
 wire [4:0] rxPhaseMonitor, rxSlipMonitor;
 assign mgtRxStatus = { 22'b0, rxSlipMonitor, rxPhaseMonitor };
@@ -215,21 +258,21 @@ localparam LOOPBACK = 3'd4; // 4 == Far end PMA loopback
 
 evrmgt evrmgt_i (
     .sysclk_in(sysClk), // input wire sysclk_in
-    .soft_reset_tx_in(mgtControl[0]), // input wire soft_reset_tx_in
-    .soft_reset_rx_in(mgtControl[0]), // input wire soft_reset_rx_in
+    .soft_reset_tx_in(softreset), // input wire soft_reset_tx_in
+    .soft_reset_rx_in(softreset), // input wire soft_reset_rx_in
     .dont_reset_on_data_error_in(1'b1), // input wire dont_reset_on_data_error_in
-    .gt0_tx_fsm_reset_done_out(mgtStatus[0]), // output wire gt0_tx_fsm_reset_done_out
-    .gt0_rx_fsm_reset_done_out(mgtStatus[1]), // output wire gt0_rx_fsm_reset_done_out
+    .gt0_tx_fsm_reset_done_out(tx_fsm_reset_done), // output wire gt0_tx_fsm_reset_done_out
+    .gt0_rx_fsm_reset_done_out(rx_fsm_reset_done), // output wire gt0_rx_fsm_reset_done_out
     .gt0_data_valid_in(1'b1), // input wire gt0_data_valid_in
 
     //_________________________________________________________________________
     //GT0  (X0Y0)
     //____________________________CHANNEL PORTS________________________________
     //------------------------------- CPLL Ports -------------------------------
-    .gt0_cpllfbclklost_out   (mgtStatus[2]), // output wire gt0_cpllfbclklost_out
-    .gt0_cplllock_out        (mgtStatus[3]), // output wire gt0_cplllock_out
+    .gt0_cpllfbclklost_out   (cpllfbclklost), // output wire gt0_cpllfbclklost_out
+    .gt0_cplllock_out        (cplllock), // output wire gt0_cplllock_out
     .gt0_cplllockdetclk_in   (sysClk), // input wire gt0_cplllockdetclk_in
-    .gt0_cpllreset_in        (mgtControl[1]), // input wire gt0_cpllreset_in
+    .gt0_cpllreset_in        (cpllreset), // input wire gt0_cpllreset_in
     //------------------------ Channel - Clocking Ports ------------------------
     .gt0_gtrefclk0_in        (mgtRefClk), // input wire gt0_gtrefclk0_in
     .gt0_gtrefclk1_in        (1'b0), // input wire gt0_gtrefclk1_in
@@ -276,16 +319,16 @@ evrmgt evrmgt_i (
     .gt0_rxoutclk_out        (rxoutclk), // output wire gt0_rxoutclk_out
     .gt0_rxoutclkfabric_out  (), // output wire gt0_rxoutclkfabric_out
     //----------- Receive Ports - RX Initialization and Reset Ports ------------
-    .gt0_gtrxreset_in        (mgtControl[2]), // input wire gt0_gtrxreset_in
-    .gt0_rxpmareset_in       (mgtControl[3]), // input wire gt0_rxpmareset_in
+    .gt0_gtrxreset_in        (gtrxreset), // input wire gt0_gtrxreset_in
+    .gt0_rxpmareset_in       (rxpmareset), // input wire gt0_rxpmareset_in
     //-------------------- Receive Ports - RX gearbox ports --------------------
     .gt0_rxslide_in          (bitSlide), // input wire gt0_rxslide_in
     //----------------- Receive Ports - RX8B/10B Decoder Ports -----------------
     .gt0_rxcharisk_out       (rxIsK), // output wire [1:0] gt0_rxcharisk_out
     //------------ Receive Ports -RX Initialization and Reset Ports ------------
-    .gt0_rxresetdone_out     (mgtStatus[4]), // output wire gt0_rxresetdone_out
+    .gt0_rxresetdone_out     (rxresetdone), // output wire gt0_rxresetdone_out
     //------------------- TX Initialization and Reset Ports --------------------
-    .gt0_gttxreset_in        (mgtControl[4]), // input wire gt0_gttxreset_in
+    .gt0_gttxreset_in        (gttxreset), // input wire gt0_gttxreset_in
     .gt0_txuserrdy_in        (1'b1), // input wire gt0_txuserrdy_in
     //---------------- Transmit Ports - FPGA TX Interface Ports ----------------
     .gt0_txusrclk_in         (evrTxClk), // input wire gt0_txusrclk_in
@@ -302,7 +345,7 @@ evrmgt evrmgt_i (
     //------------------- Transmit Ports - TX Gearbox Ports --------------------
     .gt0_txcharisk_in        (2'h0), // input wire [1:0] gt0_txcharisk_in
     //----------- Transmit Ports - TX Initialization and Reset Ports -----------
-    .gt0_txresetdone_out     (), // output wire gt0_txresetdone_out
+    .gt0_txresetdone_out     (txresetdone), // output wire gt0_txresetdone_out
 
     //____________________________COMMON PORTS________________________________
     .gt0_qplloutclk_in(1'b0), // input wire gt0_qplloutclk_in
@@ -322,9 +365,9 @@ localparam QPLL_FBDIV_RATIO = 1'b1;
 wire [15:0] tied_to_ground_vec_i = 0;
 wire tied_to_ground_i = 0;
 wire tied_to_vcc_i = 1;
-wire GT0_GTREFCLK0_COMMON_IN = refClk;
+wire GT0_GTREFCLK0_COMMON_IN = mgtRefClk;
 wire GT0_QPLLLOCKDETCLK_IN = sysClk;
-wire GT0_QPLLRESET_IN = mgtControl[1];
+wire GT0_QPLLRESET_IN = cpllreset;
 wire GT0_QPLLLOCK_OUT;
 wire GT0_QPLLREFCLKLOST_OUT;
 

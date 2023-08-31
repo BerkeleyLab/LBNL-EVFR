@@ -32,7 +32,9 @@
 #include "gpio.h"
 #include "mgt.h"
 #include "util.h"
+#include "config.h"
 
+// MGT CONTROL BITMASK
 #define CSR_W_ENABLE_RESETS     0x80000000
 #define CSR_W_RX_BITSLIDE_REQ   0x40000000
 #define CSR_W_GT_TX_RESET       0x20000000
@@ -40,18 +42,22 @@
 #define CSR_W_GT_RX_RESET       0x08000000
 #define CSR_W_CPLL_RESET        0x04000000
 #define CSR_W_SOFT_RESET        0x02000000
-
+// MGT DRP BITMASK
 #define CSR_W_DRP_WE            0x40000000
 #define CSR_W_DRP_ADDR_SHIFT    16
 #define CSR_R_DRP_BUSY          0x80000000
 #define CSR_DRP_DATA_MASK       0xFFFF
-
+// MGT STATUS BITMASK
 #define CSR_R_RX_ALIGNED        0x40000000
 #define CSR_R_RX_RESET_DONE     0x20000000
 #define CSR_R_CPLL_LOCKED       0x10000000
 #define CSR_R_CPLL_FB_CLK_LOST  0x08000000
 #define CSR_R_RX_FSM_RESET_DONE 0x04000000
 #define CSR_R_TX_FSM_RESET_DONE 0x02000000
+#define CSR_R_TX_RESET_DONE     0x01000000
+#define CPLL_LOCK_TIMEOUT_US         50000
+// QSFP TEST
+#define QSFP_TEST_ENABLE        0x00000001
 
 /*
  * Receiver alignment state machines
@@ -65,7 +71,7 @@ struct rxAligner {
                    S_AWAIT_RESET_COMPLETION, S_POST_RESET_DELAY,
                    S_POST_ALIGNMENT_DELAY } state;
 } rxAligners[1] = {
-    { .csrIdx       = GPIO_IDX_EVR_MGT_DRP_CSR, 
+    { .csrIdx       = GPIO_IDX_EVR_MGT_DRP_CSR,
       .mgtStatusIdx = GPIO_IDX_EVR_MGT_STATUS }
 };
 
@@ -173,6 +179,71 @@ mgtCrankRxAlignerFor(struct rxAligner *rxp)
 }
 
 void
+evfInit(void)
+{
+    printf("EVF QSFP-MGT init in progress..\n");
+    uint32_t then;
+    uint8_t reset_status=0; // [2:0] used to contain reset status
+    // reset CPLL
+    uint32_t reset_signal = CSR_W_ENABLE_RESETS | CSR_W_GT_TX_RESET |
+                      CSR_W_GT_RX_RESET | CSR_W_CPLL_RESET | CSR_W_SOFT_RESET;
+    for (uint8_t i=0; i<CFG_NUM_GTX_QSFP_FANOUT; i++) {
+            GPIO_WRITE(GPIO_IDX_EVF_MGT_DRP_CSR+ i*GPIO_IDX_PER_MGTWRAPPER,
+                       reset_signal);
+    }
+    microsecondSpin(25);
+    reset_signal &= ~CSR_W_CPLL_RESET;
+    for (uint8_t i=0; i<CFG_NUM_GTX_QSFP_FANOUT; i++) {
+            GPIO_WRITE(GPIO_IDX_EVF_MGT_DRP_CSR+ i*GPIO_IDX_PER_MGTWRAPPER,
+                       reset_signal);
+    }
+    // Check for CPPLlock
+    microsecondSpin(25);
+    uint8_t j = 0;
+    then = MICROSECONDS_SINCE_BOOT();
+    while(reset_status < 7) {
+        if( j >= CFG_NUM_GTX_QSFP_FANOUT) {
+            j = 0;
+        }
+        if(GPIO_READ(GPIO_IDX_EVF_MGT_DRP_CSR+
+                     j*GPIO_IDX_PER_MGTWRAPPER) & CSR_R_CPLL_LOCKED) {
+            reset_status |= 1<<j;
+        }
+        // timeout
+        if ((MICROSECONDS_SINCE_BOOT() - then) > CPLL_LOCK_TIMEOUT_US) {
+            warn("[EVF] MGTs CPLL not locked ! Status: %X\n", reset_status);
+            break;
+        }
+        j++;
+    }
+    // MGT TX reset
+    reset_signal = CSR_W_ENABLE_RESETS; //= ~(CSR_W_GT_TX_RESET);
+    for (uint8_t i=0; i<CFG_NUM_GTX_QSFP_FANOUT; i++) {
+            GPIO_WRITE(GPIO_IDX_EVF_MGT_DRP_CSR+ i*GPIO_IDX_PER_MGTWRAPPER,
+                       reset_signal);
+    }
+    // check reset_done signal
+    then = MICROSECONDS_SINCE_BOOT();
+    reset_status = 0;
+    while(reset_status < 7) {
+        if( j >= CFG_NUM_GTX_QSFP_FANOUT) {
+            j = 0;
+        }
+        if(GPIO_READ(GPIO_IDX_EVF_MGT_DRP_CSR+
+                     j*GPIO_IDX_PER_MGTWRAPPER) & CSR_R_TX_RESET_DONE) {
+            reset_status |= 1<<j;
+        }
+        // timeout
+        if ((MICROSECONDS_SINCE_BOOT() - then) > CPLL_LOCK_TIMEOUT_US) {
+            warn("[EVF] MGTs TX_RESET not completed! Status: %X\n", reset_status);
+            break;
+        }
+        j++;
+    }
+    printf("EVF QSFP-MGT init done.\n");
+}
+
+void
 mgtInit(void)
 {
     uint32_t then;
@@ -184,13 +255,13 @@ mgtInit(void)
     writeResets(resets);
     microsecondSpin(10);
     if (!(GPIO_READ(GPIO_IDX_EVR_MGT_DRP_CSR) & CSR_R_CPLL_LOCKED)) {
-        warn("Warning -- CPLL didn't lock.");
+        warn("Warning -- EVR CPLL didn't lock.");
     }
     writeResets(0);
     then = MICROSECONDS_SINCE_BOOT();
     while (!(GPIO_READ(GPIO_IDX_EVR_MGT_DRP_CSR) & CSR_R_RX_RESET_DONE)) {
         if ((MICROSECONDS_SINCE_BOOT() - then) > 100000) {
-            warn("MGT Rx reset not done: %X", GPIO_READ(GPIO_IDX_EVR_MGT_DRP_CSR));
+            warn("EVR MGT Rx reset not done: %X", GPIO_READ(GPIO_IDX_EVR_MGT_DRP_CSR));
             break;
         }
     }
@@ -200,6 +271,9 @@ mgtInit(void)
             warn("Can't align MGT receiver -- will keep trying in background");
             break;
         }
+    }
+    if(GPIO_READ(GPIO_IDX_MGT_HW_CONFIG) & QSFP_TEST_ENABLE) {
+        evfInit();
     }
 }
 

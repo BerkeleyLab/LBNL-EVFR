@@ -24,8 +24,18 @@ module common_marble_top #(
     output wire[3:0] RGMII_TXD,
 
     input  MGT_CLK_P, MGT_CLK_N,
-    input  MGT_RX_P, MGT_RX_N,
-    output MGT_TX_P, MGT_TX_N,
+    output MGT_TX_2_P, MGT_TX_2_N,
+    input  MGT_RX_2_P, MGT_RX_2_N,
+
+`ifdef QSFP_FANOUT
+    // Additional MGT used for fanout via QSFP
+    output MGT_TX_1_P, MGT_TX_1_N,
+    input  MGT_RX_1_P, MGT_RX_1_N,
+    output MGT_TX_3_P, MGT_TX_3_N,
+    input  MGT_RX_3_P, MGT_RX_3_N,
+    output MGT_TX_4_P, MGT_TX_4_N,
+    input  MGT_RX_4_P, MGT_RX_4_N,
+`endif
 
 `ifdef KICKER_DRIVER
     output [CFG_KD_OUTPUT_COUNT-1:0] DRIVER_P,
@@ -235,10 +245,13 @@ mmcMailbox #(.DEBUG("false"))
 
 /////////////////////////////////////////////////////////////////////////////
 // Event receiver
-wire evrPPSmarker;
+wire [15:0] rxCode;
+wire [7:0] evrDistributedBus;
+wire       evrPPSmarker;
 wire [CFG_EVR_OUTPUT_COUNT-1:0] evrTriggerBus;
 wire [7:0] evrCode;
-wire       evrCodeValid;
+wire       evrCodeValid, evrAligned;
+wire [1:0] evrCharIsK;
 evr #(.EVR_CLOCK_RATE(CFG_EVR_CLOCK_RATE),
       .OUTPUT_COUNT(CFG_EVR_OUTPUT_COUNT),
       .DEBUG("false"))
@@ -253,18 +266,20 @@ evr #(.EVR_CLOCK_RATE(CFG_EVR_CLOCK_RATE),
     .monitorSeconds(GPIO_IN[GPIO_IDX_EVR_MONITOR_SECONDS]),
     .monitorTicks(GPIO_IN[GPIO_IDX_EVR_MONITOR_TICKS]),
     .todSeconds(GPIO_IN[GPIO_IDX_EVR_SECONDS]),
-    .refClk(refClk200),
     .evrClk(evrClk),
     .evrCode(evrCode),
+    .rawRxCode(rxCode),
     .evrCodeValid(evrCodeValid),
+    .evrCharIsK(evrCharIsK),
     .evrTriggerBus(evrTriggerBus),
-    .evrDistributedBus(),
+    .evrDistributedBus(evrDistributedBus),
     .evrPPSmarker(evrPPSmarker),
+    .mgtAligned(evrAligned),
     .mgtRefClk(mgtRefClk),
-    .MGT_RX_P(MGT_RX_P),
-    .MGT_RX_N(MGT_RX_N),
-    .MGT_TX_P(MGT_TX_P),
-    .MGT_TX_N(MGT_TX_N));
+    .MGT_TX_P(MGT_TX_2_P),
+    .MGT_TX_N(MGT_TX_2_N),
+    .MGT_RX_P(MGT_RX_2_P),
+    .MGT_RX_N(MGT_RX_2_N));
 
 /////////////////////////////////////////////////////////////////////////////
 // Pass events to processor
@@ -278,6 +293,71 @@ evrLogger #(.DEBUG("false"))
     .evrCode(evrCode),
     .evrCodeValid(evrCodeValid));
 
+`ifdef QSFP_FANOUT
+/////////////////////////////////////////////////////////////////////////////
+// Event Fanout
+assign GPIO_IN[GPIO_IDX_MGT_HW_CONFIG] = 1; //{{31{1'b0}},1'b1};
+wire evfClk;
+// I/O MGT Pins
+wire [2:0] rxPpins = {MGT_RX_1_P, MGT_RX_3_P, MGT_RX_4_P};
+wire [2:0] rxNpins = {MGT_RX_1_N, MGT_RX_3_N, MGT_RX_4_N};
+wire [2:0] txPpins;
+assign {MGT_TX_1_P, MGT_TX_3_P, MGT_TX_4_P} = txPpins;
+wire [2:0] txNpins;
+assign {MGT_TX_1_N, MGT_TX_3_N, MGT_TX_4_N} = txNpins;
+// Data & Clocks
+wire [15:0] txCode;
+wire [2:0] evfTxInClks, evfTxOutClks, evfRxInClks, evfRxOutClks, evfReady;
+wire [1:0] evfCharIsK;
+assign evfClk = evfTxOutClks[0];
+assign evfTxInClks = {CFG_NUM_GTX_QSFP_FANOUT{evfClk}}; // loopback TXOUTCLK
+
+generate
+for (i = 0 ; i < CFG_NUM_GTX_QSFP_FANOUT; i = i + 1) begin
+localparam integer rOff = i * GPIO_IDX_PER_MGTWRAPPER;
+evfMgtWrapper #(
+    .DEBUG("false"))
+    evfmgt(
+        .sysClk(sysClk) ,
+        .sysGPIO_OUT(GPIO_OUT),
+        .drpStrobe(GPIO_STROBES[GPIO_IDX_EVF_MGT_DRP_CSR+rOff]),
+        .drpStatus(GPIO_IN[GPIO_IDX_EVF_MGT_DRP_CSR+rOff]),
+        .mgtReady(evfReady[i]),
+        .refClk(mgtRefClk),
+        .txInClk(evfTxInClks[i]),
+        .txOutClk(evfTxOutClks[i]),
+        .rxInClk(evfRxInClks[i]),
+        .rxOutClk(evfRxOutClks[i]),
+        .txCode(txCode),
+        .dataIsK(evfCharIsK),
+        .MGT_TX_P(txPpins[i]),
+        .MGT_TX_N(txNpins[i]),
+        .MGT_RX_P(rxPpins[i]),
+        .MGT_RX_N(rxNpins[i]));
+end
+endgenerate
+
+// FIFO Control signals
+wire [8:0] fifo_wr_count, fifo_rd_count;
+wire fifo_we, fifo_re, fifo_full, fifo_empty;
+assign fifo_we = evrAligned & ~fifo_full;
+assign fifo_re = evfReady=={CFG_NUM_GTX_QSFP_FANOUT{1'b1}} & ~fifo_empty;
+
+fifo_2c #(.dw(18))
+    EVFdataFifo (
+    .wr_clk(evrClk),
+    .we(fifo_we),
+    .din({evrCharIsK, rxCode}),
+    .wr_count(fifo_wr_count),
+    .full(fifo_full),
+    .rd_clk(evfClk),
+    .re(fifo_re),
+    .dout({evfCharIsK, txCode}),
+    .rd_count(fifo_rd_count),
+    .empty(fifo_empty));
+`else
+    assign GPIO_IN[GPIO_IDX_MGT_HW_CONFIG] = 0;
+`endif
 //////////////////////////////////////////////////////////////////////////////
 // I2C
 // Three channel version a holdover from Marble Mini layout, but keep

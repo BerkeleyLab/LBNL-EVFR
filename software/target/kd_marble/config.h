@@ -41,4 +41,9 @@
  */
 #define CFG_KD_OUTPUT_COUNT                 145
 
+/*
+ * QSFP Fanout for testing
+ */
+#define CFG_NUM_GTX_QSFP_FANOUT      3
+
 #endif /* _CONFIG_H_ */
