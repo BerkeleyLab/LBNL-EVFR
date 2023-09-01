@@ -255,6 +255,7 @@ cmdDEBUG(int argc, char **argv)
     }
     else {
         if (d & DEBUGFLAG_IIC_SCAN) iicProcScan();
+        if (d & DEBUGFLAG_DUMP_SCREEN) st7789vDumpScreen();
         if (d & DEBUGFLAG_DUMP_MGT_SWITCH) mgtClkSwitchDump();
         if (d & DEBUGFLAG_SHOW_RX_ALIGNER) mgtShowRxAligners();
         debugFlags = d;
