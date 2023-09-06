@@ -44,6 +44,7 @@
 #include "mgtClkSwitch.h"
 #include "systemParameters.h"
 #include "user_mgt_refclk.h"
+#include "st7789v.h"
 #include "util.h"
 
 #define CONSOLE_UDP_PORT 50004
@@ -261,6 +262,14 @@ cmdDEBUG(int argc, char **argv)
         debugFlags = d;
         printf("Debug flags: 0x%x\n", debugFlags);
     }
+    return 0;
+}
+
+static int
+cmdDumpScreen(int argc, char **argv)
+{
+    printf("dumpscreen\n");
+    st7789vDumpScreen();
     return 0;
 }
 
@@ -504,16 +513,17 @@ commandHandler(int argc, char **argv)
         const char *description;
     };
     static struct commandInfo commandTable[] = {
-      { "boot",    cmdBOOT,        "Reboot FPGA"                         },
-      { "debug",   cmdDEBUG,       "Set debug flags"                     },
-      { "eyescan", eyescanCommand, "Perform transceiver eye scan"        },
-      { "fmon",    cmdFMON,        "Show clock frequencies"              },
-      { "log",     cmdLOG,         "Replay startup console output"       },
-      { "mac",     cmdMAC,         "Set Ethernet MAC address"            },
-      { "net",     cmdNET,         "Set network parameters"              },
-      { "reg",     cmdREG,         "Show GPIO register(s)"               },
-      { "showEVIO",cmdShowEVIO,    "Show EVIO hardware inputs"           },
-      { "userMGT", cmdUMGT,        "User MGT reference clock adjustment" },
+      { "boot",       cmdBOOT,        "Reboot FPGA"                         },
+      { "debug",      cmdDEBUG,       "Set debug flags"                     },
+      { "dumpscreen", cmdDumpScreen,  "Perform screen dump via console"     },
+      { "eyescan",    eyescanCommand, "Perform transceiver eye scan"        },
+      { "fmon",       cmdFMON,        "Show clock frequencies"              },
+      { "log",        cmdLOG,         "Replay startup console output"       },
+      { "mac",        cmdMAC,         "Set Ethernet MAC address"            },
+      { "net",        cmdNET,         "Set network parameters"              },
+      { "reg",        cmdREG,         "Show GPIO register(s)"               },
+      { "showEVIO",   cmdShowEVIO,    "Show EVIO hardware inputs"           },
+      { "userMGT",    cmdUMGT,        "User MGT reference clock adjustment" },
     };
 
     if (argc <= 0)
