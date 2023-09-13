@@ -175,10 +175,9 @@ readSI570parameterFromPCBrev()
     uint8_t pcb_version = mmcMailboxRead(MB_PCB_REV_ADDR) & 0xf; // [0:3]=PCB rev
     printf("PCB version %d detected - using Si570 associated parameters.\n", pcb_version+2);
     iicProcSetMux(IIC_MUX_PORT_PORT_EXPANDER);
-    for (uint8_t i=0; i < sizeof(marble_ob_xo)/sizeof(marble_ob_xo[0]); i++) {
+    for (uint8_t i=0; i < ARRAY_SIZE(marble_ob_xo); i++) {
         if (marble_ob_xo[i].pcb_rev == pcb_version) {
-            for(uint8_t j=0; j<sizeof(marble_ob_xo[i].si57x_information)/
-                                sizeof(marble_ob_xo[i].si57x_information[0]); j++) {
+            for(uint8_t j=0; j<ARRAY_SIZE(marble_ob_xo[i].si57x_information); j++) {
                 if (iicProcWrite(marble_ob_xo[i].si57x_information[j]->iicAddr, -1, NULL, 0)) { // i2c address matches
                     si570_parameters.iicAddr = marble_ob_xo[i].si57x_information[j]->iicAddr;
                     si570_parameters.startupFrequency = marble_ob_xo[i].si57x_information[j]->startupFrequency;
