@@ -178,6 +178,9 @@ readSI570parameterFromPCBrev()
     for (uint8_t i=0; i < ARRAY_SIZE(marble_ob_xo); i++) {
         if (marble_ob_xo[i].pcb_rev == pcb_version) {
             for(uint8_t j=0; j<ARRAY_SIZE(marble_ob_xo[i].si57x_information); j++) {
+                if (marble_ob_xo[i].si57x_information[j] == NULL) {
+                    return 0;
+                }
                 if (iicProcWrite(marble_ob_xo[i].si57x_information[j]->iicAddr, -1, NULL, 0)) { // i2c address matches
                     si570_parameters.iicAddr = marble_ob_xo[i].si57x_information[j]->iicAddr;
                     si570_parameters.startupFrequency = marble_ob_xo[i].si57x_information[j]->startupFrequency;
