@@ -22,8 +22,8 @@
 #define MB_SI570_I2C_ADDR                      0x60
 #define MB_SI570_CONFIG_ADDR                   0x61
 #define MB_SI570_FREQ_ADDR                     0x62
-#define F_DCO_MIN                   4.85*1000000000
-#define F_DCO_MAX                   5.67*1000000000
+#define F_DCO_MIN                 (4.85*1000000000)
+#define F_DCO_MAX                 (5.67*1000000000)
 #define SI570_DEFAULT_TARGET_FREQUENCY  100000000.0
 struct si57x_part_numbers {
     uint8_t iicAddr;
