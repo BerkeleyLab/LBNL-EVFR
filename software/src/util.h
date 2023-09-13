@@ -39,7 +39,7 @@
 #include <xil_io.h>
 
 /*
- * Allow code to refer  to printf without actually pulling it in
+ * Allow code to refer to printf without actually pulling it in
  */
 #define printf(...) xil_printf(__VA_ARGS__)
 
@@ -85,5 +85,7 @@ void checkForReset(void);
 int resetRecoverySwitchPressed(void);
 int displaySwitchPressed(void);
 void civil_from_days(int posixDays, int *year, int *month, int *day);
+
+#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 #endif /* _UTIL_H_ */
