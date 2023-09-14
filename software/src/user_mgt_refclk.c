@@ -205,20 +205,18 @@ readSI570parameterFromMailbox()
             break;
         }
         if((MICROSECONDS_SINCE_BOOT() - then) > 5000000) {
-            print("Error - mailbox reading failed.\n");
             break;
         }
-
     }
-    // printf("Time elapsed: %d us \n", MICROSECONDS_SINCE_BOOT() - then);
     uint32_t initialFrequency = 0;
     for (uint8_t i = 0; i<4; i++) {
         initialFrequency |=  mmcMailboxRead(MB_SI570_FREQ_ADDR+i)<<((3-i)*8);
     }
-    uint8_t config = mmcMailboxRead(MB_SI570_CONFIG_ADDR);
-    if(i2c_address == 0) {
-        return 0; // in case mailbox reading fails
+    if(i2c_address == 0 || initialFrequency == 0) {
+        warn("Si570 information mailbox reading failed.\n");
+        return 0;
     }
+    uint8_t config = mmcMailboxRead(MB_SI570_CONFIG_ADDR);
     si570_parameters.iicAddr = i2c_address;
     si570_parameters.startupFrequency = initialFrequency;
     si570_parameters.temperatureStability = config & 0x1;
