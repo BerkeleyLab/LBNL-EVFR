@@ -234,7 +234,10 @@ userMGTrefClkAdjust(int offsetPPM)
         // Method 1 - fetching parameter from mailbox
         if(!readSI570parameterFromMailbox()) {
             // Method 2 - using PCB rev value
-            readSI570parameterFromPCBrev();
+            if(!readSI570parameterFromPCBrev()) {
+                warn("Unable to find Si570 I2C address. Aborting initialization.");
+                return 0;
+            }
         }
     }
     r = refInit(si570_parameters.startupFrequency,
