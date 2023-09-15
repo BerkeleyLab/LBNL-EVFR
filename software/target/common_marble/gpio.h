@@ -39,6 +39,7 @@
 #define GPIO_IDX_CONFIG_KD_GATE_DRIVER   28 // Configure kicker driver outputs
 #define GPIO_IDX_EVR_SELECT_OUTPUT       29 // Choose EVR output
 #define GPIO_IDX_EVR_CONFIG_OUTPUT       30 // Configure EVR output
+#define GPIO_IDX_GITHASH                 31 // Git 32-bit hash
 
 // QSFP Fanout
 #define GPIO_IDX_MGT_HW_CONFIG           50 // MGT hardware configuration
