@@ -39,7 +39,7 @@
 #include <xil_io.h>
 
 /*
- * Allow code to refer  to printf without actually pulling it in
+ * Allow code to refer to printf without actually pulling it in
  */
 #define printf(...) xil_printf(__VA_ARGS__)
 
@@ -61,6 +61,7 @@
 #define DEBUGFLAG_IIC_SCAN          0x10000
 #define DEBUGFLAG_DISPLAY_PRESS     0x20000
 #define DEBUGFLAG_SHOW_EVENT_LOG    0x40000
+#define DEBUGFLAG_SI570_SETTING     0x80000
 #define DEBUGFLAG_SHOW_MGT_SWITCH   0x1000000
 #define DEBUGFLAG_DUMP_MGT_SWITCH   0x2000000
 #define DEBUGFLAG_DUMP_SCREEN       0x4000000
@@ -85,5 +86,7 @@ void checkForReset(void);
 int resetRecoverySwitchPressed(void);
 int displaySwitchPressed(void);
 void civil_from_days(int posixDays, int *year, int *month, int *day);
+
+#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 #endif /* _UTIL_H_ */
