@@ -115,8 +115,6 @@ module common_marble_top #(
     output FPGA_RxD,
     input  FPGA_TxD);
 
-`include "firmwareBuildDate.v"
-
 ///////////////////////////////////////////////////////////////////////////////
 // Static outputs
 assign VCXO_EN = 1'b0;
@@ -161,7 +159,11 @@ for (i = 0 ; i < GPIO_IDX_COUNT ; i = i + 1) begin : gpio_flatten
     assign GPIO_IN_FLATTENED[ (i*32)+31 : (i*32)+0 ] = GPIO_IN[i];
 end
 endgenerate
+
+`include "firmwareBuildDate.v"
 assign GPIO_IN[GPIO_IDX_FIRMWARE_BUILD_DATE] = FIRMWARE_BUILD_DATE;
+`include "gitHash.vh"
+assign GPIO_IN[GPIO_IDX_GITHASH] = GIT_REV_32BIT;
 
 //////////////////////////////////////////////////////////////////////////////
 // Front panel controls
