@@ -510,11 +510,11 @@ assign GPIO_IN[GPIO_IDX_FMC1_FIREFLY] = {{32-CFG_EVIO_FIREFLY_COUNT{1'b0}},
 (*MARK_DEBUG="false"*) wire fmc2_iic_sda_i, fmc2_iic_sda_t;
 
 IOBUF FMC2_SCL_IOBUF (.I(1'b0),
-                      .IO(UTIO_SCL),
+                      .IO(EVRIO_SCL),
                       .O(fmc2_iic_scl_i),
                       .T(fmc2_iic_scl_t));
 IOBUF FMC2_SDA_IOBUF (.I(1'b0),
-                      .IO(UTIO_SDA),
+                      .IO(EVRIO_SDA),
                       .O(fmc2_iic_sda_i),
                       .T(fmc2_iic_sda_t));
 
