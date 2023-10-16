@@ -556,17 +556,30 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
     .triggerStrobe(evrTriggerBus[o]),
     .serdesPattern(serdesPattern));
 
-  outputDriverSelectIO outputSERDES (
-    .data_out_from_device(serdesPattern),
-    .data_out_to_pins_p(utioPatternP[o]),
-    .data_out_to_pins_n(utioPatternN[o]),
-    .clk_in(evrBitClk),
-    .clk_div_in(evrClk),
-    .io_reset(sysReset));
+  if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
+    outputDriverSelectIOdiff outputSERDES (
+        .data_out_from_device(serdesPattern),
+        .data_out_to_pins_p(evrioPatternP[o]),
+        .data_out_to_pins_n(evrioPatternN[o]),
+        .clk_in(evrBitClk),
+        .clk_div_in(evrClkInterface),
+        .io_reset(evrReset));
+  end else begin
+    outputDriverSelectIOse outputSERDES (
+        .data_out_from_device(serdesPattern),
+        .data_out_to_pins(evrioPatternP[o]),
+        .clk_in(evrBitClk),
+        .clk_div_in(evrClkInterface),
+        .io_reset(evrReset));
+  end
 end
-for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT - 1 ; o = o + 1) begin
-    assign UTIO_PATTERN_P[o] = utioPatternP[o];
-    assign UTIO_PATTERN_N[o] = utioPatternN[o];
+for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
+    if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
+        assign EVRIO_PATTERN_P[o] = evrioPatternP[o];
+        assign EVRIO_PATTERN_N[o] = evrioPatternN[o];
+    end else begin
+        assign EVRIO_TRIGGER[o-CFG_EVR_OUTPUT_PATTERN_COUNT] = evrioPatternP[o];
+    end
 end
 endgenerate
 assign UTIO_TRIGGER_P = utioPatternP[CFG_EVR_OUTPUT_COUNT-1];
