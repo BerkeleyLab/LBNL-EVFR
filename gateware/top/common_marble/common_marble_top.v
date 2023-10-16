@@ -585,15 +585,15 @@ OBUFDS utioPllRefOBUFDS (.I(evrClk), .O(UTIO_PLL_REF_P), .OB(UTIO_PLL_REF_N));
 assign UTIO_EVR_HB = evrPPSmarker;
 
 // Steal a bit from the output selection bitmap for use as PLL reset
-reg utioPLLreset = 1'b0;
+reg evrioPLLreset = 1'b0;
 always @(posedge sysClk) begin
     if (GPIO_STROBES[GPIO_IDX_EVR_SELECT_OUTPUT]) begin
-        utioPLLreset <= GPIO_OUT[31];
+        evrioPLLreset <= GPIO_OUT[31];
     end
 end
-assign UTIO_PLL_RESET_N = ~utioPLLreset;
-assign GPIO_IN[GPIO_IDX_EVR_SELECT_OUTPUT] = { utioPLLreset, 5'b0,
-                                               UTIO_5V2_PG, UTIO_5V1_PG, 24'b0};
+assign EVRIO_PLL_RESET_N = ~evrioPLLreset;
+assign GPIO_IN[GPIO_IDX_EVR_SELECT_OUTPUT] = { evrioPLLreset, 5'b0,
+                                               EVRIO_4V5_PG, EVRIO_5V1_PG, 24'b0};
 
 //////////////////////////////////////////////////////////////////////////////
 // This firmware is used for EVIO card validation.
