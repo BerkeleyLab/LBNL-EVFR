@@ -528,7 +528,7 @@ outputDriverMMCM outputDriverMMCM (
 ///////////////////////////////////////////////////////////////////////////////
 // EVR outputs
 // FIXME: UTIO for now -- EVRIO someday
-wire [CFG_EVR_OUTPUT_COUNT-1:0] utioPatternP, utioPatternN;
+wire [CFG_EVR_OUTPUT_COUNT-1:0] evrioOutputP, evrioOutputN;
 reg [CFG_EVR_OUTPUT_COUNT-1:0] outputSelect;
 always @(posedge sysClk) begin
     if (GPIO_STROBES[GPIO_IDX_EVR_SELECT_OUTPUT]) begin
@@ -556,15 +556,15 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
   if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
     outputDriverSelectIOdiff outputSERDES (
         .data_out_from_device(serdesPattern),
-        .data_out_to_pins_p(evrioPatternP[o]),
-        .data_out_to_pins_n(evrioPatternN[o]),
+        .data_out_to_pins_p(evrioOutputP[o]),
+        .data_out_to_pins_n(evrioOutputN[o]),
         .clk_in(evrBitClk),
         .clk_div_in(evrClkInterface),
         .io_reset(evrReset));
   end else begin
     outputDriverSelectIOse outputSERDES (
         .data_out_from_device(serdesPattern),
-        .data_out_to_pins(evrioPatternP[o]),
+        .data_out_to_pins(evrioOutputP[o]),
         .clk_in(evrBitClk),
         .clk_div_in(evrClkInterface),
         .io_reset(evrReset));
@@ -572,10 +572,10 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
 end
 for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
     if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
-        assign EVRIO_PATTERN_P[o] = evrioPatternP[o];
-        assign EVRIO_PATTERN_N[o] = evrioPatternN[o];
+        assign EVRIO_PATTERN_P[o] = evrioOutputP[o];
+        assign EVRIO_PATTERN_N[o] = evrioOutputN[o];
     end else begin
-        assign EVRIO_TRIGGER[o-CFG_EVR_OUTPUT_PATTERN_COUNT] = evrioPatternP[o];
+        assign EVRIO_TRIGGER[o-CFG_EVR_OUTPUT_PATTERN_COUNT] = evrioOutputP[o];
     end
 end
 endgenerate
