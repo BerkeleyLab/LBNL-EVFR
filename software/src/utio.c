@@ -188,7 +188,7 @@ utioInit(void)
     /*
      * Reset PLL
      */
-    GPIO_WRITE(GPIO_IDX_EVR_SELECT_OUTPUT, 0x8000000);
+    GPIO_WRITE(GPIO_IDX_EVR_SELECT_OUTPUT, 0x80000000);
     microsecondSpin(100);
     GPIO_WRITE(GPIO_IDX_EVR_SELECT_OUTPUT, 0x0);
     microsecondSpin(20000);
