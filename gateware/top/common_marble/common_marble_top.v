@@ -58,23 +58,20 @@ module common_marble_top #(
     // FMC2 EVRIO (only in event receiver)
     // FIXME: For now we're using a UTIO board here
     //        Hopefully the EVRIO board will be backwards compatible....
-    input          UTIO_PLL_OUT_P,
-    input          UTIO_PLL_OUT_N,
-    output         UTIO_PLL_REF_P,
-    output         UTIO_PLL_REF_N,
-    output   [2:0] UTIO_PATTERN_P,
-    output   [2:0] UTIO_PATTERN_N,
-    output         UTIO_TRIGGER_P,
-    output         UTIO_TRIGGER_N,
-    output         UTIO_PLL_RESET_N,
-    input    [7:0] UTIO_SWITCHES,
-    output   [1:0] UTIO_LED,
-    output         UTIO_EVR_HB,
-    output         UTIO_PWR_EN,
-    input          UTIO_5V1_PG,
-    input          UTIO_5V2_PG,
-    inout          UTIO_SCL,
-    inout          UTIO_SDA,
+    input          EVRIO_PLL_OUT_P,  // Not used
+    input          EVRIO_PLL_OUT_N,  // Not used
+    output         EVRIO_PLL_REF_P,
+    output         EVRIO_PLL_REF_N,
+    output   [3:0] EVRIO_PATTERN_P,
+    output   [3:0] EVRIO_PATTERN_N,
+    output   [7:0] EVRIO_TRIGGER,
+    output         EVRIO_PLL_RESET_N,
+    output         EVRIO_PWR_EN,
+    input          EVRIO_5V1_PG,
+    input          EVRIO_4V5_PG,
+    inout          EVRIO_SCL,
+    inout          EVRIO_SDA,
+    output         EVRIO_VCXO_EN,
 `endif
 
     // SPI between FPGA and microcontroller
@@ -127,8 +124,8 @@ assign PMOD1_2 = 1'b0;
 assign PMOD1_3 = 1'b0;
 assign PMOD1_4 = 1'b0;
 assign PMOD1_5 = 1'b0;
-assign UTIO_PWR_EN = 1'b1;
-assign UTIO_LED = 2'h0;
+assign EVRIO_PWR_EN = 1'b1;
+assign EVRIO_VCXO_EN = 1'b0;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Clocks
