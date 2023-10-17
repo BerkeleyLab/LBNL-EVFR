@@ -520,9 +520,11 @@ IOBUF FMC2_SDA_IOBUF (.I(1'b0),
 
 ///////////////////////////////////////////////////////////////////////////////
 // Output driver bit clock generation
+wire evrClkInterface;
 outputDriverMMCM outputDriverMMCM (
     .clk_in1(evrClk),
-    .reset(sysReset),
+    .reset(evrReset),
+    .clk_out1(evrClkInterface),
     .clk_out2(evrBitClk));
 
 ///////////////////////////////////////////////////////////////////////////////
