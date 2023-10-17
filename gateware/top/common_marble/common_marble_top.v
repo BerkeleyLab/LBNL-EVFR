@@ -519,6 +519,15 @@ IOBUF FMC2_SDA_IOBUF (.I(1'b0),
                       .T(fmc2_iic_sda_t));
 
 ///////////////////////////////////////////////////////////////////////////////
+// CDC for evr reset signal
+reg evrReset = 0;
+(*ASYNC_REG="true"*) reg evrReset_m = 0;
+always @(posedge evrClk) begin
+    evrReset_m <= sysReset | ~evrAligned;
+    evrReset <= evrReset_m;
+end
+
+///////////////////////////////////////////////////////////////////////////////
 // Output driver bit clock generation
 wire evrClkInterface;
 outputDriverMMCM outputDriverMMCM (
