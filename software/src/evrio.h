@@ -35,6 +35,10 @@
 #ifndef _EVRIO_H_
 #define _EVRIO_H_
 
+void evrioInit(void);
+void evrioCrank(void);
+uint32_t *evrioFetchSysmon(uint32_t *ap);
+
 void evrioSetMode(int output, int mode);
 void evrioSetDelay(int output, int delay);
 void evrioSetWidth(int output, int width);
