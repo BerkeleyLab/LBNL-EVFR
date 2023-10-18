@@ -532,7 +532,7 @@ end
 wire evrClkInterface;
 outputDriverMMCM outputDriverMMCM (
     .clk_in1(evrClk),
-    .reset(evrReset),
+    .reset(evrioReset),
     .clk_out1(evrClkInterface),
     .clk_out2(evrBitClk));
 
@@ -571,14 +571,14 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
         .data_out_to_pins_n(evrioOutputN[o]),
         .clk_in(evrBitClk),
         .clk_div_in(evrClkInterface),
-        .io_reset(evrReset));
+        .io_reset(evrioReset));
   end else begin
     outputDriverSelectIOse outputSERDES (
         .data_out_from_device(serdesPattern),
         .data_out_to_pins(evrioOutputP[o]),
         .clk_in(evrBitClk),
         .clk_div_in(evrClkInterface),
-        .io_reset(evrReset));
+        .io_reset(evrioReset));
   end
 end
 for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
