@@ -520,11 +520,12 @@ IOBUF FMC2_SDA_IOBUF (.I(1'b0),
 
 ///////////////////////////////////////////////////////////////////////////////
 // CDC for evr reset signal
-reg evrReset = 0;
-(*ASYNC_REG="true"*) reg evrReset_m = 0;
+reg evrioReset = 0, evrioReset_m1 = 0;
+(*ASYNC_REG="true"*) reg evrioReset_m0 = 0;
 always @(posedge evrClk) begin
-    evrReset_m <= sysReset | ~evrAligned;
-    evrReset <= evrReset_m;
+    evrioReset_m0 <= sysReset | evrioPLLreset;
+    evrioReset_m1 <= evrioReset_m0;
+    evrioReset = evrioReset_m0 | ~evrAligned;
 end
 
 ///////////////////////////////////////////////////////////////////////////////
