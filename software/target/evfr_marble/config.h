@@ -26,10 +26,10 @@
 
 /*
  * EVRIO hardware (event receiver)
- * FIXME -- THIS IS UTIO VALUE (3 pattern outputs plus one trigger)
  */
-#define CFG_EVR_OUTPUT_COUNT                4
-#define CFG_EVR_OUTPUT_SERDES_WIDTH         4
+#define CFG_EVR_OUTPUT_COUNT                12 // Number of trigger and pattern output
+#define CFG_EVR_OUTPUT_PATTERN_COUNT        4  // Number of pattern output
+#define CFG_EVR_OUTPUT_SERDES_WIDTH         4  // Width of DPRAM used to feed OutputDriver SERDES
 #define CFG_EVR_OUTPUT_PATTERN_ADDR_WIDTH   12
 #define CFG_EVR_DELAY_WIDTH                 22
 #define CFG_EVR_WIDTH_WIDTH                 22
