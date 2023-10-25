@@ -29,13 +29,9 @@ module outputSerdesIO #(
             .I  (oserdesOuput)
             );
         end
-    default: begin // Single ended default option
-        OBUF #(.IOSTANDARD ("LVCMOS25"))
-        obuf_inst (
-            .O  (data_out0),
-            .I  (oserdesOuput)
-            );
-        end
+    default: begin // block syntesis otherwise
+        DIFFERENTIAL_OUPUT_HAS_WRONG_VALUE();
+    end
     endcase
     endgenerate
 
