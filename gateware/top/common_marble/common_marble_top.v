@@ -550,42 +550,42 @@ end
 genvar o;
 generate
 for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
-  wire csrStrobe = GPIO_STROBES[GPIO_IDX_EVR_CONFIG_OUTPUT] & outputSelect[o];
-  wire [CFG_EVR_OUTPUT_SERDES_WIDTH-1:0] serdesPattern;
-  outputDriver #(.SERDES_WIDTH(CFG_EVR_OUTPUT_SERDES_WIDTH),
-                 .COARSE_DELAY_WIDTH(CFG_EVR_DELAY_WIDTH),
-                 .COARSE_WIDTH_WIDTH(CFG_EVR_WIDTH_WIDTH),
-                 .PATTERN_ADDRESS_WIDTH(CFG_EVR_OUTPUT_PATTERN_ADDR_WIDTH),
-                 .DEBUG("false"))
-  outputDriver (
-    .sysClk(sysClk),
-    .sysCsrStrobe(csrStrobe),
-    .sysGPIO_OUT(GPIO_OUT),
-    .evrClk(evrClk),
-    .triggerStrobe(evrTriggerBus[o]),
-    .serdesPattern(serdesPattern));
+    wire csrStrobe = GPIO_STROBES[GPIO_IDX_EVR_CONFIG_OUTPUT] & outputSelect[o];
+    wire [CFG_EVR_OUTPUT_SERDES_WIDTH-1:0] serdesPattern;
+    outputDriver #(.SERDES_WIDTH(CFG_EVR_OUTPUT_SERDES_WIDTH),
+                   .COARSE_DELAY_WIDTH(CFG_EVR_DELAY_WIDTH),
+                   .COARSE_WIDTH_WIDTH(CFG_EVR_WIDTH_WIDTH),
+                   .PATTERN_ADDRESS_WIDTH(CFG_EVR_OUTPUT_PATTERN_ADDR_WIDTH),
+                   .DEBUG("false"))
+    outputDriver (
+        .sysClk(sysClk),
+        .sysCsrStrobe(csrStrobe),
+        .sysGPIO_OUT(GPIO_OUT),
+        .evrClk(evrClk),
+        .triggerStrobe(evrTriggerBus[o]),
+        .serdesPattern(serdesPattern));
 
-  if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
-    outputSerdesIO #(.DIFFERENTIAL_OUPUT("true")) // Pattern output are differential
-    outputSERDESdiff_inst (
-        .data_in(serdesPattern),
-        .data_out0(evrioOutputP[o]),
-        .data_out1(evrioOutputN[o]),
-        .clk_in(evrBitClk),
-        .clk_div_in(evrClkInterface),
-        .clock_en(1'b1),
-        .reset(evrioReset));
-  end else begin
-    outputSerdesIO #(.DIFFERENTIAL_OUPUT("false")) // Trigger output are signle-ended
-    outputSERDESse_inst (
-        .data_in(serdesPattern),
-        .data_out0(evrioOutputP[o]),
-        .data_out1(),
-        .clk_in(evrBitClk),
-        .clk_div_in(evrClkInterface),
-        .clock_en(1'b1),
-        .reset(evrioReset));
-  end
+    if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
+        outputSerdesIO #(.DIFFERENTIAL_OUPUT("true")) // Pattern output are differential
+        outputSERDESdiff_inst (
+            .data_in(serdesPattern),
+            .data_out0(evrioOutputP[o]),
+            .data_out1(evrioOutputN[o]),
+            .clk_in(evrBitClk),
+            .clk_div_in(evrClkInterface),
+            .clock_en(1'b1),
+            .reset(evrioReset));
+    end else begin
+        outputSerdesIO #(.DIFFERENTIAL_OUPUT("false")) // Trigger output are signle-ended
+        outputSERDESse_inst (
+            .data_in(serdesPattern),
+            .data_out0(evrioOutputP[o]),
+            .data_out1(),
+            .clk_in(evrBitClk),
+            .clk_div_in(evrClkInterface),
+            .clock_en(1'b1),
+            .reset(evrioReset));
+    end
 end
 for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
     if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
