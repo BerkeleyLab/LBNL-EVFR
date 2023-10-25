@@ -591,9 +591,6 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
     end
 end
 endgenerate
-assign UTIO_TRIGGER_P = utioPatternP[CFG_EVR_OUTPUT_COUNT-1];
-assign UTIO_TRIGGER_N = utioPatternN[CFG_EVR_OUTPUT_COUNT-1];
-assign UTIO_EVR_HB = evrPPSmarker;
 OBUFDS evrioPllRefOBUFDS (.I(evrClk), .O(EVRIO_PLL_REF_P), .OB(EVRIO_PLL_REF_N));
 
 // Steal a bit from the output selection bitmap for use as PLL reset
