@@ -63,10 +63,6 @@ work/
 !/gateware/platform/xilinx/*/*/kdOutputDriverMMCM/kdOutputDriverMMCM.xci
 /gateware/platform/xilinx/*/*/outputDriverMMCM/
 !/gateware/platform/xilinx/*/*/outputDriverMMCM/outputDriverMMCM.xci
-/gateware/platform/xilinx/*/*/outputDriverSelectIOse/
-!/gateware/platform/xilinx/*/*/outputDriverSelectIOse/outputDriverSelectIOse.xci
-/gateware/platform/xilinx/*/*/outputDriverSelectIOdiff/
-!/gateware/platform/xilinx/*/*/outputDriverSelectIOdiff/outputDriverSelectIOdiff.xci
 /gateware/platform/xilinx/*/*/bd/
 !/gateware/platform/xilinx/*/*/bd/bd.bd
 /gateware/platform/xilinx/*/*/ila_td256_s4096_cap/
