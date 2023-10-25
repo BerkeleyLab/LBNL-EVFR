@@ -153,11 +153,6 @@ main(void)
     consoleInit();
 
     /*
-     * Determine our flavour
-     */
-    checkHardwareConfiguration();
-
-    /*
      * More initialization
      */
     tftpInit();
@@ -167,7 +162,7 @@ main(void)
     eyescanInit();
     mgtInit();
     epicsInit();
-
+    checkHardwareConfiguration();
     /*
      * Main processing loop
      */
