@@ -566,20 +566,25 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
     .serdesPattern(serdesPattern));
 
   if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
-    outputDriverSelectIOdiff outputSERDES (
-        .data_out_from_device(serdesPattern),
-        .data_out_to_pins_p(evrioOutputP[o]),
-        .data_out_to_pins_n(evrioOutputN[o]),
+    outputSerdesIO #(.DIFFERENTIAL_OUPUT("true")) // Pattern output are differential
+    outputSERDESdiff_inst (
+        .data_in(serdesPattern),
+        .data_out0(evrioOutputP[o]),
+        .data_out1(evrioOutputN[o]),
         .clk_in(evrBitClk),
         .clk_div_in(evrClkInterface),
-        .io_reset(evrioReset));
+        .clock_en(1'b1),
+        .reset(evrioReset));
   end else begin
-    outputDriverSelectIOse outputSERDES (
-        .data_out_from_device(serdesPattern),
-        .data_out_to_pins(evrioOutputP[o]),
+    outputSerdesIO #(.DIFFERENTIAL_OUPUT("false")) // Trigger output are signle-ended
+    outputSERDESse_inst (
+        .data_in(serdesPattern),
+        .data_out0(evrioOutputP[o]),
+        .data_out1(),
         .clk_in(evrBitClk),
         .clk_div_in(evrClkInterface),
-        .io_reset(evrioReset));
+        .clock_en(1'b1),
+        .reset(evrioReset));
   end
 end
 for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
