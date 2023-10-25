@@ -45,7 +45,6 @@
 #include "mmcMailbox.h"
 #include "softwareBuildDate.h"
 #include "util.h"
-#include "utio.h"
 #include "xadc.h"
 
 /*
@@ -110,7 +109,7 @@ sysmonFetch(uint32_t *args)
     *ap++ = GPIO_READ(GPIO_IDX_EVR_MONITOR_CSR);
     ap += fetchFanSpeeds(ap);
     ap = evioFetchSysmon(ap);
-    ap = utioFetchSysmon(ap); /* FIXME -- Here's where EVRIO values would read back */
+    ap = evrioFetchSysmon(ap);
     return ap - args;
 }
 
