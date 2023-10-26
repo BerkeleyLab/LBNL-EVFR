@@ -69,7 +69,8 @@ checkHardwareConfiguration(void)
             hwConfig |= HWCONFIG_HAS_EVIO;
             evioInit();
         }
-        else if ((strcmp(name, "EVRIO") == 0) && (fmcIndex == 1)) {
+        else if ((strcmp(name, "EVRIO") == 0 ||
+                  strcmp(name, "UserTiming") == 0) && (fmcIndex == 1)) {
             evrioInit();
             hwConfig |= HWCONFIG_HAS_EVRIO;
         }
