@@ -543,7 +543,6 @@ outputDriverMMCM outputDriverMMCM (
 
 ///////////////////////////////////////////////////////////////////////////////
 // EVR outputs
-// FIXME: UTIO for now -- EVRIO someday
 wire [CFG_EVR_OUTPUT_COUNT-1:0] evrioOutputP, evrioOutputN;
 reg [CFG_EVR_OUTPUT_COUNT-1:0] outputSelect;
 always @(posedge sysClk) begin
@@ -600,8 +599,14 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
     end
 end
 endgenerate
-OBUFDS evrioPllRefOBUFDS (.I(evrClk), .O(EVRIO_PLL_REF_P), .OB(EVRIO_PLL_REF_N));
-
+OBUFDS evrioPllRefOBUFDS (.I(evrClkOddr), .O(EVRIO_PLL_REF_P), .OB(EVRIO_PLL_REF_N));
+`ifndef SIMULATE
+ODDR #(.DDR_CLK_EDGE("SAME_EDGE"))
+evrioPllclkOut (
+    .Q(evrClkOddr), .C(evrClk), .CE(1'b1),
+	.D1(1'b1), .D2(1'b0), .R(1'b0), .S(1'b0)
+);
+`endif
 // Steal a bit from the output selection bitmap for use as PLL reset
 reg evrioPLLreset = 1'b0;
 always @(posedge sysClk) begin
