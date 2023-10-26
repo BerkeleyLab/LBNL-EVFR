@@ -2,13 +2,13 @@ module outputSerdesIO #(
     parameter DIFFERENTIAL_OUPUT = "false",
     parameter DATA_WIDTH = 4
     ) (
-    input  [DATA_WIDTH-1:0] data_in,    // Parallel input data
-    output                  data_out0,  // Differential positive or single-ended pin
-    output                  data_out1,  // Differential negative pin
-    input                   clk_in,     // Serial-side clock
-    input                   clk_div_in, // Parallel-side clock
-    input                   clock_en,   // Clock enable
-    input                   reset);     // Async assertion, sync deassertion
+    input  [DATA_WIDTH-1:0] dataIn,      // Parallel input data
+    output                  dataOutP,    // Differential positive or single-ended pin
+    output                  dataOutN,    // Differential negative pin
+    input                   serialClk,   // Serial-side clock
+    input                   parallelClk, // Parallel-side clock
+    input                   clockEnable, // Clock enable
+    input                   reset);      // Async assertion, sync deassertion
 
     // OUTPUT BUFFER ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     wire oserdesOuput;
@@ -17,16 +17,16 @@ module outputSerdesIO #(
     "true": begin
         OBUFDS #(.IOSTANDARD ("LVDS_25"))
         obufds_inst (
-            .O          (data_out0),
-            .OB         (data_out1),
+            .O          (dataOutP),
+            .OB         (dataOutN),
             .I          (oserdesOuput)
             );
         end
     "false": begin
         OBUF #(.IOSTANDARD ("LVCMOS25"))
         obuf_inst (
-            .O  (data_out0),
-            .I  (oserdesOuput)
+            .O          (dataOutP),
+            .I          (oserdesOuput)
             );
         end
     default: begin // block syntesis otherwise
@@ -40,7 +40,7 @@ module outputSerdesIO #(
     genvar in_count;
     for (in_count = 0; in_count < DATA_WIDTH; in_count = in_count + 1)
     begin
-        assign oserdesInput[in_count] = data_in[in_count];
+        assign oserdesInput[in_count] = dataIn[in_count];
     end
 
     OSERDESE2 # (
@@ -66,9 +66,9 @@ module outputSerdesIO #(
         .SHIFTIN2       (1'b0),
         .SHIFTOUT1      (),
         .SHIFTOUT2      (),
-        .OCE            (clock_enable),
-        .CLK            (clk_in),
-        .CLKDIV         (clk_div_in),
+        .OCE            (clockEnable),
+        .CLK            (serialClk),
+        .CLKDIV         (parallelClk),
         .OQ             (oserdesOuput),
         .TQ             (),
         .OFB            (),

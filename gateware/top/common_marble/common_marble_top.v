@@ -572,22 +572,22 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
     if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
         outputSerdesIO #(.DIFFERENTIAL_OUPUT("true")) // Pattern output are differential
         outputSERDESdiff_inst (
-            .data_in(serdesPattern),
-            .data_out0(evrioOutputP[o]),
-            .data_out1(evrioOutputN[o]),
-            .clk_in(evrBitClk),
-            .clk_div_in(evrClkInterface),
-            .clock_en(1'b1),
+            .dataIn(serdesPattern),
+            .dataOutP(evrioOutputP[o]),
+            .dataOutN(evrioOutputN[o]),
+            .serialClk(evrBitClk),
+            .parallelClk(evrClkInterface),
+            .clockEnable(1'b1),
             .reset(evrioReset));
     end else begin
         outputSerdesIO #(.DIFFERENTIAL_OUPUT("false")) // Trigger output are signle-ended
         outputSERDESse_inst (
-            .data_in(serdesPattern),
-            .data_out0(evrioOutputP[o]),
-            .data_out1(),
-            .clk_in(evrBitClk),
-            .clk_div_in(evrClkInterface),
-            .clock_en(1'b1),
+            .dataIn(serdesPattern),
+            .dataOutP(evrioOutputP[o]),
+            .dataOutN(),
+            .serialClk(evrBitClk),
+            .parallelClk(evrClkInterface),
+            .clockEnable(1'b1),
             .reset(evrioReset));
     end
 end
