@@ -50,7 +50,6 @@ __SRC_FILES = \
 	tftp.c \
 	user_mgt_refclk.c \
 	util.c \
-	utio.c \
 	xadc.c
 SRC_FILES = $(addprefix $(SW_SRC_DIR)/, $(__SRC_FILES))
 
@@ -81,7 +80,6 @@ __HDR_FILES = \
 	tftp.h \
 	user_mgt_refclk.h \
 	util.h \
-	utio.h \
 	xadc.h
 HDR_FILES = $(addprefix $(SW_SRC_DIR)/, $(__HDR_FILES))
 

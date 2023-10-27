@@ -48,7 +48,7 @@
 #include "systemParameters.h"
 #include "tftp.h"
 #include "util.h"
-#include "utio.h"
+#include "evrio.h"
 
 /*
  * Type/length 7:6 11 ASCII if english...
@@ -69,12 +69,10 @@ checkHardwareConfiguration(void)
             hwConfig |= HWCONFIG_HAS_EVIO;
             evioInit();
         }
-        else if ((strcmp(name, "EVRIO") == 0) && (fmcIndex == 1)) {
+        else if ((strcmp(name, "EVRIO") == 0 ||
+                  strcmp(name, "UserTiming") == 0) && (fmcIndex == 1)) {
+            evrioInit();
             hwConfig |= HWCONFIG_HAS_EVRIO;
-        }
-        else if ((strcmp(name, "UserTiming") == 0) && (fmcIndex == 1)) {
-            utioInit();
-            hwConfig |= HWCONFIG_HAS_UTIO;
         }
         else if (strcmp(name, "KDIO") == 0) {
             hwConfig |= HWCONFIG_HAS_KICKER_DRIVER;
@@ -157,11 +155,6 @@ main(void)
     consoleInit();
 
     /*
-     * Determine our flavour
-     */
-    checkHardwareConfiguration();
-
-    /*
      * More initialization
      */
     tftpInit();
@@ -171,7 +164,7 @@ main(void)
     eyescanInit();
     mgtInit();
     epicsInit();
-
+    checkHardwareConfiguration();
     /*
      * Main processing loop
      */
@@ -184,8 +177,8 @@ main(void)
         pollHighPriority();
         mgtCrankRxAligner();
         pollHighPriority();
-        if (hwConfig & HWCONFIG_HAS_UTIO) {
-            utioCrank();
+        if (hwConfig & HWCONFIG_HAS_EVRIO) {
+            evrioCrank();
         }
         pollHighPriority();
         if (hwConfig & HWCONFIG_HAS_EVIO) {

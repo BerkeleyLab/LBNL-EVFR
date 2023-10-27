@@ -58,23 +58,20 @@ module common_marble_top #(
     // FMC2 EVRIO (only in event receiver)
     // FIXME: For now we're using a UTIO board here
     //        Hopefully the EVRIO board will be backwards compatible....
-    input          UTIO_PLL_OUT_P,
-    input          UTIO_PLL_OUT_N,
-    output         UTIO_PLL_REF_P,
-    output         UTIO_PLL_REF_N,
-    output   [2:0] UTIO_PATTERN_P,
-    output   [2:0] UTIO_PATTERN_N,
-    output         UTIO_TRIGGER_P,
-    output         UTIO_TRIGGER_N,
-    output         UTIO_PLL_RESET_N,
-    input    [7:0] UTIO_SWITCHES,
-    output   [1:0] UTIO_LED,
-    output         UTIO_EVR_HB,
-    output         UTIO_PWR_EN,
-    input          UTIO_5V1_PG,
-    input          UTIO_5V2_PG,
-    inout          UTIO_SCL,
-    inout          UTIO_SDA,
+    input          EVRIO_PLL_OUT_P,  // Not used
+    input          EVRIO_PLL_OUT_N,  // Not used
+    output         EVRIO_PLL_REF_P,
+    output         EVRIO_PLL_REF_N,
+    output   [3:0] EVRIO_PATTERN_P,
+    output   [3:0] EVRIO_PATTERN_N,
+    output   [7:0] EVRIO_TRIGGER,
+    output         EVRIO_PLL_RESET_N,
+    output         EVRIO_PWR_EN,
+    input          EVRIO_5V1_PG,
+    input          EVRIO_4V5_PG,
+    inout          EVRIO_SCL,
+    inout          EVRIO_SDA,
+    output         EVRIO_VCXO_EN,
 `endif
 
     // SPI between FPGA and microcontroller
@@ -125,8 +122,8 @@ assign PMOD1_2 = 1'b0;
 assign PMOD1_3 = 1'b0;
 assign PMOD1_4 = 1'b0;
 assign PMOD1_5 = 1'b0;
-assign UTIO_PWR_EN = 1'b1;
-assign UTIO_LED = 2'h0;
+assign EVRIO_PWR_EN = 1'b1;
+assign EVRIO_VCXO_EN = 1'b0;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Clocks
@@ -515,77 +512,124 @@ assign GPIO_IN[GPIO_IDX_FMC1_FIREFLY] = {{32-CFG_EVIO_FIREFLY_COUNT{1'b0}},
 (*MARK_DEBUG="false"*) wire fmc2_iic_sda_i, fmc2_iic_sda_t;
 
 IOBUF FMC2_SCL_IOBUF (.I(1'b0),
-                      .IO(UTIO_SCL),
+                      .IO(EVRIO_SCL),
                       .O(fmc2_iic_scl_i),
                       .T(fmc2_iic_scl_t));
 IOBUF FMC2_SDA_IOBUF (.I(1'b0),
-                      .IO(UTIO_SDA),
+                      .IO(EVRIO_SDA),
                       .O(fmc2_iic_sda_i),
                       .T(fmc2_iic_sda_t));
 
 ///////////////////////////////////////////////////////////////////////////////
+// CDC for evr reset signal
+wire evrioReset;
+reg sysOrPllReset = 0;
+(*ASYNC_REG="true"*) reg evrioReset_m0 = 0, evrioReset_m1 = 0;
+always @(posedge sysClk) begin
+    sysOrPllReset <= sysReset | evrioPLLreset;
+end
+always @(posedge evrClk) begin
+    evrioReset_m0 <= sysOrPllReset;
+    evrioReset_m1 <= evrioReset_m0;
+end
+assign evrioReset = evrioReset_m1 | ~evrAligned;
+
+///////////////////////////////////////////////////////////////////////////////
 // Output driver bit clock generation
+wire evrClkInterface;
 outputDriverMMCM outputDriverMMCM (
     .clk_in1(evrClk),
-    .reset(sysReset),
+    .reset(evrioReset),
+    .clk_out1(evrClkInterface),
     .clk_out2(evrBitClk));
 
 ///////////////////////////////////////////////////////////////////////////////
 // EVR outputs
-// FIXME: UTIO for now -- EVRIO someday
-wire [CFG_EVR_OUTPUT_COUNT-1:0] utioPatternP, utioPatternN;
+wire [CFG_EVR_OUTPUT_COUNT-1:0] evrioOutputP, evrioOutputN;
 reg [CFG_EVR_OUTPUT_COUNT-1:0] outputSelect;
 always @(posedge sysClk) begin
     if (GPIO_STROBES[GPIO_IDX_EVR_SELECT_OUTPUT]) begin
         outputSelect <= GPIO_OUT[CFG_EVR_OUTPUT_COUNT-1:0];
     end
 end
+
 genvar o;
 generate
 for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
-  wire csrStrobe = GPIO_STROBES[GPIO_IDX_EVR_CONFIG_OUTPUT] & outputSelect[o];
-  wire [CFG_EVR_OUTPUT_SERDES_WIDTH-1:0] serdesPattern;
-  outputDriver #(.SERDES_WIDTH(CFG_EVR_OUTPUT_SERDES_WIDTH),
-                 .COARSE_DELAY_WIDTH(CFG_EVR_DELAY_WIDTH),
-                 .COARSE_WIDTH_WIDTH(CFG_EVR_WIDTH_WIDTH),
-                 .PATTERN_ADDRESS_WIDTH(CFG_EVR_OUTPUT_PATTERN_ADDR_WIDTH),
-                 .DEBUG("false"))
-  outputDriver (
-    .sysClk(sysClk),
-    .sysCsrStrobe(csrStrobe),
-    .sysGPIO_OUT(GPIO_OUT),
-    .evrClk(evrClk),
-    .triggerStrobe(evrTriggerBus[o]),
-    .serdesPattern(serdesPattern));
+    wire csrStrobe = GPIO_STROBES[GPIO_IDX_EVR_CONFIG_OUTPUT] & outputSelect[o];
+    wire [CFG_EVR_OUTPUT_SERDES_WIDTH-1:0] serdesPattern;
+    outputDriver #(.SERDES_WIDTH(CFG_EVR_OUTPUT_SERDES_WIDTH),
+                   .COARSE_DELAY_WIDTH(CFG_EVR_DELAY_WIDTH),
+                   .COARSE_WIDTH_WIDTH(CFG_EVR_WIDTH_WIDTH),
+                   .PATTERN_ADDRESS_WIDTH(CFG_EVR_OUTPUT_PATTERN_ADDR_WIDTH),
+                   .DEBUG("false"))
+    outputDriver (
+        .sysClk(sysClk),
+        .sysCsrStrobe(csrStrobe),
+        .sysGPIO_OUT(GPIO_OUT),
+        .evrClk(evrClk),
+        .triggerStrobe(evrTriggerBus[o]),
+        .serdesPattern(serdesPattern));
 
-  outputDriverSelectIO outputSERDES (
-    .data_out_from_device(serdesPattern),
-    .data_out_to_pins_p(utioPatternP[o]),
-    .data_out_to_pins_n(utioPatternN[o]),
-    .clk_in(evrBitClk),
-    .clk_div_in(evrClk),
-    .io_reset(sysReset));
-end
-for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT - 1 ; o = o + 1) begin
-    assign UTIO_PATTERN_P[o] = utioPatternP[o];
-    assign UTIO_PATTERN_N[o] = utioPatternN[o];
-end
-endgenerate
-assign UTIO_TRIGGER_P = utioPatternP[CFG_EVR_OUTPUT_COUNT-1];
-assign UTIO_TRIGGER_N = utioPatternN[CFG_EVR_OUTPUT_COUNT-1];
-OBUFDS utioPllRefOBUFDS (.I(evrClk), .O(UTIO_PLL_REF_P), .OB(UTIO_PLL_REF_N));
-assign UTIO_EVR_HB = evrPPSmarker;
-
-// Steal a bit from the output selection bitmap for use as PLL reset
-reg utioPLLreset = 1'b0;
-always @(posedge sysClk) begin
-    if (GPIO_STROBES[GPIO_IDX_EVR_SELECT_OUTPUT]) begin
-        utioPLLreset <= GPIO_OUT[31];
+    if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
+        outputSerdesIO #(.DIFFERENTIAL_OUPUT("true")) // Pattern output are differential
+        outputSERDESdiff_inst (
+            .dataIn(serdesPattern),
+            .dataOutP(evrioOutputP[o]),
+            .dataOutN(evrioOutputN[o]),
+            .serialClk(evrBitClk),
+            .parallelClk(evrClkInterface),
+            .clockEnable(1'b1),
+            .reset(evrioReset));
+    end else begin
+        outputSerdesIO #(.DIFFERENTIAL_OUPUT("false")) // Trigger output are signle-ended
+        outputSERDESse_inst (
+            .dataIn(serdesPattern),
+            .dataOutP(evrioOutputP[o]),
+            .dataOutN(),
+            .serialClk(evrBitClk),
+            .parallelClk(evrClkInterface),
+            .clockEnable(1'b1),
+            .reset(evrioReset));
     end
 end
-assign UTIO_PLL_RESET_N = ~utioPLLreset;
-assign GPIO_IN[GPIO_IDX_EVR_SELECT_OUTPUT] = { utioPLLreset, 5'b0,
-                                               UTIO_5V2_PG, UTIO_5V1_PG, 24'b0};
+
+for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
+    if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
+        assign EVRIO_PATTERN_P[o] = evrioOutputP[o];
+        assign EVRIO_PATTERN_N[o] = evrioOutputN[o];
+    end else begin
+        assign EVRIO_TRIGGER[o-CFG_EVR_OUTPUT_PATTERN_COUNT] = evrioOutputP[o];
+    end
+end
+endgenerate
+
+wire evrClkOddr;
+OBUFDS evrioPllRefOBUFDS (.I(evrClkOddr), .O(EVRIO_PLL_REF_P), .OB(EVRIO_PLL_REF_N));
+
+`ifndef SIMULATE
+ODDR #(.DDR_CLK_EDGE("SAME_EDGE"))
+evrioPllclkOut (
+    .Q(evrClkOddr),
+    .C(evrClk),
+    .CE(1'b1),
+	.D1(1'b1),
+    .D2(1'b0),
+    .R(1'b0),
+    .S(1'b0)
+);
+`endif
+
+// Steal a bit from the output selection bitmap for use as PLL reset
+reg evrioPLLreset = 1'b0;
+always @(posedge sysClk) begin
+    if (GPIO_STROBES[GPIO_IDX_EVR_SELECT_OUTPUT]) begin
+        evrioPLLreset <= GPIO_OUT[31];
+    end
+end
+assign EVRIO_PLL_RESET_N = ~evrioPLLreset;
+assign GPIO_IN[GPIO_IDX_EVR_SELECT_OUTPUT] = { evrioPLLreset, 5'b0,
+                                               EVRIO_4V5_PG, EVRIO_5V1_PG, 24'b0};
 
 //////////////////////////////////////////////////////////////////////////////
 // This firmware is used for EVIO card validation.
