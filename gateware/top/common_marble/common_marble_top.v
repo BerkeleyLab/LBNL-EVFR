@@ -550,6 +550,7 @@ always @(posedge sysClk) begin
         outputSelect <= GPIO_OUT[CFG_EVR_OUTPUT_COUNT-1:0];
     end
 end
+
 genvar o;
 generate
 for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
@@ -590,6 +591,7 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
             .reset(evrioReset));
     end
 end
+
 for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
     if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
         assign EVRIO_PATTERN_P[o] = evrioOutputP[o];
@@ -599,14 +601,23 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
     end
 end
 endgenerate
+
+wire evrClkOddr;
 OBUFDS evrioPllRefOBUFDS (.I(evrClkOddr), .O(EVRIO_PLL_REF_P), .OB(EVRIO_PLL_REF_N));
+
 `ifndef SIMULATE
 ODDR #(.DDR_CLK_EDGE("SAME_EDGE"))
 evrioPllclkOut (
-    .Q(evrClkOddr), .C(evrClk), .CE(1'b1),
-	.D1(1'b1), .D2(1'b0), .R(1'b0), .S(1'b0)
+    .Q(evrClkOddr),
+    .C(evrClk),
+    .CE(1'b1),
+	.D1(1'b1),
+    .D2(1'b0),
+    .R(1'b0),
+    .S(1'b0)
 );
 `endif
+
 // Steal a bit from the output selection bitmap for use as PLL reset
 reg evrioPLLreset = 1'b0;
 always @(posedge sysClk) begin
