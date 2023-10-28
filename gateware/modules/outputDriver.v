@@ -14,6 +14,7 @@ module outputDriver #(
     input  [31:0] sysGPIO_OUT,
 
     input                                              evrClk,
+    input                                              evrHBstrobe,
     (*mark_debug=DEBUG*) input  wire                   triggerStrobe,
     (*mark_debug=DEBUG*) output reg [SERDES_WIDTH-1:0] serdesPattern = 0);
 
@@ -27,9 +28,10 @@ localparam OP_SET_MODE    = 2'd0,
            OP_SET_PATTERN = 2'd3;
 
 // Operating modes
-localparam M_DISABLED = 2'd0,
-           M_PULSE    = 2'd1,
-           M_PATTERN  = 2'd2;
+localparam M_DISABLED        = 2'd0,
+           M_PULSE           = 2'd1,
+           M_PATTERN_SINGLE  = 2'd2,
+           M_PATTERN_LOOP    = 2'd3;
 
 // Clock domain crossing
 reg sysInfoToggle = 0;
@@ -136,7 +138,7 @@ always @(posedge evrClk) begin
             M_PULSE: begin
                 state <= S_COARSE_DELAY;
             end
-            M_PATTERN: begin
+            M_PATTERN_SINGLE, M_PATTERN_LOOP: begin
                 state <= S_DELAY_PATTERN;
             end
             default: ;
@@ -171,9 +173,25 @@ always @(posedge evrClk) begin
         serdesPattern <= dpramQ;
         readAddress <= readAddress + 1;
         patternCount <= patternCount - 1;
-        if (patternDone) begin
-            state <= S_IDLE;
+        case (mode) // exit condition
+        M_PATTERN_SINGLE: begin
+            if (patternDone) begin
+                state <= S_IDLE;
+            end
         end
+        M_PATTERN_LOOP: begin
+            if (evrHBstrobe) begin
+                state <= S_IDLE;
+            end
+            if (patternDone) begin
+                state <= S_DELAY_PATTERN;
+                coarseDelayCount <= {1'b0, coarseDelay} - 1;
+                patternCount <= {1'b0, lastWriteAddress} - 1;
+                readAddress <= 0;
+            end
+        end
+        default: state <= S_IDLE;
+        endcase
     end
     default: state <= S_IDLE;
     endcase
