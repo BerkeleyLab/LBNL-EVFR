@@ -553,6 +553,16 @@ always @(posedge sysClk) begin
     end
 end
 
+reg evrHBstrobe;
+always @(posedge evrClk) begin
+    if (evrCodeValid) begin
+        if (evrCode==122) begin
+            evrHBstrobe <= 1'b1;
+        end
+    end else begin
+        evrHBstrobe <= 1'b0;
+    end
+end
 genvar o;
 generate
 for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
@@ -568,6 +578,7 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
         .sysCsrStrobe(csrStrobe),
         .sysGPIO_OUT(GPIO_OUT),
         .evrClk(evrClk),
+        .evrHBstrobe(evrHBstrobe),
         .triggerStrobe(evrTriggerBus[o]),
         .serdesPattern(serdesPattern));
 
