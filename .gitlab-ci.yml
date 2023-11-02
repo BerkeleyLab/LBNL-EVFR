@@ -68,7 +68,7 @@ sw_evfr_marble:
     paths:
       - software/app/evfr/evfr_marble.elf
       - software/app/evfr/evfr_marble.elf.size
-      - software/app/evfr/evfr_marble_top*.bit
+      - software/app/evfr/evfr_marble*.bit
 
 sw_kd_marble:
   before_script:
@@ -86,4 +86,4 @@ sw_kd_marble:
     paths:
       - software/app/kd/kd_marble.elf
       - software/app/kd/kd_marble.elf.size
-      - software/app/kd/kd_marble_top*.bit
+      - software/app/kd/kd_marble*.bit
