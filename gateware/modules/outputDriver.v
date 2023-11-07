@@ -14,7 +14,6 @@ module outputDriver #(
     input  [31:0] sysGPIO_OUT,
 
     input                                              evrClk,
-    input                                              evrHBstrobe,
     (*mark_debug=DEBUG*) input  wire                   triggerStrobe,
     (*mark_debug=DEBUG*) output reg [SERDES_WIDTH-1:0] serdesPattern = 0);
 
