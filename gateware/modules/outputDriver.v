@@ -103,12 +103,12 @@ reg [PATTERN_ADDRESS_WIDTH-1:0] lastWriteAddress = 0;
 (*mark_debug=DEBUG*) reg [PATTERN_ADDRESS_WIDTH:0] patternCount = 0;
 wire patternDone = patternCount[PATTERN_ADDRESS_WIDTH];
 
-localparam S_IDLE             = 3'd0,
-           S_COARSE_DELAY     = 3'd1,
-           S_SEND_PULSE       = 3'd2,
-           S_DELAY_PATTERN    = 3'd3,
-           S_SEND_PATTERN     = 3'd4,
-           S_PATTERN_RESET    = 3'd5;
+localparam S_IDLE                = 3'd0,
+           S_COARSE_DELAY        = 3'd1,
+           S_SEND_PULSE          = 3'd2,
+           S_DELAY_PATTERN       = 3'd3,
+           S_SEND_PATTERN_SINGLE = 3'd4,
+           S_SEND_PATTERN_LOOP   = 3'd5;
 
 (*mark_debug=DEBUG*) reg [2:0] state = S_IDLE;
 reg [1:0] mode = M_PULSE;
@@ -140,8 +140,11 @@ always @(posedge evrClk) begin
             M_PULSE: begin
                 state <= S_COARSE_DELAY;
             end
-            M_PATTERN_SINGLE, M_PATTERN_LOOP: begin
+            M_PATTERN_SINGLE: begin
                 state <= S_DELAY_PATTERN;
+            end
+            M_PATTERN_LOOP: begin
+                state <= S_SEND_PATTERN_LOOP;
             end
             default: ;
             endcase
@@ -168,33 +171,31 @@ always @(posedge evrClk) begin
         coarseDelayCount <= coarseDelayCount - 1;
         if (coarseDelayDone) begin
             readAddress <= 1;
-            state <= S_SEND_PATTERN;
-        end
-        if (mode==M_PATTERN_LOOP && evrHBstrobe) begin
-            state <= S_PATTERN_RESET;
+            state <= S_SEND_PATTERN_SINGLE;
         end
     end
-    S_SEND_PATTERN: begin
+    S_SEND_PATTERN_SINGLE: begin
         serdesPattern <= dpramQ;
         readAddress <= readAddress + 1;
         patternCount <= patternCount - 1;
-        if (evrHBstrobe || patternDone) begin
-            case (mode)
-            M_PATTERN_SINGLE: begin
-                state <= S_IDLE;
-            end
-            M_PATTERN_LOOP: begin
-                state <= S_PATTERN_RESET;
-            end
-            default: state <= S_IDLE;
-            endcase
+        if (patternDone) begin
+            state <= S_IDLE;
         end
     end
-    S_PATTERN_RESET: begin
-        coarseDelayCount <= {1'b0, coarseDelay} - 1;
-        patternCount <= {1'b0, lastWriteAddress} - 1;
-        readAddress <= 0;
-        state <= S_DELAY_PATTERN;
+    S_SEND_PATTERN_LOOP: begin
+        serdesPattern <= dpram[readAddress];
+        readAddress <= readAddress + 1;
+        patternCount <= patternCount - 1;
+        if (mode==M_PATTERN_LOOP && (triggerStrobe || patternDone)) begin
+            patternCount <= {1'b0, lastWriteAddress} - 1;
+            readAddress <= 0;
+            if (infoToggle != infoMatch) begin
+                state <= S_IDLE;
+            end
+        end
+        else if (patternDone) begin
+            state <= S_IDLE;
+        end
     end
     default: state <= S_IDLE;
     endcase
