@@ -6,10 +6,11 @@ APP          ?= evfr
 
 TARGET       = $(APP)_$(PLATFORM)
 GW_TGT_DIR   = $(GW_SYN_DIR)/$(TARGET)
+GIT_COMMIT   = $(shell git rev-parse --short=8 --verify HEAD || echo "NOCOMMIT")
 ELF          = $(THIS_DIR)/$(TARGET).elf
 
 BIT          ?= $(GW_TGT_DIR)/$(TARGET)_top.bit
-DEPLOY_BIT   ?= $(THIS_DIR)/downloadEVFR.bit
+DEPLOY_BIT   ?= $(THIS_DIR)/$(TARGET).$(GIT_COMMIT).bit
 MMI          ?= $(GW_TGT_DIR)/$(TARGET)_top.mmi
 
 clean::
