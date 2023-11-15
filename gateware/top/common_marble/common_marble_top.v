@@ -140,10 +140,13 @@ IBUFDS_GTE2 mgtRef (.I(MGT_CLK_P),
 BUFG mgtRefBUFG (.I(mgtRefClk), .O(mgtRefClkMonitor));
 
 wire evrioRefClk, evrioRefClkMonitor;
+`ifndef KICKER_DRIVER
 IBUFDS evrioPllClkIBUFDS (.I(EVRIO_PLL_OUT_P),
                           .IB(EVRIO_PLL_OUT_N),
                           .O(evrioRefClk));
 BUFG evrioPllOutBUFG (.I(evrioRefClk), .O(evrioRefClkMonitor));
+`endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // Resets
 wire sysReset;
