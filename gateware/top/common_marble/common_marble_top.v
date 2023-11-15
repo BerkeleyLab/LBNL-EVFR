@@ -58,8 +58,8 @@ module common_marble_top #(
     // FMC2 EVRIO (only in event receiver)
     // FIXME: For now we're using a UTIO board here
     //        Hopefully the EVRIO board will be backwards compatible....
-    input          EVRIO_PLL_OUT_P,  // Not used
-    input          EVRIO_PLL_OUT_N,  // Not used
+    input          EVRIO_PLL_OUT_P,
+    input          EVRIO_PLL_OUT_N,
     output         EVRIO_PLL_REF_P,
     output         EVRIO_PLL_REF_N,
     output   [3:0] EVRIO_PATTERN_P,
@@ -139,6 +139,11 @@ IBUFDS_GTE2 mgtRef (.I(MGT_CLK_P),
                     .ODIV2());
 BUFG mgtRefBUFG (.I(mgtRefClk), .O(mgtRefClkMonitor));
 
+wire evrioRefClk, evrioRefClkMonitor;
+IBUFDS pllRef (.I(EVRIO_PLL_OUT_P),
+               .IB(EVRIO_PLL_OUT_N),
+               .O(evrioRefClk));
+BUFG evrioPllOutBUFG (.I(evrioRefClk), .O(evrioRefClkMonitor));
 ///////////////////////////////////////////////////////////////////////////////
 // Resets
 wire sysReset;
@@ -386,7 +391,7 @@ wire [3:0] iic_proc_i = { sda_sense[0], iic_proc_o[2:0] };
 
 /////////////////////////////////////////////////////////////////////////////
 // Measure clock rates
-frequencyCounters #(.NF(5),
+frequencyCounters #(.NF(6),
                     .CLK_RATE(SYSCLK_FREQUENCY),
                     .DEBUG("false"))
   frequencyCounters (
@@ -394,7 +399,8 @@ frequencyCounters #(.NF(5),
     .csrStrobe(GPIO_STROBES[GPIO_IDX_FREQ_MONITOR_CSR]),
     .GPIO_OUT(GPIO_OUT),
     .status(GPIO_IN[GPIO_IDX_FREQ_MONITOR_CSR]),
-    .unknownClocks({ethernetRxClk,
+    .unknownClocks({evrioRefClkMonitor,
+                    ethernetRxClk,
                     ethernetTxClk,
                     evrClk,
                     mgtRefClkMonitor,
