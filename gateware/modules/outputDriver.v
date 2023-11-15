@@ -111,6 +111,8 @@ localparam S_IDLE                = 3'd0,
 
 (*mark_debug=DEBUG*) reg [2:0] state = S_IDLE;
 reg [1:0] mode = M_PULSE;
+reg [2:0] patternLoopInitLatency;
+wire patternLoopInitDone = patternLoopInitLatency[2];
 
 always @(posedge evrClk) begin
     dpramQ <= dpram[readAddress];
@@ -125,6 +127,7 @@ always @(posedge evrClk) begin
         coarseDelayCount <= {1'b0, coarseDelay} - 1;
         patternCount <= {1'b0, lastWriteAddress} - 1;
         readAddress <= 0;
+        patternLoopInitLatency <= {3'b10};
         if (infoToggle != infoMatch) begin
             mode <= sysMode;
             firstPattern <= sysFirstPattern;
@@ -169,9 +172,16 @@ always @(posedge evrClk) begin
     S_DELAY_PATTERN: begin
         coarseDelayCount <= coarseDelayCount - 1;
         if (coarseDelayDone) begin
-            serdesPattern <= dpram[readAddress];
-            readAddress <= readAddress + 1;
-            state <= S_SEND_PATTERN_SINGLE;
+            case (mode)
+            M_PATTERN_SINGLE: begin
+                readAddress <= 1;
+                state <= S_SEND_PATTERN_SINGLE;
+            end
+            M_PATTERN_LOOP: begin
+                readAddress <= 0;
+                state <= S_SEND_PATTERN_LOOP;
+            end
+            endcase
         end
     end
     S_SEND_PATTERN_SINGLE: begin
@@ -183,18 +193,20 @@ always @(posedge evrClk) begin
         end
     end
     S_SEND_PATTERN_LOOP: begin
-        serdesPattern <= dpram[readAddress];
+        if(patternLoopInitDone) begin
+            serdesPattern <= dpramQ;
+        end else begin
+            patternLoopInitLatency <= patternLoopInitDone - 1;
+            serdesPattern <= {SERDES_WIDTH{1'b0}};
+        end
         readAddress <= readAddress + 1;
         patternCount <= patternCount - 1;
-        if (mode==M_PATTERN_LOOP && (triggerStrobe || patternDone)) begin
+        if (triggerStrobe || patternDone) begin
             patternCount <= {1'b0, lastWriteAddress} - 1;
             readAddress <= 0;
             if (infoToggle != infoMatch) begin
                 state <= S_IDLE;
             end
-        end
-        else if (patternDone) begin
-            state <= S_IDLE;
         end
     end
     default: state <= S_IDLE;
