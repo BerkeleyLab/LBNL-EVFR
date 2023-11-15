@@ -39,7 +39,7 @@ reg infoToggle = 0, infoMatch = 0;
 (* ASYNC_REG="TRUE" *) reg sysInfoMatch_m = 0;
 reg sysInfoMatch = 0;
 
-reg [SERDES_WIDTH-1:0] dpram [0:(1<<PATTERN_ADDRESS_WIDTH)-1];
+reg [SERDES_WIDTH-1:0] dpram [0:(1<<PATTERN_ADDRESS_WIDTH)-1], dpramQ;
 
 ////////////////////// System clock domain //////////////////////////////////
 reg [DELAY_INFO_WIDTH-1:0] sysDelayInfo = 0;
@@ -113,6 +113,8 @@ localparam S_IDLE                = 3'd0,
 reg [1:0] mode = M_PULSE;
 
 always @(posedge evrClk) begin
+    dpramQ <= dpram[readAddress];
+
     infoToggle_m <= sysInfoToggle;
     infoToggle   <= infoToggle_m;
 
@@ -173,7 +175,7 @@ always @(posedge evrClk) begin
         end
     end
     S_SEND_PATTERN_SINGLE: begin
-        serdesPattern <= dpram[readAddress];
+        serdesPattern <= dpramQ;
         readAddress <= readAddress + 1;
         patternCount <= patternCount - 1;
         if (patternDone) begin
