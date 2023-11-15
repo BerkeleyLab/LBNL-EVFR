@@ -139,12 +139,12 @@ IBUFDS_GTE2 mgtRef (.I(MGT_CLK_P),
                     .ODIV2());
 BUFG mgtRefBUFG (.I(mgtRefClk), .O(mgtRefClkMonitor));
 
-wire evrioRefClk, evrioRefClkMonitor;
+wire evrioPllOutClk, evrioPllOutClkMonitor;
 `ifndef KICKER_DRIVER
 IBUFDS evrioPllClkIBUFDS (.I(EVRIO_PLL_OUT_P),
                           .IB(EVRIO_PLL_OUT_N),
-                          .O(evrioRefClk));
-BUFG evrioPllOutBUFG (.I(evrioRefClk), .O(evrioRefClkMonitor));
+                          .O(evrioPllOutClk));
+BUFG evrioPllOutBUFG (.I(evrioPllOutClk), .O(evrioPllOutClkMonitor));
 `endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -402,7 +402,7 @@ frequencyCounters #(.NF(6),
     .csrStrobe(GPIO_STROBES[GPIO_IDX_FREQ_MONITOR_CSR]),
     .GPIO_OUT(GPIO_OUT),
     .status(GPIO_IN[GPIO_IDX_FREQ_MONITOR_CSR]),
-    .unknownClocks({evrioRefClkMonitor,
+    .unknownClocks({evrioPllOutClkMonitor,
                     ethernetRxClk,
                     ethernetTxClk,
                     evrClk,
