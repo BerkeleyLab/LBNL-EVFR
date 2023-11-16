@@ -105,4 +105,4 @@ set_property -dict {PACKAGE_PIN K22 IOSTANDARD LVCMOS25} [get_ports {EVRIO_TRIGG
 # LA20_P -- G21
 set_property -dict {PACKAGE_PIN L22 IOSTANDARD LVCMOS25} [get_ports {EVRIO_TRIGGER[7]}]
 
-create_clock -period 2.000 -name evrpll_out_clk [get_ports EVRIO_PLL_OUT_P]
+create_clock -period 2.000 -name evrio_pll_out_clk [get_ports EVRIO_PLL_OUT_P]
