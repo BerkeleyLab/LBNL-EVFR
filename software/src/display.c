@@ -306,18 +306,19 @@ drawFMON(int redraw)
                                    "MGT reference",
                                    "Event receiver",
                                    "Ethernet Tx",
-                                   "Ethernet Rx" };
+                                   "Ethernet Rx",
+                                   "EVRIO PLL" };
     if(redraw) {
         st7789vShowString(0, LINE_FROM_BOTTOM(FREQ_STR_VOFF),
                             "Frequencies [MHz]:______________");
-        for(uint8_t j=0; j<sizeof names / sizeof names[0]; j++) {
+        for(uint8_t j=1; j<sizeof names / sizeof names[0]; j++) {
             char cbuf[20];
             sprintf(cbuf, "%16s : ", names[j]);
             st7789vShowString(st7789vCharWidth,
-                              LINE_FROM_BOTTOM(FREQ_STR_VOFF-1-j), cbuf);
+                              LINE_FROM_BOTTOM(FREQ_STR_VOFF-j), cbuf);
         }
     }
-    for (uint8_t i = 0 ; i < sizeof names / sizeof names[0] ; i++) {
+    for (uint8_t i = 1 ; i < sizeof names / sizeof names[0] ; i++) {
         char cbuf[12];
         GPIO_WRITE(GPIO_IDX_FREQ_MONITOR_CSR, i);
         uint32_t csr = GPIO_READ(GPIO_IDX_FREQ_MONITOR_CSR);
