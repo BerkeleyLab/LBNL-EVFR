@@ -343,7 +343,7 @@ drawFMON(int redraw)
             sprintf(cbuf, "%3lu.%06lu", rate / 1000000, rate % 1000000);
         }
         st7789vShowString(20*st7789vCharWidth,
-                          LINE_FROM_BOTTOM(FREQ_STR_VOFF-1-i), cbuf);
+                          LINE_FROM_BOTTOM(FREQ_STR_VOFF-i), cbuf);
     }
     return 0;
 }
