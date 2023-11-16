@@ -101,6 +101,7 @@ reg [PATTERN_ADDRESS_WIDTH-1:0] lastWriteAddress = 0;
 (*mark_debug=DEBUG*) reg [PATTERN_ADDRESS_WIDTH-1:0] readAddress = 0;
 (*mark_debug=DEBUG*) reg [PATTERN_ADDRESS_WIDTH:0] patternCount = 0;
 wire patternDone = patternCount[PATTERN_ADDRESS_WIDTH];
+reg patternLoopRunEnable = 0, triggerStrobe_d=0;
 
 localparam S_IDLE                = 3'd0,
            S_COARSE_DELAY        = 3'd1,
@@ -111,8 +112,6 @@ localparam S_IDLE                = 3'd0,
 
 (*mark_debug=DEBUG*) reg [2:0] state = S_IDLE;
 reg [1:0] mode = M_PULSE;
-reg [2:0] patternLoopInitLatency;
-wire patternLoopInitDone = patternLoopInitLatency[2];
 
 always @(posedge evrClk) begin
     dpramQ <= dpram[readAddress];
@@ -127,7 +126,7 @@ always @(posedge evrClk) begin
         coarseDelayCount <= {1'b0, coarseDelay} - 1;
         patternCount <= {1'b0, lastWriteAddress} - 1;
         readAddress <= 0;
-        patternLoopInitLatency <= {3'b10};
+        patternLoopRunEnable <= 1'b0;
         if (infoToggle != infoMatch) begin
             mode <= sysMode;
             firstPattern <= sysFirstPattern;
@@ -136,14 +135,17 @@ always @(posedge evrClk) begin
             coarseWidth <= sysCoarseWidth;
             lastWriteAddress <= sysLastWriteAddress;
             infoMatch <= infoToggle;
-        end
-        if (triggerStrobe) begin
+        end else begin
             case (mode)
             M_PULSE: begin
-                state <= S_COARSE_DELAY;
+                if (triggerStrobe) begin
+                    state <= S_COARSE_DELAY;
+                end
             end
             M_PATTERN_SINGLE: begin
-                state <= S_DELAY_PATTERN;
+                if (triggerStrobe) begin
+                    state <= S_DELAY_PATTERN;
+                end;
             end
             M_PATTERN_LOOP: begin
                 state <= S_SEND_PATTERN_LOOP;
@@ -172,16 +174,8 @@ always @(posedge evrClk) begin
     S_DELAY_PATTERN: begin
         coarseDelayCount <= coarseDelayCount - 1;
         if (coarseDelayDone) begin
-            case (mode)
-            M_PATTERN_SINGLE: begin
-                readAddress <= 1;
-                state <= S_SEND_PATTERN_SINGLE;
-            end
-            M_PATTERN_LOOP: begin
-                readAddress <= 0;
-                state <= S_SEND_PATTERN_LOOP;
-            end
-            endcase
+            readAddress <= 1;
+            state <= S_SEND_PATTERN_SINGLE;
         end
     end
     S_SEND_PATTERN_SINGLE: begin
@@ -193,20 +187,25 @@ always @(posedge evrClk) begin
         end
     end
     S_SEND_PATTERN_LOOP: begin
-        if(patternLoopInitDone) begin
+        triggerStrobe_d <= triggerStrobe;
+        if (patternLoopRunEnable) begin
             serdesPattern <= dpramQ;
+            readAddress <= readAddress + 1;
+            patternCount <= patternCount - 1;
+            if (triggerStrobe || patternDone) begin
+                patternCount <= {1'b0, lastWriteAddress} - 1;
+                readAddress <= 0;
+            end
         end else begin
-            patternLoopInitLatency <= patternLoopInitDone - 1;
+            if(triggerStrobe_d) begin
+                patternLoopRunEnable <= 1'b1;
+                readAddress <= readAddress + 1;
+                patternCount <= patternCount - 1;
+            end
             serdesPattern <= {SERDES_WIDTH{1'b0}};
         end
-        readAddress <= readAddress + 1;
-        patternCount <= patternCount - 1;
-        if (triggerStrobe || patternDone) begin
-            patternCount <= {1'b0, lastWriteAddress} - 1;
-            readAddress <= 0;
-            if (infoToggle != infoMatch) begin
-                state <= S_IDLE;
-            end
+        if (infoToggle != infoMatch) begin
+            state <= S_IDLE;
         end
     end
     default: state <= S_IDLE;
