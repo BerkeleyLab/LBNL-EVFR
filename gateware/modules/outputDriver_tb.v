@@ -126,9 +126,7 @@ parameter coarseWidthCount = 'hA, //10
           coarseDelayCount = 'h0,
           firstPattern     = 'hF,
           lastPattern      = 'hF;
-parameter PULSE_MODE_PARAM = CSR_W_OPCODE_SET_DELAY |
-                             (coarseDelayCount << CFG_EVR_OUTPUT_SERDES_WIDTH) |
-                             firstPattern;
+
 // Pattern parameters
 parameter PATTERN_BITSTRING = {{11{1'b0}},{5{1'b1}}},
           PATTERN_SIZE = $bits(PATTERN_BITSTRING),
@@ -172,7 +170,34 @@ initial begin
     @(posedge clk);
 
     `set_cyan_text; $display("@%0d: ##### Module initialization complete #####", $time);  `clear_text_color;
+end
 
+// Mode changing
+initial begin
+    repeat(1000) begin
+        @(posedge evrClk);
+    end
+    CSR0.write32(WR_REG_OFFSET_CSR, CSR_W_OPCODE_SET_MODE | M_PATTERN_SINGLE);
+
+    repeat(100) begin
+        @(posedge evrClk);
+    end
+    CSR0.write32(WR_REG_OFFSET_CSR, CSR_W_OPCODE_SET_MODE | M_PATTERN_SINGLE);
+
+    repeat(100) begin
+        @(posedge evrClk);
+    end
+    CSR0.write32(WR_REG_OFFSET_CSR, CSR_W_OPCODE_SET_MODE | M_PULSE);
+
+    repeat(100) begin
+        @(posedge evrClk);
+    end
+    CSR0.write32(WR_REG_OFFSET_CSR, CSR_W_OPCODE_SET_MODE | M_PATTERN_LOOP);
+
+    repeat(100) begin
+        @(posedge evrClk);
+    end
+    CSR0.write32(WR_REG_OFFSET_CSR, CSR_W_OPCODE_SET_MODE | M_PULSE);
 end
 
 endmodule
