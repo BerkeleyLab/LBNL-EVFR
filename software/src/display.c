@@ -40,6 +40,8 @@
 #define MAC_STR_HOFF                                     CHAR_FROM_LEFT(0)
 #define MMC_STR_VOFF                                          MAC_STR_VOFF
 #define MMC_STR_HOFF                                    CHAR_FROM_LEFT(18)
+#define GIT_STR_VOFF                                   LINE_FROM_BOTTOM(1)
+#define GIT_STR_HOFF                                    CHAR_FROM_LEFT(18)
 #define FREQ_STR_VOFF                                                   14 // lines from bottom (header)
 #define VOLTAGE_HOFF                                     CHAR_FROM_LEFT(0) // header
 #define VOLTAGE_VOFF                                   LINE_FROM_BOTTOM(4) // header
@@ -292,6 +294,16 @@ drawMMCfirmware(int redraw) {
         sprintf(cbuf, "- MMC=%8X", getMMCfirmware());
         st7789vShowString(MMC_STR_HOFF,
                           MMC_STR_VOFF, cbuf);
+    }
+}
+
+static void
+drawGitHash(int redraw) {
+    if(redraw) {
+        char cbuf [23];
+        sprintf(cbuf, "- GIT=%8X", GPIO_READ(GPIO_IDX_GITHASH));
+        st7789vShowString(GIT_STR_HOFF,
+                          GIT_STR_VOFF, cbuf);
     }
 }
 
@@ -611,6 +623,7 @@ screen0(int redraw) {
         eventMonitorCrank();
         drawMMCfirmware(redraw);
         eventMonitorCrank();
+        drawGitHash(redraw);
         eventMonitorCrank();
         drawFMON(redraw);
         eventMonitorCrank();
