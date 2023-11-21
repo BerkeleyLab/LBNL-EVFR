@@ -308,7 +308,8 @@ drawGitHash(int redraw) {
 }
 
 /*
- * Draw the onboard frequencies measured by FPGA. Same ouput as FPGA console
+ * Draw the onboard frequencies measured by FPGA. Same ouput values as FPGA
+ * console. System frequency is not shown because of lack of screen space.
  */
 
 static int
