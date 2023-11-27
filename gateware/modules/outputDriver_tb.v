@@ -170,10 +170,8 @@ initial begin
     @(posedge clk);
 
     `set_cyan_text; $display("@%0d: ##### Module initialization complete #####", $time);  `clear_text_color;
-end
 
-// Mode changing
-initial begin
+    // waits for mode changing
     repeat(1000) begin
         @(posedge evrClk);
     end
