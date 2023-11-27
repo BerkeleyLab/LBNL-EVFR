@@ -1,19 +1,14 @@
 `timescale 1ns / 1ns
 
 module outputDriver_tb #(
-    `include "gpioIDX.vh"
-    parameter CSR_DATA_BUS_WIDTH = 32,
-    parameter CSR_STROBE_BUS_WIDTH = 1,
-    parameter EVR_TRIGGER_PERIOD = 128
+    parameter CSR_DATA_BUS_WIDTH                  = 32,
+    parameter CSR_STROBE_BUS_WIDTH                = 1,
+    parameter EVR_TRIGGER_PERIOD                  = 128,
+    parameter CFG_EVR_OUTPUT_SERDES_WIDTH         = 4,
+    parameter CFG_EVR_OUTPUT_PATTERN_ADDR_WIDTH   = 12,
+    parameter CFG_EVR_DELAY_WIDTH                 = 22,
+    parameter CFG_EVR_WIDTH_WIDTH                 = 22
 );
-
-////////////////////////////////////////////////////////////////////////////////
-// DESIGN parameters memo (from config.h)
-// CFG_EVR_OUTPUT_SERDES_WIDTH         4
-// CFG_EVR_OUTPUT_PATTERN_ADDR_WIDTH   12
-// CFG_EVR_DELAY_WIDTH                 22
-// CFG_EVR_WIDTH_WIDTH                 22
-////////////////////////////////////////////////////////////////////////////////
 
 // color printing defines
 `define display_blue(s)     `set_blue_text; $display(s); `clear_text_color;
