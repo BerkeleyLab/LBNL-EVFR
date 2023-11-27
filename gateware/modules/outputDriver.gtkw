@@ -1,0 +1,97 @@
+[*]
+[*] GTKWave Analyzer v3.3.114 (w)1999-2023 BSI
+[*] Thu Nov 16 19:16:57 2023
+[*]
+[dumpfile] "/home/alessio/Project/EVRIO-event-fanout-receiver/gateware/modules/outputDriver.vcd"
+[dumpfile_mtime] "Thu Nov 16 19:16:39 2023"
+[dumpfile_size] 255370
+[savefile] "/home/alessio/Project/EVRIO-event-fanout-receiver/gateware/modules/outputDriver.gtkw"
+[timestart] 10316
+[size] 1920 1153
+[pos] -1 -1
+*-3.900000 10348 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] outputDriver_tb.
+[sst_width] 273
+[signals_width] 293
+[sst_expanded] 1
+[sst_vpaned_height] 281
+@22
+outputDriver_tb.DUT.coarseDelayCount[22:0]
+@29
+outputDriver_tb.DUT.coarseDelayDone
+@22
+outputDriver_tb.DUT.coarseDelay[21:0]
+outputDriver_tb.DUT.coarseWidthCount[22:0]
+@28
+outputDriver_tb.DUT.coarseWidthDone
+@22
+outputDriver_tb.DUT.coarseWidth[21:0]
+outputDriver_tb.DUT.dpramQ[3:0]
+@28
+outputDriver_tb.DUT.evrClk
+@22
+outputDriver_tb.DUT.firstPattern[3:0]
+@28
+outputDriver_tb.DUT.infoMatch
+outputDriver_tb.DUT.infoToggle
+outputDriver_tb.DUT.infoToggle_m
+@22
+outputDriver_tb.DUT.lastPattern[3:0]
+outputDriver_tb.DUT.lastWriteAddress[11:0]
+@28
+[color] 6
+outputDriver_tb.DUT.mode[1:0]
+@22
+outputDriver_tb.DUT.patternCount[12:0]
+@28
+[color] 2
+outputDriver_tb.DUT.patternDone
+@22
+outputDriver_tb.DUT.readAddress[11:0]
+@800022
+[color] 1
+outputDriver_tb.DUT.serdesPattern[3:0]
+@28
+[color] 1
+(0)outputDriver_tb.DUT.serdesPattern[3:0]
+[color] 1
+(1)outputDriver_tb.DUT.serdesPattern[3:0]
+[color] 1
+(2)outputDriver_tb.DUT.serdesPattern[3:0]
+[color] 1
+(3)outputDriver_tb.DUT.serdesPattern[3:0]
+@1001200
+-group_end
+@28
+[color] 3
+outputDriver_tb.DUT.state[2:0]
+outputDriver_tb.DUT.sysClk
+@22
+outputDriver_tb.DUT.sysCoarseDelay[21:0]
+outputDriver_tb.DUT.sysCoarseWidth[21:0]
+@28
+outputDriver_tb.DUT.sysCsrStrobe
+@22
+outputDriver_tb.DUT.sysDelayInfo[25:0]
+outputDriver_tb.DUT.sysFirstPattern[3:0]
+outputDriver_tb.DUT.sysGPIO_OUT[31:0]
+@28
+outputDriver_tb.DUT.sysInfoMatch
+outputDriver_tb.DUT.sysInfoMatch_m
+outputDriver_tb.DUT.sysInfoToggle
+@22
+outputDriver_tb.DUT.sysLastPattern[3:0]
+outputDriver_tb.DUT.sysLastWriteAddress[11:0]
+@28
+outputDriver_tb.DUT.sysMode[1:0]
+@22
+outputDriver_tb.DUT.sysWidthInfo[25:0]
+outputDriver_tb.DUT.sysWriteAddress[11:0]
+outputDriver_tb.DUT.sysWritePattern[3:0]
+@28
+[color] 2
+outputDriver_tb.DUT.triggerStrobe
+[color] 7
+outputDriver_tb.DUT.patternLoopRunEnable
+[pattern_trace] 1
+[pattern_trace] 0
