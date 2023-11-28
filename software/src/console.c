@@ -281,7 +281,8 @@ cmdFMON(int argc, char **argv)
                                    "MGT reference",
                                    "Event receiver",
                                    "Ethernet Tx",
-                                   "Ethernet Rx" };
+                                   "Ethernet Rx",
+                                   "EVRIO PLL" };
     for (i = 0 ; i < sizeof names / sizeof names[0] ; i++) {
         GPIO_WRITE(GPIO_IDX_FREQ_MONITOR_CSR, i);
         uint32_t csr = GPIO_READ(GPIO_IDX_FREQ_MONITOR_CSR);

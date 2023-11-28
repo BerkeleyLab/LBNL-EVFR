@@ -40,6 +40,8 @@
 #define MAC_STR_HOFF                                     CHAR_FROM_LEFT(0)
 #define MMC_STR_VOFF                                          MAC_STR_VOFF
 #define MMC_STR_HOFF                                    CHAR_FROM_LEFT(18)
+#define GIT_STR_VOFF                                   LINE_FROM_BOTTOM(1)
+#define GIT_STR_HOFF                                    CHAR_FROM_LEFT(18)
 #define FREQ_STR_VOFF                                                   14 // lines from bottom (header)
 #define VOLTAGE_HOFF                                     CHAR_FROM_LEFT(0) // header
 #define VOLTAGE_VOFF                                   LINE_FROM_BOTTOM(4) // header
@@ -295,8 +297,19 @@ drawMMCfirmware(int redraw) {
     }
 }
 
+static void
+drawGitHash(int redraw) {
+    if(redraw) {
+        char cbuf [23];
+        sprintf(cbuf, "- GIT=%8X", GPIO_READ(GPIO_IDX_GITHASH));
+        st7789vShowString(GIT_STR_HOFF,
+                          GIT_STR_VOFF, cbuf);
+    }
+}
+
 /*
- * Draw the onboard frequencies measured by FPGA. Same ouput as FPGA console
+ * Draw the onboard frequencies measured by FPGA. Same ouput values as FPGA
+ * console. System frequency is not shown because of lack of screen space.
  */
 
 static int
@@ -306,18 +319,19 @@ drawFMON(int redraw)
                                    "MGT reference",
                                    "Event receiver",
                                    "Ethernet Tx",
-                                   "Ethernet Rx" };
+                                   "Ethernet Rx",
+                                   "EVRIO PLL" };
     if(redraw) {
         st7789vShowString(0, LINE_FROM_BOTTOM(FREQ_STR_VOFF),
                             "Frequencies [MHz]:______________");
-        for(uint8_t j=0; j<sizeof names / sizeof names[0]; j++) {
+        for(uint8_t j=1; j<sizeof names / sizeof names[0]; j++) {
             char cbuf[20];
             sprintf(cbuf, "%16s : ", names[j]);
             st7789vShowString(st7789vCharWidth,
-                              LINE_FROM_BOTTOM(FREQ_STR_VOFF-1-j), cbuf);
+                              LINE_FROM_BOTTOM(FREQ_STR_VOFF-j), cbuf);
         }
     }
-    for (uint8_t i = 0 ; i < sizeof names / sizeof names[0] ; i++) {
+    for (uint8_t i = 1 ; i < sizeof names / sizeof names[0] ; i++) {
         char cbuf[12];
         GPIO_WRITE(GPIO_IDX_FREQ_MONITOR_CSR, i);
         uint32_t csr = GPIO_READ(GPIO_IDX_FREQ_MONITOR_CSR);
@@ -330,7 +344,7 @@ drawFMON(int redraw)
             sprintf(cbuf, "%3lu.%06lu", rate / 1000000, rate % 1000000);
         }
         st7789vShowString(20*st7789vCharWidth,
-                          LINE_FROM_BOTTOM(FREQ_STR_VOFF-1-i), cbuf);
+                          LINE_FROM_BOTTOM(FREQ_STR_VOFF-i), cbuf);
     }
     return 0;
 }
@@ -610,6 +624,7 @@ screen0(int redraw) {
         eventMonitorCrank();
         drawMMCfirmware(redraw);
         eventMonitorCrank();
+        drawGitHash(redraw);
         eventMonitorCrank();
         drawFMON(redraw);
         eventMonitorCrank();

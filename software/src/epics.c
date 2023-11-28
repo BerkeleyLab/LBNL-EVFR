@@ -110,6 +110,8 @@ sysmonFetch(uint32_t *args)
     ap += fetchFanSpeeds(ap);
     ap = evioFetchSysmon(ap);
     ap = evrioFetchSysmon(ap);
+    GPIO_WRITE(GPIO_IDX_FREQ_MONITOR_CSR, 5);
+    *ap++ = GPIO_READ(GPIO_IDX_FREQ_MONITOR_CSR) & 0x3FFFFFFF;
     return ap - args;
 }
 
