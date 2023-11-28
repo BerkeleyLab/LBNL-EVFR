@@ -44,7 +44,7 @@ localparam COMMA_COUNTER_RELOAD = COMMAS_NEEDED - 1;
 localparam COMMA_COUNTER_WIDTH = $clog2(COMMA_COUNTER_RELOAD+1) + 1;
 (*mark_debug=DEBUG*) reg [COMMA_COUNTER_WIDTH-1:0] commaCounter =
                                                            COMMA_COUNTER_RELOAD;
-assign rxIsAligned = commaCounter[COMMA_COUNTER_WIDTH-1];
+wire rxIsAligned = commaCounter[COMMA_COUNTER_WIDTH-1];
 wire sysSlideRequest;
 (*ASYNC_REG="true"*) reg slideRequest_m = 0;
 reg slideRequest_d0 = 0, slideRequest_d1 = 0;
@@ -108,7 +108,7 @@ assign     monitorSeconds = monitorFIFOout[40+:32];
 
 //////////////////////////////////////////////////////////////////////////////
 // Small EVR
-(*MARK_DEBUG=DEBUG*) wire evrPPS;
+(*MARK_DEBUG=DEBUG*) wire evrPPS, evrTimestampValid;
 smallEVR #(.ACTION_WIDTH(1+OUTPUT_COUNT),
            .DEBUG(DEBUG))
   smallEVR (
@@ -241,7 +241,7 @@ ___________________________________________________________________
 | GPIO_IN[25] | (0x02000000) | mgtStatus[1] | tx_fsm_reset_done    |
 | GPIO_IN[24] | (0x01000000) | mgtStatus[0] | txresetdone          |
 '------------------------------------------------------------------' */
-wire rxIsAligned, txresetdone, rxresetdone, cplllock, cpllfbclklost, rx_fsm_reset_done, tx_fsm_reset_done;
+wire txresetdone, rxresetdone, cplllock, cpllfbclklost, rx_fsm_reset_done, tx_fsm_reset_done;
 assign mgtStatus = {rxIsAligned,
                     rxresetdone,
                     cplllock,
@@ -428,8 +428,8 @@ wire GT0_QPLLREFCLKLOST_OUT;
         .QPLLLOCK                       (GT0_QPLLLOCK_OUT),
         .QPLLLOCKDETCLK                 (GT0_QPLLLOCKDETCLK_IN),
         .QPLLLOCKEN                     (tied_to_vcc_i),
-        .QPLLOUTCLK                     (gt0_qplloutclk_i),
-        .QPLLOUTREFCLK                  (gt0_qplloutrefclk_i),
+        .QPLLOUTCLK                     (),
+        .QPLLOUTREFCLK                  (),
         .QPLLOUTRESET                   (tied_to_ground_i),
         .QPLLPD                         (tied_to_ground_i),
         .QPLLREFCLKLOST                 (GT0_QPLLREFCLKLOST_OUT),
