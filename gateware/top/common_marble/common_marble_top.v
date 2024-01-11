@@ -294,8 +294,11 @@ evrLogger #(.DEBUG("false"))
   evrLogger (
     .sysClk(sysClk),
     .GPIO_OUT(GPIO_OUT),
-    .csrStrobe(GPIO_STROBES[GPIO_IDX_EVR_LOG_CSR]),
-    .status(GPIO_IN[GPIO_IDX_EVR_LOG_CSR]),
+    .csrStrobeLogger1(GPIO_STROBES[GPIO_IDX_EVR_DISP_LOG_CSR]),
+    .statusLogger1(GPIO_IN[GPIO_IDX_EVR_DISP_LOG_CSR]),
+    .csrStrobeLogger2(GPIO_STROBES[GPIO_IDX_EVR_TLOG_CSR]),
+    .statusLogger2(GPIO_IN[GPIO_IDX_EVR_TLOG_CSR]),
+    .sysDataTicks(GPIO_IN[GPIO_IDX_EVR_TLOG_TICKS]),
     .evrClk(evrClk),
     .evrCode(evrCode),
     .evrCodeValid(evrCodeValid));
