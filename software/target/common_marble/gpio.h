@@ -26,7 +26,7 @@
 #define GPIO_IDX_EVR_MONITOR_SECONDS     12 // EVR monitor seconds (POSIX)
 #define GPIO_IDX_EVR_MONITOR_TICKS       13 // EVR monitor ticks (RF/4)
 #define GPIO_IDX_EVR_SECONDS             14 // EVR time of day (POSIX)
-#define GPIO_IDX_EVR_LOG_CSR             15 // EVR log
+#define GPIO_IDX_EVR_DISP_LOG_CSR        15 // EVR log
 #define GPIO_IDX_FMC1_FIREFLY            16 // Firefly reset/enable
 #define GPIO_IDX_FREQ_MONITOR_CSR        17 // Frequency measurement CSR
 #define GPIO_IDX_NET_CONFIG_CSR          18 // Network configuration
@@ -40,6 +40,8 @@
 #define GPIO_IDX_EVR_SELECT_OUTPUT       29 // Choose EVR output
 #define GPIO_IDX_EVR_CONFIG_OUTPUT       30 // Configure EVR output
 #define GPIO_IDX_GITHASH                 31 // Git 32-bit hash
+#define GPIO_IDX_EVR_TLOG_CSR            32 // EVR tlog event logger control
+#define GPIO_IDX_EVR_TLOG_TICKS          33 // EVR tlog event logger ticks
 
 // QSFP Fanout
 #define GPIO_IDX_MGT_HW_CONFIG           50 // MGT hardware configuration
