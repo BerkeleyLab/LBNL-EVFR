@@ -94,7 +94,7 @@ drawEventLog(int redrawAll)
             displayHead = displayHead->forw;
         }
         displayTail = NULL;
-        csrIdx = GPIO_IDX_EVR_LOG_CSR; // evgIdx ? GPIO_IDX_EVG_2_LOG_CSR : GPIO_IDX_EVG_1_LOG_CSR;
+        csrIdx = GPIO_IDX_EVR_DISP_LOG_CSR;
         GPIO_WRITE(csrIdx, CSR_RW_RESET);
         microsecondSpin(1);
         GPIO_WRITE(csrIdx, 0);
