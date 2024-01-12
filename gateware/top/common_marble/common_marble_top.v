@@ -291,14 +291,24 @@ evr #(.EVR_CLOCK_RATE(CFG_EVR_CLOCK_RATE),
 /////////////////////////////////////////////////////////////////////////////
 // Pass events to processor
 evrLogger #(.DEBUG("false"))
-  evrLogger (
+  evrLoggerDisplay (
     .sysClk(sysClk),
     .GPIO_OUT(GPIO_OUT),
-    .csrStrobe(GPIO_STROBES[GPIO_IDX_EVR_LOG_CSR]),
-    .status(GPIO_IN[GPIO_IDX_EVR_LOG_CSR]),
+    .csrStrobe(GPIO_STROBES[GPIO_IDX_EVR_DISP_LOG_CSR]),
+    .status(GPIO_IN[GPIO_IDX_EVR_DISP_LOG_CSR]),
     .evrClk(evrClk),
     .evrCode(evrCode),
     .evrCodeValid(evrCodeValid));
+
+evFIFO evFIFOtlog (
+    .sysClk(sysClk),
+    .sysCsrStrobe(GPIO_STROBES[GPIO_IDX_EVR_TLOG_CSR]),
+    .sysGpioOut(GPIO_OUT),
+    .sysCsr(GPIO_IN[GPIO_IDX_EVR_TLOG_CSR]),
+    .sysDataTicks(GPIO_IN[GPIO_IDX_EVR_TLOG_TICKS]),
+    .evClk(evrClk),
+    .evChar(evrCode),
+    .evCharIsK(!evrCodeValid));
 
 `ifdef QSFP_FANOUT
 /////////////////////////////////////////////////////////////////////////////
