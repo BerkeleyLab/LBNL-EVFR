@@ -294,14 +294,21 @@ evrLogger #(.DEBUG("false"))
   evrLogger (
     .sysClk(sysClk),
     .GPIO_OUT(GPIO_OUT),
-    .csrStrobeLogger1(GPIO_STROBES[GPIO_IDX_EVR_DISP_LOG_CSR]),
-    .statusLogger1(GPIO_IN[GPIO_IDX_EVR_DISP_LOG_CSR]),
-    .csrStrobeLogger2(GPIO_STROBES[GPIO_IDX_EVR_TLOG_CSR]),
-    .statusLogger2(GPIO_IN[GPIO_IDX_EVR_TLOG_CSR]),
-    .sysDataTicksLogger2(GPIO_IN[GPIO_IDX_EVR_TLOG_TICKS]),
+    .csrStrobe(GPIO_STROBES[GPIO_IDX_EVR_DISP_LOG_CSR]),
+    .status(GPIO_IN[GPIO_IDX_EVR_DISP_LOG_CSR]),
     .evrClk(evrClk),
     .evrCode(evrCode),
     .evrCodeValid(evrCodeValid));
+
+evFIFO evFIFOtlog (
+    .sysClk(sysClk),
+    .sysCsrStrobe(GPIO_STROBES[GPIO_IDX_EVR_TLOG_CSR]),
+    .sysGpioOut(GPIO_OUT),
+    .sysCsr(GPIO_IN[GPIO_IDX_EVR_TLOG_CSR]),
+    .sysDataTicks(GPIO_IN[GPIO_IDX_EVR_TLOG_TICKS]),
+    .evClk(evrClk),
+    .evChar(evrCode),
+    .evCharIsK(!evrCodeValid));
 
 `ifdef QSFP_FANOUT
 /////////////////////////////////////////////////////////////////////////////
