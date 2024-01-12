@@ -546,7 +546,7 @@ cmdTLOG(int argc, char **argv)
             }
             wAddrOld = wAddr;
         }
-        for (pass = 0 ; rAddr < wAddr ; ) {
+        for (pass = 0 ; rAddr != wAddr ; ) {
             int event;
             GPIO_WRITE(gpioIdxEventLogCsr, 0x80000000 | rAddr);
             rAddr = (rAddr + 1) & addrMask;
