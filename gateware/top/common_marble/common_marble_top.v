@@ -291,7 +291,7 @@ evr #(.EVR_CLOCK_RATE(CFG_EVR_CLOCK_RATE),
 /////////////////////////////////////////////////////////////////////////////
 // Pass events to processor
 evrLogger #(.DEBUG("false"))
-  evrLogger (
+  evrLoggerDisplay (
     .sysClk(sysClk),
     .GPIO_OUT(GPIO_OUT),
     .csrStrobe(GPIO_STROBES[GPIO_IDX_EVR_DISP_LOG_CSR]),
