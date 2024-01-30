@@ -197,30 +197,33 @@ readSI570parameterFromPCBrev()
 int
 readSI570parameterFromMailbox()
 {
-    uint8_t i2c_address = 0;
-    uint32_t then = MICROSECONDS_SINCE_BOOT();
-    while (1) {
+    uint8_t i2c_address = 0, mailbox_attempts = 10;
+    while (mailbox_attempts>0) {
         i2c_address = mmcMailboxRead(MB_SI570_I2C_ADDR);
         if (i2c_address != 0) {
+            i2c_address = i2c_address>>1;
             break;
         }
-        if((MICROSECONDS_SINCE_BOOT() - then) > 5000000) {
-            break;
-        }
+        mailbox_attempts--;
     }
     uint32_t initialFrequency = 0;
     for (uint8_t i = 0; i<4; i++) {
         initialFrequency |=  mmcMailboxRead(MB_SI570_FREQ_ADDR+i)<<((3-i)*8);
     }
-    if(i2c_address == 0 || initialFrequency == 0) {
+    uint8_t config = mmcMailboxRead(MB_SI570_CONFIG_ADDR);
+    // Mailbox configuration validity check
+    if(i2c_address == 0 || initialFrequency == 0 || (config & 0x40) != 0x40) {
         warn("Si570 information mailbox reading failed.\n");
+        if(debugFlags & DEBUGFLAG_SI570_SETTING) {
+            printf("\tMailbox information read:\n\t*) ADDR=0%02x\n\t*)FREQ=%d Hz\n\tCONF=0%02x\n",
+                    i2c_address, initialFrequency, config);
+        }
         return 0;
     }
-    uint8_t config = mmcMailboxRead(MB_SI570_CONFIG_ADDR);
     si570_parameters.iicAddr = i2c_address;
     si570_parameters.startupFrequency = initialFrequency;
-    si570_parameters.temperatureStability = config & 0x1;
-    si570_parameters.outputEnablePolarity = (config & 0x2)>>1;
+    si570_parameters.outputEnablePolarity = config & 0x1;
+    si570_parameters.temperatureStability = (config & 0x2)>>1;
     print("Using Si570 parameters stored in mailbox.\n");
     return 1;
 }
