@@ -271,11 +271,6 @@ evioInit(void)
      * Set loopback for the receiving upstream stream
      */
     evioSetLoopback(XPOINT_IO_FIRST_FIREFLY);
-
-    /*
-     * Show xpoint mapping
-     */
-    evioShowCrosspointRegisters();
 }
 
 /*
