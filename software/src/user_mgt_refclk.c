@@ -213,9 +213,9 @@ readSI570parameterFromMailbox()
     uint8_t config = mmcMailboxRead(MB_SI570_CONFIG_ADDR);
     // Mailbox configuration validity check
     if(i2c_address == 0 || initialFrequency == 0 || (config & 0x40) != 0x40) {
-        warn("Si570 information mailbox reading failed.\n");
+        warn("Reading Si570 information from mailbox failed.");
         if(debugFlags & DEBUGFLAG_SI570_SETTING) {
-            printf("\tMailbox information read:\n\t*) ADDR=0%02x\n\t*)FREQ=%d Hz\n\tCONF=0%02x\n",
+            printf("\tMailbox information read:\n\t*) ADDR=0x%02x\n\t*) FREQ=%d Hz\n\t*) CONF=0x%02x\n",
                     i2c_address, initialFrequency, config);
         }
         return 0;
