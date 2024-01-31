@@ -232,6 +232,11 @@ cmdDEBUG(int argc, char **argv)
         argc--;
         argv++;
     }
+    if ((argc > 1) && (strcmp(argv[1], "-h") == 0)) {
+        argc--;
+        argv++;
+        printDebugFlags();
+    }
     if (argc > 2) {
             printf("Too many arguments.\n");
             return 0;
