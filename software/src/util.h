@@ -86,6 +86,7 @@ void checkForReset(void);
 int resetRecoverySwitchPressed(void);
 int displaySwitchPressed(void);
 void civil_from_days(int posixDays, int *year, int *month, int *day);
+void printDebugFlags();
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
