@@ -456,6 +456,7 @@ evioShowCrosspointRegisters(void)
                                                 fireflyStatus[i][1].rxLowPower);
         }
     }
+    fireflyShowAll();
 }
 
 /*
