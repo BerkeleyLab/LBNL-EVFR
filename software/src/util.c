@@ -174,7 +174,7 @@ printDebugFlags()
     };
     printf("Debug flags available:\n");
     for (uint8_t i = 0 ; i < sizeof debugTable / sizeof debugTable[0] ; i++) {
-        printf("%30s -- %8p\n", debugTable[i].name, debugTable[i].flagValue);
+        printf("%30s -- 0x%8x\n", debugTable[i].name, debugTable[i].flagValue);
     }
     return;
 }
