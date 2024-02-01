@@ -143,3 +143,38 @@ resetFPGA(int bootAlternateImage)
     microsecondSpin(1000000);
     printf("====== FPGA REBOOT FAILED ======\n");
 }
+
+void
+printDebugFlags()
+{
+    struct debugFlagsTable {
+        const char *name;
+        uint32_t   flagValue;
+    };
+    static struct debugFlagsTable debugTable[] = {
+        {"DEBUGFLAG_EPICS",            DEBUGFLAG_EPICS           },
+        {"DEBUGFLAG_EVENT_MONITOR",    DEBUGFLAG_EVENT_MONITOR   },
+        {"DEBUGFLAG_TFTP",             DEBUGFLAG_TFTP            },
+        {"DEBUGFLAG_BOOT_FLASH",       DEBUGFLAG_BOOT_FLASH      },
+        {"DEBUGFLAG_KICKER_DRIVER",    DEBUGFLAG_KICKER_DRIVER   },
+        {"DEBUGFLAG_SHOW_MGT_RESETS",  DEBUGFLAG_SHOW_MGT_RESETS },
+        {"DEBUGFLAG_SHOW_RX_ALIGNER",  DEBUGFLAG_SHOW_RX_ALIGNER },
+        {"DEBUGFLAG_IIC_PROC",         DEBUGFLAG_IIC_PROC        },
+        {"DEBUGFLAG_IIC_EVIO",         DEBUGFLAG_IIC_EVIO        },
+        {"DEBUGFLAG_IIC_EVIO_REG",     DEBUGFLAG_IIC_EVIO_REG    },
+        {"DEBUGFLAG_IIC_FMC2",         DEBUGFLAG_IIC_FMC2        },
+        {"DEBUGFLAG_IIC_FMC2_REG",     DEBUGFLAG_IIC_FMC2_REG    },
+        {"DEBUGFLAG_IIC_SCAN",         DEBUGFLAG_IIC_SCAN        },
+        {"DEBUGFLAG_DISPLAY_PRESS",    DEBUGFLAG_DISPLAY_PRESS   },
+        {"DEBUGFLAG_SHOW_EVENT_LOG",   DEBUGFLAG_SHOW_EVENT_LOG  },
+        {"DEBUGFLAG_SI570_SETTING",    DEBUGFLAG_SI570_SETTING   },
+        {"DEBUGFLAG_SHOW_MGT_SWITCH",  DEBUGFLAG_SHOW_MGT_SWITCH },
+        {"DEBUGFLAG_DUMP_MGT_SWITCH",  DEBUGFLAG_DUMP_MGT_SWITCH },
+        {"DEBUGFLAG_DUMP_SCREEN",      DEBUGFLAG_DUMP_SCREEN     }
+    };
+    printf("Debug flags available:\n");
+    for (uint8_t i = 0 ; i < sizeof debugTable / sizeof debugTable[0] ; i++) {
+        printf("%30s -- 0x%8x\n", debugTable[i].name, debugTable[i].flagValue);
+    }
+    return;
+}
