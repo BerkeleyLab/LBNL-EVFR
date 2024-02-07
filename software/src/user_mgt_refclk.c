@@ -200,7 +200,7 @@ readSI570parameterFromMailbox()
     uint8_t i2c_address = 0;
     uint32_t initialFrequency = 0;
 
-    i2c_address = mmcMailboxRead(MB_SI570_I2C_ADDR);
+    i2c_address = mmcMailboxRead(MB_SI570_I2C_ADDR)>>1;
     for (uint8_t i = 0; i<4; i++) {
         initialFrequency |=  mmcMailboxRead(MB_SI570_FREQ_ADDR+i)<<((3-i)*8);
     }
