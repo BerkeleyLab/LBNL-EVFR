@@ -166,6 +166,11 @@ main(void)
     epicsInit();
     checkHardwareConfiguration();
     if (hwConfig & (HWCONFIG_HAS_EVRIO | HWCONFIG_HAS_EVIO)) {
+        /*
+         * The current EVRIO version has a non-constant CLK3 phase relationship
+         * with the reference clock (evrClk) hence the workaround relies on the
+         * PAT0 output to generate a 125 MHz clock
+         */
         printf("Setting PAT0 as 125 MHz clock (pattern loop mode)\n");
         uint32_t pattern[] = {3, 0, 0, 0};
         evrioSetPattern(0, 4, pattern);
