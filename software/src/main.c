@@ -165,6 +165,13 @@ main(void)
     mgtInit();
     epicsInit();
     checkHardwareConfiguration();
+    if (hwConfig & (HWCONFIG_HAS_EVRIO | HWCONFIG_HAS_EVIO)) {
+        printf("Setting PAT0 as 125 MHz clock (pattern loop mode)\n");
+        uint32_t pattern[] = {3, 0, 0, 0};
+        evrioSetPattern(0, 4, pattern);
+        evrioSetMode(0, 3);
+        evrSetActionForEvent(122, 1);
+    }
     /*
      * Main processing loop
      */
