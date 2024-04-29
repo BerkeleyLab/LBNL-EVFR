@@ -18,9 +18,9 @@ module evr #(
 
     output wire                    evrClk,
     output reg               [7:0] evrCode = 0,
-    output wire              [15:0] rawRxCode,
     output reg                     evrCodeValid = 0,
-    output wire               [1:0] evrCharIsK,
+    output reg               [15:0] evrChars = 0,
+    output reg               [1:0] evrCharIsK = 0,
     output wire [OUTPUT_COUNT-1:0] evrTriggerBus,
     output wire              [7:0] evrDistributedBus,
     output wire                    evrPPSmarker,
@@ -34,8 +34,6 @@ module evr #(
 (*mark_debug=DEBUG*) wire [15:0] rxData;
 (*mark_debug=DEBUG*) wire [1:0] rxIsK, rxNotInTable;
 assign mgtAligned = rxIsAligned;
-assign evrCharIsK = rxIsK;
-assign rawRxCode = rxData;
 
 //////////////////////////////////////////////////////////////////////////////
 // Receiver alignment detection
@@ -45,6 +43,9 @@ localparam COMMA_COUNTER_WIDTH = $clog2(COMMA_COUNTER_RELOAD+1) + 1;
 (*mark_debug=DEBUG*) reg [COMMA_COUNTER_WIDTH-1:0] commaCounter =
                                                            COMMA_COUNTER_RELOAD;
 wire rxIsAligned = commaCounter[COMMA_COUNTER_WIDTH-1];
+// K character can only appear on word 0
+wire rxDataErr = (rxNotInTable != 0) || rxIsK[1];
+
 wire sysSlideRequest;
 (*ASYNC_REG="true"*) reg slideRequest_m = 0;
 reg slideRequest_d0 = 0, slideRequest_d1 = 0;
@@ -54,7 +55,17 @@ always @(posedge evrClk) begin
     slideRequest_d0 <= slideRequest_m;
     slideRequest_d1 <= slideRequest_d0;
     bitSlide <= slideRequest_d0 && !slideRequest_d1;
-    if ((rxNotInTable != 0) || rxIsK[1]) begin
+
+    if (rxIsAligned && !rxDataErr) begin
+        evrChars <= rxData;
+        evrCharIsK <= rxIsK;
+    end
+    else begin
+        evrChars <= 0;
+        evrCharIsK <= 0;
+    end
+
+    if (rxDataErr) begin
         commaCounter <= COMMA_COUNTER_RELOAD;
     end
     else if (!rxIsAligned && rxIsK[0] && (rxData[7:0] == 8'hBC)) begin
@@ -64,12 +75,12 @@ end
 
 //////////////////////////////////////////////////////////////////////////////
 // Pass event codes out
-wire goodCode = (rxIsAligned && (rxData[7:0] != 0) && !rxIsK[0]);
+wire goodCode = (evrChars[7:0] != 0) && !evrCharIsK[0];
 reg   [7:0] evrCode_d;
 wire [63:0] evrTimestamp;
 reg  [63:0] evrTimestamp_d;
 always @(posedge evrClk) begin
-    evrCode <= goodCode ? rxData[7:0] : 8'h00;
+    evrCode <= goodCode ? evrChars[7:0] : 8'h00;
     evrCodeValid <= goodCode;
     evrCode_d <= evrCode;
     evrTimestamp_d <= evrTimestamp;
@@ -113,8 +124,8 @@ smallEVR #(.ACTION_WIDTH(1+OUTPUT_COUNT),
            .DEBUG(DEBUG))
   smallEVR (
     .evrRxClk(evrClk),
-    .evrRxWord(rxData),
-    .evrCharIsK(rxIsK),
+    .evrRxWord(evrChars),
+    .evrCharIsK(evrCharIsK),
     .ppsMarker(evrPPS),
     .timestampValid(evrTimestampValid),
     .timestamp(evrTimestamp),
@@ -134,7 +145,7 @@ wire evrHBmarker = evrHBstretch[HB_STRETCH_WIDTH-1];
 (*ASYNC_REG="true"*) reg hbMarker_m;
 reg hbMarker;
 always @(posedge evrClk) begin
-    if ((rxData[7:0] == 8'd122) && !rxIsK[0]) begin
+    if (evrCode  == 8'd122) begin
         evrHBstretch <= -HB_STRETCH_RELOAD;
     end
     else if (evrHBmarker) begin
