@@ -32,7 +32,7 @@ module evr #(
     output  MGT_TX_N);
 
 (*mark_debug=DEBUG*) wire [15:0] rxData;
-(*mark_debug=DEBUG*) wire [1:0] rxIsK, rxNotInTable;
+(*mark_debug=DEBUG*) wire [1:0] rxIsK, rxNotInTable, rxDispErr;
 assign mgtAligned = rxIsAligned;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -44,7 +44,7 @@ localparam COMMA_COUNTER_WIDTH = $clog2(COMMA_COUNTER_RELOAD+1) + 1;
                                                            COMMA_COUNTER_RELOAD;
 wire rxIsAligned = commaCounter[COMMA_COUNTER_WIDTH-1];
 // K character can only appear on word 0
-wire rxDataErr = (rxNotInTable != 0) || rxIsK[1];
+wire rxDataErr = (rxNotInTable != 0) || rxIsK[1] || (rxDispErr != 0);
 
 wire sysSlideRequest;
 (*ASYNC_REG="true"*) reg slideRequest_m = 0;
@@ -312,7 +312,7 @@ evrmgt evrmgt_i (
     //---------------- Receive Ports - FPGA RX interface Ports -----------------
     .gt0_rxdata_out          (rxData), // output wire [15:0] gt0_rxdata_out
     //---------------- Receive Ports - RX 8B/10B Decoder Ports -----------------
-    .gt0_rxdisperr_out       (), // output wire [1:0] gt0_rxdisperr_out
+    .gt0_rxdisperr_out       (rxDispErr), // output wire [1:0] gt0_rxdisperr_out
     .gt0_rxnotintable_out    (rxNotInTable), // output wire [1:0] gt0_rxnotintable_out
     //------------------------- Receive Ports - RX AFE -------------------------
     .gt0_gtxrxp_in           (MGT_RX_P), // input wire gt0_gtxrxp_in
