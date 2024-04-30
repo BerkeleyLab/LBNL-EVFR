@@ -252,12 +252,12 @@ mmcMailbox #(.DEBUG("false"))
 
 /////////////////////////////////////////////////////////////////////////////
 // Event receiver
-wire [15:0] rxCode;
 wire [7:0] evrDistributedBus;
 wire       evrPPSmarker;
 wire [CFG_EVR_OUTPUT_COUNT-1:0] evrTriggerBus;
 wire [7:0] evrCode;
 wire       evrCodeValid, evrAligned;
+wire [15:0] evrChars;
 wire [1:0] evrCharIsK;
 evr #(.EVR_CLOCK_RATE(CFG_EVR_CLOCK_RATE),
       .OUTPUT_COUNT(CFG_EVR_OUTPUT_COUNT),
@@ -275,8 +275,8 @@ evr #(.EVR_CLOCK_RATE(CFG_EVR_CLOCK_RATE),
     .todSeconds(GPIO_IN[GPIO_IDX_EVR_SECONDS]),
     .evrClk(evrClk),
     .evrCode(evrCode),
-    .rawRxCode(rxCode),
     .evrCodeValid(evrCodeValid),
+    .evrChars(evrChars),
     .evrCharIsK(evrCharIsK),
     .evrTriggerBus(evrTriggerBus),
     .evrDistributedBus(evrDistributedBus),
@@ -364,7 +364,7 @@ fifo_2c #(.dw(18))
     EVFdataFifo (
     .wr_clk(evrClk),
     .we(fifo_we),
-    .din({evrCharIsK, rxCode}),
+    .din({evrCharIsK, evrChars}),
     .wr_count(fifo_wr_count),
     .full(fifo_full),
     .rd_clk(evfClk),
