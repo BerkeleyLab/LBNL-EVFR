@@ -541,14 +541,13 @@ IOBUF FMC2_SDA_IOBUF (.I(1'b0),
 
 ///////////////////////////////////////////////////////////////////////////////
 // CDC for reset signals
-localparam SERDES_RESET_COUNTER_RELOAD = 0; // 255;
-localparam SERDES_RESET_COUNTER_WIDTH = 8; // $clog2(SERDES_RESET_COUNTER_RELOAD);
+localparam SERDES_RESET_COUNTER_WIDTH = 8;
 wire mmcmLocked, serdesReset;
 reg sysOrPllReset = 1'b0;
 reg evrioPLLreset = 1'b0;
 (*ASYNC_REG="true"*) reg mmcmLocked_m0 = 0, mmcmLocked_m1 = 0;
 (*ASYNC_REG="true"*) reg evrioReset_m0 = 0, evrioReset_m1 = 0, evrioReset = 0;
-reg [SERDES_RESET_COUNTER_WIDTH:0] serdesResetCounter = SERDES_RESET_COUNTER_RELOAD;
+reg [SERDES_RESET_COUNTER_WIDTH:0] serdesResetCounter = 0;
 
 always @(posedge sysClk) begin
     sysOrPllReset <= sysReset | evrioPLLreset;
@@ -562,7 +561,7 @@ always @(posedge evrClk) begin
     mmcmLocked_m0 <= mmcmLocked;
     mmcmLocked_m1 <= mmcmLocked_m0;
     if (!mmcmLocked_m1) begin
-        serdesResetCounter <= SERDES_RESET_COUNTER_RELOAD;
+        serdesResetCounter <= 0;
     end else begin
         if (serdesReset) begin
             serdesResetCounter <= serdesResetCounter + 1;
