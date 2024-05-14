@@ -7,12 +7,14 @@ XSCT ?= xsct -norlwrap
 
 include ../../../dir_list.mk
 
+GIT_COMMIT   = $(shell git rev-parse --short=8 --verify HEAD || echo "NOCOMMIT")
+
 APP         ?= evfr
 PLATFORM    ?= marble
 TARGET      = $(APP)_$(PLATFORM)
 GW_TGT_DIR  = $(GW_SYN_DIR)/$(TARGET)
 BIT         ?= $(GW_TGT_DIR)/$(TARGET)_top.bit
-DEPLOY_BIT  ?= $(THIS_DIR)/download.bit
+DEPLOY_BIT  ?= $(THIS_DIR)/$(TARGET).$(GIT_COMMIT).bit
 MMI         ?= $(GW_TGT_DIR)/$(TARGET)_top.mmi
 ELF 	    ?= $(THIS_DIR)/$(TARGET).elf
 
@@ -104,8 +106,8 @@ SRC_SPIFLASHDRIVER_FILES = $(addprefix $(SW_SPIFLASHDRIVER_DIR)/, $(__SRC_SPIFLA
 SRC_FILES += $(SRC_SPIFLASHDRIVER_FILES)
 
 __HDR_SPIFLASHDRIVER_FILES = \
-	spiflash.h \
-HDR_SPIFLASHDRIVER_FILES = $(addprefix $(SPIFLASHDRIVER_DIR)/, $(__HDR_SPIFLASHDRIVER_FILES))
+	spiflash.h
+HDR_SPIFLASHDRIVER_FILES = $(addprefix $(SW_SPIFLASHDRIVER_DIR)/, $(__HDR_SPIFLASHDRIVER_FILES))
 
 HDR_FILES += $(HDR_SPIFLASHDRIVER_FILES)
 
@@ -121,7 +123,7 @@ ST7789V_DIR = $(SW_LIBS_DIR)/st7789v
 __ST7789V_SRC_FILES = \
 	systemFont.c \
 	st7789v.c
-__ST7789V_HDR_FILES =\
+__ST7789V_HDR_FILES = \
 	lv_font.h \
 	st7789v.h
 

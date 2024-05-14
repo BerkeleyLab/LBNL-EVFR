@@ -46,6 +46,7 @@
 #include "user_mgt_refclk.h"
 #include "st7789v.h"
 #include "util.h"
+#include "evio.h"
 
 #define CONSOLE_UDP_PORT 50004
 #define UDP_BUFSIZE      1460
@@ -231,6 +232,11 @@ cmdDEBUG(int argc, char **argv)
         sFlag = 1;
         argc--;
         argv++;
+    }
+    if ((argc > 1) && (strcmp(argv[1], "-h") == 0)) {
+        argc--;
+        argv++;
+        printDebugFlags();
     }
     if (argc > 2) {
             printf("Too many arguments.\n");
@@ -600,6 +606,18 @@ cmdTLOG(int argc, char **argv)
     return 0;
 }
 
+static int
+cmdCrosspoint(int argc, char **argv)
+{
+    if (!(hwConfig & HWCONFIG_HAS_EVIO)) {
+        printf("EVIO card not installed.\n");
+        return 1;
+    }
+    evioShowCrosspointRegisters();
+    return 0;
+}
+
+
 static void
 commandHandler(int argc, char **argv)
 {
@@ -613,6 +631,7 @@ commandHandler(int argc, char **argv)
     };
     static struct commandInfo commandTable[] = {
       { "boot",       cmdBOOT,        "Reboot FPGA"                         },
+      { "crosspoint", cmdCrosspoint,  "Show EVIO crosspoint registers"      },
       { "debug",      cmdDEBUG,       "Set debug flags"                     },
       { "dumpscreen", cmdDumpScreen,  "Perform screen dump via console"     },
       { "eyescan",    eyescanCommand, "Perform transceiver eye scan"        },

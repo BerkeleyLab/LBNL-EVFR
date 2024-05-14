@@ -128,7 +128,7 @@ assign EVRIO_VCXO_EN = 1'b0;
 ///////////////////////////////////////////////////////////////////////////////
 // Clocks
 wire sysClk, refClk125, refClk125d90, refClk200;
-wire evrClk, evrBitClk;
+wire evrClk, evrClkInterface, evrBitClk;
 wire ethernetRxClk, ethernetTxClk;
 
 wire mgtRefClk, mgtRefClkMonitor;
@@ -252,12 +252,12 @@ mmcMailbox #(.DEBUG("false"))
 
 /////////////////////////////////////////////////////////////////////////////
 // Event receiver
-wire [15:0] rxCode;
 wire [7:0] evrDistributedBus;
 wire       evrPPSmarker;
 wire [CFG_EVR_OUTPUT_COUNT-1:0] evrTriggerBus;
 wire [7:0] evrCode;
 wire       evrCodeValid, evrAligned;
+wire [15:0] evrChars;
 wire [1:0] evrCharIsK;
 evr #(.EVR_CLOCK_RATE(CFG_EVR_CLOCK_RATE),
       .OUTPUT_COUNT(CFG_EVR_OUTPUT_COUNT),
@@ -275,8 +275,8 @@ evr #(.EVR_CLOCK_RATE(CFG_EVR_CLOCK_RATE),
     .todSeconds(GPIO_IN[GPIO_IDX_EVR_SECONDS]),
     .evrClk(evrClk),
     .evrCode(evrCode),
-    .rawRxCode(rxCode),
     .evrCodeValid(evrCodeValid),
+    .evrChars(evrChars),
     .evrCharIsK(evrCharIsK),
     .evrTriggerBus(evrTriggerBus),
     .evrDistributedBus(evrDistributedBus),
@@ -364,7 +364,7 @@ fifo_2c #(.dw(18))
     EVFdataFifo (
     .wr_clk(evrClk),
     .we(fifo_we),
-    .din({evrCharIsK, rxCode}),
+    .din({evrCharIsK, evrChars}),
     .wr_count(fifo_wr_count),
     .full(fifo_full),
     .rd_clk(evfClk),
@@ -540,26 +540,43 @@ IOBUF FMC2_SDA_IOBUF (.I(1'b0),
                       .T(fmc2_iic_sda_t));
 
 ///////////////////////////////////////////////////////////////////////////////
-// CDC for evr reset signal
-wire evrioReset;
-reg sysOrPllReset = 0;
-(*ASYNC_REG="true"*) reg evrioReset_m0 = 0, evrioReset_m1 = 0;
+// CDC for reset signals
+localparam SERDES_RESET_COUNTER_WIDTH = 8;
+wire mmcmLocked, serdesReset;
+reg sysOrPllReset = 1'b0;
+reg evrioPLLreset = 1'b0;
+(*ASYNC_REG="true"*) reg mmcmLocked_m0 = 0, mmcmLocked_m1 = 0;
+(*ASYNC_REG="true"*) reg evrioReset_m0 = 0, evrioReset_m1 = 0, evrioReset = 0;
+reg [SERDES_RESET_COUNTER_WIDTH:0] serdesResetCounter = 0;
+
 always @(posedge sysClk) begin
     sysOrPllReset <= sysReset | evrioPLLreset;
 end
 always @(posedge evrClk) begin
     evrioReset_m0 <= sysOrPllReset;
     evrioReset_m1 <= evrioReset_m0;
+    evrioReset <= evrioReset_m1 | ~evrAligned;
 end
-assign evrioReset = evrioReset_m1 | ~evrAligned;
+always @(posedge evrClk) begin
+    mmcmLocked_m0 <= mmcmLocked;
+    mmcmLocked_m1 <= mmcmLocked_m0;
+    if (!mmcmLocked_m1) begin
+        serdesResetCounter <= 0;
+    end else begin
+        if (serdesReset) begin
+            serdesResetCounter <= serdesResetCounter + 1;
+        end
+    end
+end
+assign serdesReset = ~serdesResetCounter[SERDES_RESET_COUNTER_WIDTH];
 
 ///////////////////////////////////////////////////////////////////////////////
 // Output driver bit clock generation
-wire evrClkInterface;
 outputDriverMMCM outputDriverMMCM (
     .clk_in1(evrClk),
     .reset(evrioReset),
     .clk_out1(evrClkInterface),
+    .locked(mmcmLocked),
     .clk_out2(evrBitClk));
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -588,10 +605,11 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
         .sysGPIO_OUT(GPIO_OUT),
         .evrClk(evrClk),
         .triggerStrobe(evrTriggerBus[o]),
-        .serdesPattern(serdesPattern));
+        .serdesPattern(serdesPattern),
+        .reset(serdesReset));
 
     if(o < CFG_EVR_OUTPUT_PATTERN_COUNT) begin
-        outputSerdesIO #(.DIFFERENTIAL_OUPUT("true")) // Pattern output are differential
+        outputSerdesIO #(.DIFFERENTIAL_OUPUT("true")) // Pattern output is differential
         outputSERDESdiff_inst (
             .dataIn(serdesPattern),
             .dataOutP(evrioOutputP[o]),
@@ -599,9 +617,9 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
             .serialClk(evrBitClk),
             .parallelClk(evrClkInterface),
             .clockEnable(1'b1),
-            .reset(evrioReset));
+            .reset(serdesReset));
     end else begin
-        outputSerdesIO #(.DIFFERENTIAL_OUPUT("false")) // Trigger output are signle-ended
+        outputSerdesIO #(.DIFFERENTIAL_OUPUT("false")) // Trigger output is signle-ended
         outputSERDESse_inst (
             .dataIn(serdesPattern),
             .dataOutP(evrioOutputP[o]),
@@ -609,7 +627,7 @@ for (o = 0 ; o < CFG_EVR_OUTPUT_COUNT ; o = o + 1) begin
             .serialClk(evrBitClk),
             .parallelClk(evrClkInterface),
             .clockEnable(1'b1),
-            .reset(evrioReset));
+            .reset(serdesReset));
     end
 end
 
@@ -640,7 +658,6 @@ evrioPllclkOut (
 `endif
 
 // Steal a bit from the output selection bitmap for use as PLL reset
-reg evrioPLLreset = 1'b0;
 always @(posedge sysClk) begin
     if (GPIO_STROBES[GPIO_IDX_EVR_SELECT_OUTPUT]) begin
         evrioPLLreset <= GPIO_OUT[31];
