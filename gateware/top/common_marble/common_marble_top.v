@@ -544,7 +544,8 @@ IOBUF FMC2_SDA_IOBUF (.I(1'b0),
 localparam SERDES_RESET_COUNTER_RELOAD = 0; // 255;
 localparam SERDES_RESET_COUNTER_WIDTH = 8; // $clog2(SERDES_RESET_COUNTER_RELOAD);
 wire mmcmLocked, serdesReset;
-reg sysOrPllReset = 0;
+reg sysOrPllReset = 1'b0;
+reg evrioPLLreset = 1'b0;
 (*ASYNC_REG="true"*) reg mmcmLocked_m0 = 0, mmcmLocked_m1 = 0;
 (*ASYNC_REG="true"*) reg evrioReset_m0 = 0, evrioReset_m1 = 0, evrioReset = 0;
 reg [SERDES_RESET_COUNTER_WIDTH:0] serdesResetCounter = SERDES_RESET_COUNTER_RELOAD;
@@ -658,7 +659,6 @@ evrioPllclkOut (
 `endif
 
 // Steal a bit from the output selection bitmap for use as PLL reset
-reg evrioPLLreset = 1'b0;
 always @(posedge sysClk) begin
     if (GPIO_STROBES[GPIO_IDX_EVR_SELECT_OUTPUT]) begin
         evrioPLLreset <= GPIO_OUT[31];
