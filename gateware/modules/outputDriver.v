@@ -12,7 +12,7 @@ module outputDriver #(
     input         sysClk,
     input         sysCsrStrobe,
     input  [31:0] sysGPIO_OUT,
-
+    input         reset,
     input                                              evrClk,
     (*mark_debug=DEBUG*) input  wire                   triggerStrobe,
     (*mark_debug=DEBUG*) output reg [SERDES_WIDTH-1:0] serdesPattern = 0);
@@ -111,7 +111,7 @@ localparam S_IDLE                = 3'd0,
            S_SEND_PATTERN_LOOP   = 3'd5;
 
 (*mark_debug=DEBUG*) reg [2:0] state = S_IDLE;
-reg [1:0] mode = M_PULSE;
+reg [1:0] mode = M_DISABLED;
 
 always @(posedge evrClk) begin
     dpramQ <= dpram[readAddress];
@@ -119,97 +119,102 @@ always @(posedge evrClk) begin
     infoToggle_m <= sysInfoToggle;
     infoToggle   <= infoToggle_m;
 
-    case (state)
-    S_IDLE: begin
+    if (reset) begin
         serdesPattern <= {SERDES_WIDTH{1'b0}};
-        coarseWidthCount <= {1'b0, coarseWidth} - 1;
-        coarseDelayCount <= {1'b0, coarseDelay} - 1;
-        patternCount <= {1'b0, lastWriteAddress} - 1;
-        readAddress <= 0;
-        patternLoopRunEnable <= 1'b0;
-        if (infoToggle != infoMatch) begin
-            mode <= sysMode;
-            firstPattern <= sysFirstPattern;
-            lastPattern <= sysLastPattern;
-            coarseDelay <= sysCoarseDelay;
-            coarseWidth <= sysCoarseWidth;
-            lastWriteAddress <= sysLastWriteAddress;
-            infoMatch <= infoToggle;
-        end else begin
-            case (mode)
-            M_PULSE: begin
-                if (triggerStrobe) begin
-                    state <= S_COARSE_DELAY;
+        state <= S_IDLE;
+    end else begin
+        case (state)
+        S_IDLE: begin
+            serdesPattern <= {SERDES_WIDTH{1'b0}};
+            coarseWidthCount <= {1'b0, coarseWidth} - 1;
+            coarseDelayCount <= {1'b0, coarseDelay} - 1;
+            patternCount <= {1'b0, lastWriteAddress} - 1;
+            readAddress <= 0;
+            patternLoopRunEnable <= 1'b0;
+            if (infoToggle != infoMatch) begin
+                mode <= sysMode;
+                firstPattern <= sysFirstPattern;
+                lastPattern <= sysLastPattern;
+                coarseDelay <= sysCoarseDelay;
+                coarseWidth <= sysCoarseWidth;
+                lastWriteAddress <= sysLastWriteAddress;
+                infoMatch <= infoToggle;
+            end else begin
+                case (mode)
+                M_PULSE: begin
+                    if (triggerStrobe) begin
+                        state <= S_COARSE_DELAY;
+                    end
                 end
+                M_PATTERN_SINGLE: begin
+                    if (triggerStrobe) begin
+                        state <= S_DELAY_PATTERN;
+                    end;
+                end
+                M_PATTERN_LOOP: begin
+                    state <= S_SEND_PATTERN_LOOP;
+                end
+                default: ;
+                endcase
             end
-            M_PATTERN_SINGLE: begin
-                if (triggerStrobe) begin
-                    state <= S_DELAY_PATTERN;
-                end;
+        end
+        S_COARSE_DELAY: begin
+            coarseDelayCount <= coarseDelayCount - 1;
+            if (coarseDelayDone) begin
+                serdesPattern <= firstPattern;
+                state <= S_SEND_PULSE;
             end
-            M_PATTERN_LOOP: begin
-                state <= S_SEND_PATTERN_LOOP;
+        end
+        S_SEND_PULSE: begin
+            coarseWidthCount <= coarseWidthCount - 1;
+            if (coarseWidthDone) begin
+                serdesPattern <= lastPattern;
+                state <= S_IDLE;
             end
-            default: ;
-            endcase
+            else begin
+                serdesPattern <= {SERDES_WIDTH{1'b1}};
+            end
         end
-    end
-    S_COARSE_DELAY: begin
-        coarseDelayCount <= coarseDelayCount - 1;
-        if (coarseDelayDone) begin
-            serdesPattern <= firstPattern;
-            state <= S_SEND_PULSE;
+        S_DELAY_PATTERN: begin
+            coarseDelayCount <= coarseDelayCount - 1;
+            if (coarseDelayDone) begin
+                readAddress <= 1;
+                state <= S_SEND_PATTERN_SINGLE;
+            end
         end
-    end
-    S_SEND_PULSE: begin
-        coarseWidthCount <= coarseWidthCount - 1;
-        if (coarseWidthDone) begin
-            serdesPattern <= lastPattern;
-            state <= S_IDLE;
-        end
-        else begin
-            serdesPattern <= {SERDES_WIDTH{1'b1}};
-        end
-    end
-    S_DELAY_PATTERN: begin
-        coarseDelayCount <= coarseDelayCount - 1;
-        if (coarseDelayDone) begin
-            readAddress <= 1;
-            state <= S_SEND_PATTERN_SINGLE;
-        end
-    end
-    S_SEND_PATTERN_SINGLE: begin
-        serdesPattern <= dpramQ;
-        readAddress <= readAddress + 1;
-        patternCount <= patternCount - 1;
-        if (patternDone) begin
-            state <= S_IDLE;
-        end
-    end
-    S_SEND_PATTERN_LOOP: begin
-        triggerStrobe_d <= triggerStrobe;
-        if (patternLoopRunEnable) begin
+        S_SEND_PATTERN_SINGLE: begin
             serdesPattern <= dpramQ;
             readAddress <= readAddress + 1;
             patternCount <= patternCount - 1;
-            if (triggerStrobe || patternDone) begin
-                patternCount <= {1'b0, lastWriteAddress} - 1;
-                readAddress <= 0;
+            if (patternDone) begin
+                state <= S_IDLE;
             end
-        end else begin
-            if(triggerStrobe_d) begin
-                patternLoopRunEnable <= 1'b1;
+        end
+        S_SEND_PATTERN_LOOP: begin
+            triggerStrobe_d <= triggerStrobe;
+            if (patternLoopRunEnable) begin
+                serdesPattern <= dpramQ;
                 readAddress <= readAddress + 1;
                 patternCount <= patternCount - 1;
+                if (triggerStrobe || patternDone) begin
+                    patternCount <= {1'b0, lastWriteAddress} - 1;
+                    readAddress <= 0;
+                end
+            end else begin
+                if(triggerStrobe_d) begin
+                    patternLoopRunEnable <= 1'b1;
+                    readAddress <= readAddress + 1;
+                    patternCount <= patternCount - 1;
+                end
+                serdesPattern <= {SERDES_WIDTH{1'b0}};
             end
-            serdesPattern <= {SERDES_WIDTH{1'b0}};
+            if (infoToggle != infoMatch) begin
+                state <= S_IDLE;
+            end
         end
-        if (infoToggle != infoMatch) begin
-            state <= S_IDLE;
-        end
+        default: state <= S_IDLE;
+        endcase
     end
-    default: state <= S_IDLE;
-    endcase
 end
 
 endmodule
