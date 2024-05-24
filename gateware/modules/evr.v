@@ -33,7 +33,6 @@ module evr #(
 
 (*mark_debug=DEBUG*) wire [15:0] rxData;
 (*mark_debug=DEBUG*) wire [1:0] rxIsK, rxNotInTable, rxDispErr;
-assign mgtAligned = rxIsAligned;
 
 //////////////////////////////////////////////////////////////////////////////
 // Receiver alignment detection
@@ -43,6 +42,7 @@ localparam COMMA_COUNTER_WIDTH = $clog2(COMMA_COUNTER_RELOAD+1) + 1;
 (*mark_debug=DEBUG*) reg [COMMA_COUNTER_WIDTH-1:0] commaCounter =
                                                            COMMA_COUNTER_RELOAD;
 wire rxIsAligned = commaCounter[COMMA_COUNTER_WIDTH-1];
+assign mgtAligned = rxIsAligned;
 // K character can only appear on word 0
 wire rxDataErr = (rxNotInTable != 0) || rxIsK[1] || (rxDispErr != 0);
 
