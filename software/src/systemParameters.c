@@ -97,6 +97,7 @@ systemParametersInit(void)
     if (cp) {
         printf("\n====== %s -- Assigning default parameters ===\n\n", cp);
         systemParameters.netConfig = netDefault;
+        systemParameters.userMGTrefClkOffsetPPM = 0;
         systemParameters.startupDebugFlags = 0;
     }
     debugFlags = systemParameters.startupDebugFlags;
