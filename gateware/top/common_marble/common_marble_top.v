@@ -447,23 +447,45 @@ badger badger (
 // FIXME: If pretrigger is needed, add programmable pulse generator and use leading edge of to generate it and trailing edge to drive evrGateStrobe -- or use two trigger bus lines and individual pretrigger/trigger event codes.
 /////////////////////////////////////////////////////////////////////////////
 // Gate driver clocks
-wire kgdClk, kgdBitClk, kgdGateStrobe;
+wire kgdClk, kgdBitClk;
+wire [CFG_GATE_COUNT-1:0] kgdGateStrobe;
+wire [CFG_GATE_COUNT*32-1:0] GPIO_IN_KD_GATE_DRIVER_FLATTENED;
+wire [CFG_GATE_COUNT-1:0] GPIO_STROBES_KD_GATE_DRIVER_FLATTENED;
 wire sysIdelayControlReset;
-kickerDriverClockGenerator #(.DEBUG("false"))
+kickerDriverClockGateGenerator #(
+    .DEBUG("false"),
+    .NUM_GATES(CFG_GATE_COUNT))
   kickerDriverClockGenerator (
     .sysClk(sysClk),
-    .sysCsrStrobe(GPIO_STROBES[GPIO_IDX_CONFIG_KD_GATE_DRIVER]),
+    .sysClockCsrStrobe(GPIO_STROBES[GPIO_IDX_CONFIG_KD_CLOCK_DRIVER]),
+    .sysGateCsrStrobe(GPIO_STROBES_KD_GATE_DRIVER_FLATTENED),
     .sysGPIO_OUT(GPIO_OUT),
-    .sysStatus(GPIO_IN[GPIO_IDX_CONFIG_KD_GATE_DRIVER]),
+    .sysClockStatus(GPIO_IN[GPIO_IDX_CONFIG_KD_CLOCK_DRIVER]),
+    .sysGateStatus(GPIO_IN_KD_GATE_DRIVER_FLATTENED),
     .evrClk(evrClk),
-    .evrGateStrobe(evrTriggerBus[0]),
+    .evrGateStrobe(evrTriggerBus[0+:CFG_GATE_COUNT]),
     .refClk200(refClk200),
     .sysIdelayControlReset(sysIdelayControlReset),
     .kgdClk(kgdClk),
     .kgdBitClk(kgdBitClk),
     .kgdGateStrobe(kgdGateStrobe));
+
+generate
+for (i = 0; i < CFG_GATE_COUNT; i = i + 1) begin
+
+assign GPIO_IN[GPIO_IDX_CONFIG_KD_GATE_DRIVER + i*GPIO_IDX_PER_KD_GATE_DRIVER] =
+    GPIO_IN_KD_GATE_DRIVER_FLATTENED[32*i+:32];
+
+assign GPIO_STROBES_KD_GATE_DRIVER_FLATTENED[i*GPIO_IDX_PER_KD_GATE_DRIVER] =
+    GPIO_STROBES[GPIO_IDX_CONFIG_KD_GATE_DRIVER + i*GPIO_IDX_PER_KD_GATE_DRIVER];
+
+end
+endgenerate
+
+// FIXME add a switch to select which one to send to the diagnostic
+// input
 assign FMC1_CLK1_M2C_P = evrTriggerBus[0];
-assign FMC1_CLK1_M2C_N = kgdGateStrobe;
+assign FMC1_CLK1_M2C_N = kgdGateStrobe[0];
 assign FMC1_FAN1_TACH = PMOD2_6;
 assign FMC2_FAN1_TACH = PMOD2_7;
 

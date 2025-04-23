@@ -19,6 +19,11 @@
 #define CFG_FAN_COUNT   2
 
 /*
+ * Number of internal gates for kicker driver
+ */
+#define CFG_GATE_COUNT   2
+
+/*
  * EVIO hardware (event fanout)
  */
 #define CFG_EVIO_FIREFLY_COUNT          6

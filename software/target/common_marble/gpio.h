@@ -36,7 +36,7 @@
 #define GPIO_IDX_DISPLAY_CSR             22 // LCD CSR
 #define GPIO_IDX_DISPLAY_DATA            23 // LCD Data
 #define GPIO_IDX_EVIO_HW_IN              24 // EVIO hardware inputs
-#define GPIO_IDX_CONFIG_KD_GATE_DRIVER   28 // Configure kicker driver outputs
+#define GPIO_IDX_CONFIG_KD_CLOCK_DRIVER  28 // Configure kicker driver clock output
 #define GPIO_IDX_EVR_SELECT_OUTPUT       29 // Choose EVR output
 #define GPIO_IDX_EVR_CONFIG_OUTPUT       30 // Configure EVR output
 #define GPIO_IDX_GITHASH                 31 // Git 32-bit hash
@@ -47,6 +47,10 @@
 #define GPIO_IDX_MGT_HW_CONFIG           50 // MGT hardware configuration
 #define GPIO_IDX_EVF_MGT_DRP_CSR         51 // EVF MGT control/status
 #define GPIO_IDX_PER_MGTWRAPPER           1 // EVF MGT register offset
+
+// Number of gates
+#define GPIO_IDX_CONFIG_KD_GATE_DRIVER   64 // Configure kicker driver outputs
+#define GPIO_IDX_PER_KD_GATE_DRIVER       1 // KD gate driver register offset
 
 #include <xil_io.h>
 #include <xparameters.h>
