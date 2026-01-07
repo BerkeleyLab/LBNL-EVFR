@@ -63,17 +63,29 @@
 #define CSR_R_MOSI     0x10
 #define CSR_R_MISO     0x40
 
+// Marble flash memory macros (draft)
+#define FL256S256Mb
+#define FL256S_SR1_REG_ADDR     0x05
+#define FL256S_CR1_REG_ADDR     0x35
+#define FL256S_SR1_BP_SHIFT     0x2
+#define FL256S_SR1_BP_MASK      0x7
+#define FL256S_CR1_TBPROT_SHIFT 0x5
+#define FL256S_CR1_TBPROT_MASK  0x1
+#ifdef FL256S256Mb
+# define FL256S_SIZE (256*1024*1024/8)
+#elif defined FL256S128Mb
+# define FL256S_SIZE (128*1024*1024/8)
+#endif
+
 #include "spiflash.h"
 
 static int
 spiFlashTxRx(struct spiflash_s *spi, const uint8_t *tx_data, uint32_t tx_len,
                                            uint8_t *rx_data, uint32_t rx_len)
 {
-//printf("W %d %d", tx_len, rx_len);
     while (tx_len--) {
         int w = *tx_data++;
         int b;
-//printf(" %02X", w);
         for (b = 0x80 ; b != 0 ; b >>= 1) {
             GPIO_WRITE(GPIO_IDX_QSPI_FLASH_CSR,
                    ((w & b) ? CSR_W_MOSI_SET : CSR_W_MOSI_CLR) | CSR_W_CLK_CLR);
@@ -92,17 +104,14 @@ spiFlashTxRx(struct spiflash_s *spi, const uint8_t *tx_data, uint32_t tx_len,
         }
         rx_len--;
         *rx_data++ = r;
-//printf(" (%02X)", r);
     }
     GPIO_WRITE(GPIO_IDX_QSPI_FLASH_CSR, CSR_W_CLK_CLR);
-//printf("\n");
     return SPIFLASH_OK;
 }
 
 static void
 spiFlashCS(struct spiflash_s *spi, uint8_t cs)
 {
-//printf("spiFlashCS %d\n", cs);
     GPIO_WRITE(GPIO_IDX_QSPI_FLASH_CSR, cs ? CSR_W_CS_B_CLR : CSR_W_CS_B_SET);
 }
 
@@ -168,12 +177,45 @@ bootFlashRead(uint32_t address, uint32_t length, void *buf)
 int
 bootFlashWrite(uint32_t address, uint32_t length, const void *buf)
 {
+    printf("bootFlashWrite at %d\n", address); // TODO remove it
+    uint8_t reg, bp, tbprot;
     int ret;
+
+    // Check write protection before proceeding
+    if(SPIFLASH_read_reg(&spif, FL256S_SR1_REG_ADDR, &reg) != SPIFLASH_OK) {
+        return SPIFLASH_ERR_INTERNAL;
+    }
+    bp = (reg>>FL256S_SR1_BP_SHIFT)&FL256S_SR1_BP_MASK;
+    printf("SR1: %d -- BP: %d\n", reg, bp); // TODO: replace with SPIF_DBG
+    if(SPIFLASH_read_reg(&spif, FL256S_CR1_REG_ADDR, &reg) != SPIFLASH_OK) {
+        return SPIFLASH_ERR_INTERNAL;
+    }
+    tbprot = (reg>>FL256S_CR1_TBPROT_SHIFT)&FL256S_CR1_TBPROT_MASK;
+    printf("CR1: %d -- tbprot: %d\n", reg, tbprot); // TODO: replace with SPIF_DBG
+    for(reg = 128; bp>0; bp--) {
+        reg /= 2;
+    }
+    // Skip if BP = [0, 0, 0]
+    if (reg < 128) {
+        printf("Protection covers 1/%d of memory (%d bytes)\n", reg, FL256S_SIZE/reg);
+        if (tbprot == 1 && address < FL256S_SIZE/reg) { // low address space protected
+            printf("ERROR - attempt to write protected flash memory area!");
+            return SPIFLASH_ERR_BAD_CONFIG;
+        }
+        else if(tbprot == 0 && address > (FL256S_SIZE - FL256S_SIZE/reg)) { // high address space protected
+            printf("ERROR - attempt to write protected flash memory area!");
+            return SPIFLASH_ERR_BAD_CONFIG;
+        }
+    } else {
+        printf("No write protection");
+    }
+
     uint32_t sectorSize =
             (address < (BOOT_FLASH_LO_SECTOR_COUNT*BOOT_FLASH_LO_SECTOR_SIZE)) ?
                           BOOT_FLASH_LO_SECTOR_SIZE : BOOT_FLASH_HI_SECTOR_SIZE;
     if ((address % sectorSize) == 0) {
         ret = SPIFLASH_erase(&spif, address, sectorSize);
+        printf("SPIFLASH_erase ret: %d\n", ret);
         if (ret != SPIFLASH_OK) {
             return ret;
         }
