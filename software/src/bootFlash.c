@@ -46,8 +46,11 @@
 # define BOOT_FLASH_LO_SECTOR_SIZE  (64*1024)
 # define BOOT_FLASH_HI_SECTOR_SIZE  (4*1024)
 #endif
+
 #define BOOT_FLASH_SIZE             (16*1024*1024)
 #define BOOT_FLASH_BIG_SECTOR_SIZE  (64*1024)
+
+#define BOOT_FLASH_WP_SECTOR_SIZE   (BOOT_FLASH_SIZE / 64)
 
 #define SPIF_DBG(...) if(debugFlags&DEBUGFLAG_BOOT_FLASH)printf("SPIFL:" __VA_ARGS__)
 
@@ -63,20 +66,7 @@
 #define CSR_R_MOSI     0x10
 #define CSR_R_MISO     0x40
 
-// Marble flash memory macros (draft)
-#define FL256S128Mb // marble < 1.4.4
-#define FL256S_SR1_REG_ADDR     0x05
-#define FL256S_CR1_REG_ADDR     0x35
-#define FL256S_SR1_BP_SHIFT     0x2
-#define FL256S_SR1_BP_MASK      0x7
-#define FL256S_CR1_TBPROT_SHIFT 0x5
-#define FL256S_CR1_TBPROT_MASK  0x1
-#ifdef FL256S256Mb
-# define FL256S_SIZE (256*1024*1024/8)
-#elif defined FL256S128Mb
-# define FL256S_SIZE (128*1024*1024/8)
-#endif
-
+#include "s25flxxxs.h"
 #include "spiflash.h"
 
 static int
@@ -133,7 +123,7 @@ bootFlashInit(void)
     };
     static const spiflash_cmd_tbl_t spiFlashCMD = SPIFLASH_CMD_TBL_STANDARD;
     static const spiflash_config_t spiFlashCFG = {
-      .sz = 1024*1024*16,
+      .sz = BOOT_FLASH_SIZE,
       .page_sz = 256,
       .addr_sz = 3,
       .addr_dummy_sz = 0, // Single line data
@@ -168,6 +158,78 @@ bootFlashRead(uint32_t address, uint32_t length, void *buf)
     return SPIFLASH_fast_read(&spif, address, length, buf);
 }
 
+static int
+bootFlashWPAddress(uint32_t *start, uint32_t *size)
+{
+    int ret = SPIFLASH_OK;
+    uint32_t wp_start = 0;
+    uint32_t wp_size = 0;
+    uint8_t reg_sr1 = 0, reg_cr1 = 0;
+    uint8_t bp = 0;
+    uint8_t tbprot = 0;
+
+    ret = SPIFLASH_read_reg(&spif, S25FLXXXS_SR1_REG, &reg_sr1);
+    ret |= SPIFLASH_read_reg(&spif, S25FLXXXS_CR1_REG, &reg_cr1);
+    if(ret != SPIFLASH_OK) {
+        return ret;
+    }
+
+    bp = S25FLXXXS_SR1_BP_R(reg_sr1);
+    tbprot = S25FLXXXS_CR1_TBPROT_R(reg_cr1);
+
+    if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
+        printf("bootFlashWPAddress: BP:0x%02X TBPROT:0x%02X\n", bp, tbprot);
+    }
+
+    if (bp == 0) {
+        *start = 0;
+        *size = 0;
+        return SPIFLASH_OK;
+    }
+
+    wp_size = (BOOT_FLASH_WP_SECTOR_SIZE * (1 << (bp-1)));
+    if (tbprot == 0) {
+        wp_start = BOOT_FLASH_SIZE - wp_size;
+    }
+    else {
+        wp_start = 0;
+    }
+
+    *start = wp_start;
+    *size = wp_size;
+
+    if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
+        printf("bootFlashWPAddress: WP start:0x%08X WP size:0x%08X\n", *start, *size);
+    }
+
+    return SPIFLASH_OK;
+}
+
+static int
+bootFlashIsWriteOk(uint32_t address, uint32_t length)
+{
+    int ret = SPIFLASH_OK;
+    uint32_t wp_start = 0;
+    uint32_t wp_size = 0;
+
+    ret = bootFlashWPAddress(&wp_start, &wp_size);
+    if (ret != SPIFLASH_OK) {
+        return ret;
+    }
+
+    if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
+        printf("bootFlashIsWriteOk: address:length 0x%08X:0x%08X wp_start:wp_size 0x%08X:0x%08X\n",
+                address, length, wp_start, wp_size);
+    }
+
+    if (((address >= wp_start) && (address < (wp_start + wp_size))) ||
+            ((address <= wp_start) && ((address + length) > wp_start))) {
+        return SPIFLASH_ERR_BAD_STATE;
+    }
+
+    return SPIFLASH_OK;
+}
+
 /*
  * The following function imposes some constraints on how it is invoked.
  *  - The first write to a sector must begin at the first address of the sector.
@@ -177,37 +239,11 @@ bootFlashRead(uint32_t address, uint32_t length, void *buf)
 int
 bootFlashWrite(uint32_t address, uint32_t length, const void *buf)
 {
-    printf("bootFlashWrite at %d\n", address); // TODO remove it
-    uint8_t reg, bp, tbprot;
-    int ret;
+    int ret = SPIFLASH_OK;
 
-    // Check write protection before proceeding
-    if(SPIFLASH_read_reg(&spif, FL256S_SR1_REG_ADDR, &reg) != SPIFLASH_OK) {
-        return SPIFLASH_ERR_INTERNAL;
-    }
-    bp = (reg>>FL256S_SR1_BP_SHIFT)&FL256S_SR1_BP_MASK;
-    printf("SR1: %d -- BP: %d\n", reg, bp); // TODO: replace with SPIF_DBG
-    if(SPIFLASH_read_reg(&spif, FL256S_CR1_REG_ADDR, &reg) != SPIFLASH_OK) {
-        return SPIFLASH_ERR_INTERNAL;
-    }
-    tbprot = (reg>>FL256S_CR1_TBPROT_SHIFT)&FL256S_CR1_TBPROT_MASK;
-    printf("CR1: %d -- tbprot: %d\n", reg, tbprot); // TODO: replace with SPIF_DBG
-    for(reg = 128; bp>0; bp--) {
-        reg /= 2;
-    }
-    // Skip if BP = [0, 0, 0]
-    if (reg < 128) {
-        printf("Protection covers 1/%d of memory (%d bytes)\n", reg, FL256S_SIZE/reg);
-        if (tbprot == 1 && address < FL256S_SIZE/reg) { // low address space protected
-            printf("ERROR - attempt to write protected flash memory area!");
-            return SPIFLASH_ERR_BAD_CONFIG;
-        }
-        else if(tbprot == 0 && address > (FL256S_SIZE - FL256S_SIZE/reg)) { // high address space protected
-            printf("ERROR - attempt to write protected flash memory area!");
-            return SPIFLASH_ERR_BAD_CONFIG;
-        }
-    } else {
-        printf("No write protection");
+    ret = bootFlashIsWriteOk(address, length);
+    if (ret != SPIFLASH_OK) {
+        return ret;
     }
 
     uint32_t sectorSize =
@@ -215,7 +251,6 @@ bootFlashWrite(uint32_t address, uint32_t length, const void *buf)
                           BOOT_FLASH_LO_SECTOR_SIZE : BOOT_FLASH_HI_SECTOR_SIZE;
     if ((address % sectorSize) == 0) {
         ret = SPIFLASH_erase(&spif, address, sectorSize);
-        printf("SPIFLASH_erase ret: %d\n", ret);
         if (ret != SPIFLASH_OK) {
             return ret;
         }
