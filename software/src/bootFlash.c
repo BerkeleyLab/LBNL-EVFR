@@ -64,7 +64,7 @@
 #define CSR_R_MISO     0x40
 
 // Marble flash memory macros (draft)
-#define FL256S256Mb
+#define FL256S128Mb // marble < 1.4.4
 #define FL256S_SR1_REG_ADDR     0x05
 #define FL256S_CR1_REG_ADDR     0x35
 #define FL256S_SR1_BP_SHIFT     0x2
