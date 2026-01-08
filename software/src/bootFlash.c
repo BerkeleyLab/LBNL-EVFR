@@ -74,6 +74,16 @@
 #include "s25flxxxs.h"
 #include "spiflash.h"
 
+static struct bootFlash_t {
+    spiflash_t spif;
+    uint32_t wp_start;
+    uint32_t wp_size;
+} bootFlash = {
+    .wp_start = 0,
+    // Assume the lower half of the flash is protected
+    .wp_size = BOOT_FLASH_SIZE / 2
+};
+
 static int
 spiFlashTxRx(struct spiflash_s *spi, const uint8_t *tx_data, uint32_t tx_len,
                                            uint8_t *rx_data, uint32_t rx_len)
@@ -116,7 +126,67 @@ spiFlashWait(struct spiflash_s *spi, uint32_t ms)
     microsecondSpin(ms * 1000);
 }
 
-static spiflash_t spif;
+static int
+spiFlashWPAddress(uint32_t *start, uint32_t *size)
+{
+    int ret = SPIFLASH_OK;
+    uint32_t wp_start = 0;
+    uint32_t wp_size = 0;
+    uint8_t reg_sr1 = 0, reg_cr1 = 0;
+    uint8_t bp = 0;
+    uint8_t tbprot = 0;
+
+    ret = SPIFLASH_read_reg(&bootFlash.spif, S25FLXXXS_SR1_REG, &reg_sr1);
+    ret |= SPIFLASH_read_reg(&bootFlash.spif, S25FLXXXS_CR1_REG, &reg_cr1);
+    if(ret != SPIFLASH_OK) {
+        return ret;
+    }
+
+    bp = S25FLXXXS_SR1_BP_R(reg_sr1);
+    tbprot = S25FLXXXS_CR1_TBPROT_R(reg_cr1);
+
+    if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
+        printf("spiFlashWPAddress: BP:0x%02X TBPROT:0x%02X\n", bp, tbprot);
+    }
+
+    if (bp == 0) {
+        *start = 0;
+        *size = 0;
+        return SPIFLASH_OK;
+    }
+
+    wp_size = (BOOT_FLASH_WP_SECTOR_SIZE * (1 << (bp-1)));
+    if (tbprot == 0) {
+        wp_start = BOOT_FLASH_SIZE - wp_size;
+    }
+    else {
+        wp_start = 0;
+    }
+
+    *start = wp_start;
+    *size = wp_size;
+
+    if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
+        printf("spiFlashWPAddress: WP start:0x%08X WP size:0x%08X\n", *start, *size);
+    }
+
+    return SPIFLASH_OK;
+}
+
+static int
+spiFlashIsWriteOk(uint32_t address, uint32_t length)
+{
+    uint32_t wp_start = bootFlash.wp_start;
+    uint32_t wp_size = bootFlash.wp_size;
+
+    if (((address >= wp_start) && (address < (wp_start + wp_size))) ||
+            ((address <= wp_start) && ((address + length) > wp_start))) {
+        return SPIFLASH_ERR_BAD_STATE;
+    }
+
+    return SPIFLASH_OK;
+}
+
 void
 bootFlashInit(void)
 {
@@ -142,97 +212,39 @@ bootFlashInit(void)
       .block_erase_64_ms = 200,
       .chip_erase_ms = 30000
     };
-    SPIFLASH_init(&spif, &spiFlashCFG, &spiFlashCMD, &spiFlashHAL, NULL,
+    SPIFLASH_init(&bootFlash.spif, &spiFlashCFG, &spiFlashCMD, &spiFlashHAL, NULL,
                                                     SPIFLASH_SYNCHRONOUS, NULL);
     /* Dummy read since first transaction doesn't seem to work */
-    SPIFLASH_read_jedec_id(&spif, &id);
-    if (SPIFLASH_read_jedec_id(&spif, &id) == SPIFLASH_OK) {
+    SPIFLASH_read_jedec_id(&bootFlash.spif, &id);
+    if (SPIFLASH_read_jedec_id(&bootFlash.spif, &id) == SPIFLASH_OK) {
         printf("Boot flash JEDEC ID: 0x%X\n", (unsigned int)id);
     }
     else {
         warn("Can't read boot flash ID");
     }
-    if (SPIFLASH_read_product_id(&spif, &id) == SPIFLASH_OK) {
+    if (SPIFLASH_read_product_id(&bootFlash.spif, &id) == SPIFLASH_OK) {
         printf("Boot flash product ID: 0x%X\n", (unsigned int)id);
     }
+
+    uint32_t wp_start = 0;
+    uint32_t wp_size = 0;
+    if (!(spiFlashWPAddress(&wp_start, &wp_size) == SPIFLASH_OK)) {
+        warn("Can't read WP bits. Assuming lower half is WP");
+        wp_start = 0;
+        wp_size = BOOT_FLASH_SIZE / 2;
+    }
+
+    bootFlash.wp_start = wp_start;
+    bootFlash.wp_size = wp_size;
+
+    printf("Boot flash WP start:size 0x%08X:0x%08X\n",
+            bootFlash.wp_start, bootFlash.wp_size);
 }
 
 int
 bootFlashRead(uint32_t address, uint32_t length, void *buf)
 {
-    return SPIFLASH_fast_read(&spif, address, length, buf);
-}
-
-static int
-bootFlashWPAddress(uint32_t *start, uint32_t *size)
-{
-    int ret = SPIFLASH_OK;
-    uint32_t wp_start = 0;
-    uint32_t wp_size = 0;
-    uint8_t reg_sr1 = 0, reg_cr1 = 0;
-    uint8_t bp = 0;
-    uint8_t tbprot = 0;
-
-    ret = SPIFLASH_read_reg(&spif, S25FLXXXS_SR1_REG, &reg_sr1);
-    ret |= SPIFLASH_read_reg(&spif, S25FLXXXS_CR1_REG, &reg_cr1);
-    if(ret != SPIFLASH_OK) {
-        return ret;
-    }
-
-    bp = S25FLXXXS_SR1_BP_R(reg_sr1);
-    tbprot = S25FLXXXS_CR1_TBPROT_R(reg_cr1);
-
-    if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
-        printf("bootFlashWPAddress: BP:0x%02X TBPROT:0x%02X\n", bp, tbprot);
-    }
-
-    if (bp == 0) {
-        *start = 0;
-        *size = 0;
-        return SPIFLASH_OK;
-    }
-
-    wp_size = (BOOT_FLASH_WP_SECTOR_SIZE * (1 << (bp-1)));
-    if (tbprot == 0) {
-        wp_start = BOOT_FLASH_SIZE - wp_size;
-    }
-    else {
-        wp_start = 0;
-    }
-
-    *start = wp_start;
-    *size = wp_size;
-
-    if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
-        printf("bootFlashWPAddress: WP start:0x%08X WP size:0x%08X\n", *start, *size);
-    }
-
-    return SPIFLASH_OK;
-}
-
-static int
-bootFlashIsWriteOk(uint32_t address, uint32_t length)
-{
-    int ret = SPIFLASH_OK;
-    uint32_t wp_start = 0;
-    uint32_t wp_size = 0;
-
-    ret = bootFlashWPAddress(&wp_start, &wp_size);
-    if (ret != SPIFLASH_OK) {
-        return ret;
-    }
-
-    if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
-        printf("bootFlashIsWriteOk: address:length 0x%08X:0x%08X wp_start:wp_size 0x%08X:0x%08X\n",
-                address, length, wp_start, wp_size);
-    }
-
-    if (((address >= wp_start) && (address < (wp_start + wp_size))) ||
-            ((address <= wp_start) && ((address + length) > wp_start))) {
-        return SPIFLASH_ERR_BAD_STATE;
-    }
-
-    return SPIFLASH_OK;
+    return SPIFLASH_fast_read(&bootFlash.spif, address, length, buf);
 }
 
 /*
@@ -246,7 +258,7 @@ bootFlashWrite(uint32_t address, uint32_t length, const void *buf)
 {
     int ret = SPIFLASH_OK;
 
-    ret = bootFlashIsWriteOk(address, length);
+    ret = spiFlashIsWriteOk(address, length);
     if (ret != SPIFLASH_OK) {
         return ret;
     }
@@ -255,16 +267,16 @@ bootFlashWrite(uint32_t address, uint32_t length, const void *buf)
             (address < (BOOT_FLASH_LO_SECTOR_COUNT*BOOT_FLASH_LO_SECTOR_SIZE)) ?
                           BOOT_FLASH_LO_SECTOR_SIZE : BOOT_FLASH_HI_SECTOR_SIZE;
     if ((address % sectorSize) == 0) {
-        ret = SPIFLASH_erase(&spif, address, sectorSize);
+        ret = SPIFLASH_erase(&bootFlash.spif, address, sectorSize);
         if (ret != SPIFLASH_OK) {
             return ret;
         }
     }
-    return SPIFLASH_write(&spif, address, length, buf);
+    return SPIFLASH_write(&bootFlash.spif, address, length, buf);
 }
 
 void
 bfErase(void)
 {
-    printf("SPIFLASH_chip_erase %d\n",  SPIFLASH_chip_erase(&spif));
+    printf("SPIFLASH_chip_erase %d\n",  SPIFLASH_chip_erase(&bootFlash.spif));
 }
