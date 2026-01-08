@@ -47,7 +47,12 @@
 # define BOOT_FLASH_HI_SECTOR_SIZE  (4*1024)
 #endif
 
-#define BOOT_FLASH_SIZE             (16*1024*1024)
+#ifdef BOOT_FLASH_32MB_VARIANT
+# define BOOT_FLASH_SIZE             (32*1024*1024)
+#else
+# define BOOT_FLASH_SIZE             (16*1024*1024)
+#endif
+
 #define BOOT_FLASH_BIG_SECTOR_SIZE  (64*1024)
 
 #define BOOT_FLASH_WP_SECTOR_SIZE   (BOOT_FLASH_SIZE / 64)
