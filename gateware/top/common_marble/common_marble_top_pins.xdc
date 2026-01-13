@@ -100,5 +100,6 @@ set_property -dict {PACKAGE_PIN L4} [get_ports MGT_RX_2_P]
 set_property -dict {PACKAGE_PIN L3} [get_ports MGT_RX_2_N]
 
 # Bank 0 setup
-set_property CFGBVS VCCO [current_design]
-set_property CONFIG_VOLTAGE 3.3 [current_design]
+set_property CFGBVS VCCO                     [current_design]
+set_property CONFIG_VOLTAGE 3.3              [current_design]
+set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
