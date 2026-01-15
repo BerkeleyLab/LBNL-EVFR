@@ -88,9 +88,14 @@ static int
 spiFlashTxRx(struct spiflash_s *spi, const uint8_t *tx_data, uint32_t tx_len,
                                            uint8_t *rx_data, uint32_t rx_len)
 {
+    if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
+        printf("spiFlashTxRx: W %d %d", tx_len, rx_len);
+    }
+
     while (tx_len--) {
         int w = *tx_data++;
         int b;
+//printf(" %02X", w);
         for (b = 0x80 ; b != 0 ; b >>= 1) {
             GPIO_WRITE(GPIO_IDX_QSPI_FLASH_CSR,
                    ((w & b) ? CSR_W_MOSI_SET : CSR_W_MOSI_CLR) | CSR_W_CLK_CLR);
@@ -103,20 +108,40 @@ spiFlashTxRx(struct spiflash_s *spi, const uint8_t *tx_data, uint32_t tx_len,
         for (b = 0x80 ; b != 0 ; b >>= 1) {
             GPIO_WRITE(GPIO_IDX_QSPI_FLASH_CSR, CSR_W_CLK_SET);
             GPIO_WRITE(GPIO_IDX_QSPI_FLASH_CSR, CSR_W_CLK_CLR);
+            /*
+             * The assumption is that there is enough delay between
+             * the clock going low and the data being read.
+             * Add another CSR_W_CLK_CLR operation here
+             * if that assumption is invalid.
+             */
             if (GPIO_READ(GPIO_IDX_QSPI_FLASH_CSR) & CSR_R_MISO) {
-                    r |= b;
+                r |= b;
             }
         }
         rx_len--;
         *rx_data++ = r;
+
+        if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
+            printf(" (%02X)", r);
+        }
     }
+
     GPIO_WRITE(GPIO_IDX_QSPI_FLASH_CSR, CSR_W_CLK_CLR);
+
+    if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
+        printf("\n");
+    }
+
     return SPIFLASH_OK;
 }
 
 static void
 spiFlashCS(struct spiflash_s *spi, uint8_t cs)
 {
+    if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
+        printf("spiFlashCS %d\n", cs);
+    }
+
     GPIO_WRITE(GPIO_IDX_QSPI_FLASH_CSR, cs ? CSR_W_CS_B_CLR : CSR_W_CS_B_SET);
 }
 
