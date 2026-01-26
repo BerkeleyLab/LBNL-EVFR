@@ -56,8 +56,6 @@ module common_marble_top #(
     input                                         FMC1_FAN2_TACH,
 
     // FMC2 EVRIO (only in event receiver)
-    // FIXME: For now we're using a UTIO board here
-    //        Hopefully the EVRIO board will be backwards compatible....
     input          EVRIO_PLL_OUT_P,
     input          EVRIO_PLL_OUT_N,
     output         EVRIO_PLL_REF_P,
@@ -80,13 +78,13 @@ module common_marble_top #(
     input  FPGA_MOSI,
     output FPGA_MISO,
 
-    // FIXME: Test points (maybe kicker pretrigger someday?)
-    output PMOD1_0,
-    output PMOD1_1,
-    output PMOD1_2,
-    output PMOD1_3,
-    output PMOD1_4,
-    output PMOD1_5,
+    // Kicker driver gate monitors
+    inout  PMOD1_0,
+    inout  PMOD1_1,
+    inout  PMOD1_2,
+    inout  PMOD1_3,
+    inout  PMOD1_4,
+    inout  PMOD1_5,
     input  PMOD1_6,
     input  PMOD1_7,
 
@@ -116,12 +114,6 @@ module common_marble_top #(
 // Static outputs
 assign VCXO_EN = 1'b0;
 assign PHY_RSTN = 1'b1;
-assign PMOD1_0 = 1'b0;
-assign PMOD1_1 = 1'b0;
-assign PMOD1_2 = 1'b0;
-assign PMOD1_3 = 1'b0;
-assign PMOD1_4 = 1'b0;
-assign PMOD1_5 = 1'b0;
 assign EVRIO_PWR_EN = 1'b1;
 assign EVRIO_VCXO_EN = 1'b0;
 
@@ -383,6 +375,7 @@ fifo_2c #(.dw(18))
 wire [2:0] sda_drive, sda_sense;
 wire [3:0] iic_proc_o;
 wire [1:0] sclUnused;
+wire       scl0;
 i2cHandler #(.CLK_RATE(SYSCLK_FREQUENCY),
              .CHANNEL_COUNT(3),
              .DEBUG("false"))
@@ -504,6 +497,31 @@ IDELAYCTRL idelayControl2 (
 assign GPIO_IN[GPIO_IDX_FMC1_FIREFLY] = {1'b1,
                                          {32-1-CFG_EVIO_FIREFLY_COUNT{1'b0}},
                                          {CFG_EVIO_FIREFLY_COUNT{1'b1}}};
+
+// Use FMC1 IIC to communicate with gate driver monitors
+(*MARK_DEBUG="false"*) wire evio_iic_scl_i, evio_iic_scl_t;
+(*MARK_DEBUG="false"*) wire evio_iic_sda_i, evio_iic_sda_t;
+(*MARK_DEBUG="false"*) wire [EVIO_FIREFLY_SELECT_WIDTH:0] evio_iic_gpo;
+
+wire [2:0] scl_i, sda_i, scl_t, sda_t;
+IOBUF KDMON_1_SCL_IOBUF (.I(1'b0), .IO(PMOD1_0), .O(scl_i[0]), .T(scl_t[0]));
+IOBUF KDMON_1_SDA_IOBUF (.I(1'b0), .IO(PMOD1_1), .O(sda_i[0]), .T(sda_t[0]));
+IOBUF KDMON_2_SCL_IOBUF (.I(1'b0), .IO(PMOD1_2), .O(scl_i[1]), .T(scl_t[1]));
+IOBUF KDMON_2_SDA_IOBUF (.I(1'b0), .IO(PMOD1_3), .O(sda_i[1]), .T(sda_t[1]));
+IOBUF KDMON_3_SCL_IOBUF (.I(1'b0), .IO(PMOD1_4), .O(scl_i[2]), .T(scl_t[2]));
+IOBUF KDMON_3_SDA_IOBUF (.I(1'b0), .IO(PMOD1_5), .O(sda_i[2]), .T(sda_t[2]));
+generate
+for (i = 0 ; i < 3 ; i = i + 1) begin
+    assign scl_t[i] = evio_iic_scl_t | !evio_iic_gpo[i];
+    assign sda_t[i] = evio_iic_sda_t | !evio_iic_gpo[i];
+end
+endgenerate
+assign evio_iic_scl_i = ~((~scl_i[0] & evio_iic_gpo[0]) |
+                          (~scl_i[1] & evio_iic_gpo[1]) |
+                          (~scl_i[2] & evio_iic_gpo[2]));
+assign evio_iic_sda_i = ~((~sda_i[0] & evio_iic_gpo[0]) |
+                          (~sda_i[1] & evio_iic_gpo[1]) |
+                          (~sda_i[2] & evio_iic_gpo[2]));
 
 `else
 ///////////////////////////////////////////////////////////////////////////////
@@ -650,7 +668,7 @@ evrioPllclkOut (
     .Q(evrClkOddr),
     .C(evrClk),
     .CE(1'b1),
-	.D1(1'b1),
+    .D1(1'b1),
     .D2(1'b0),
     .R(1'b0),
     .S(1'b0)
