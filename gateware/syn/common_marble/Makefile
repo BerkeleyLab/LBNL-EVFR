@@ -76,13 +76,27 @@ endif
 include $(MODULES_DIR)/axi_lite_generic_reg_rules.mk
 include $(MODULES_DIR)/bantamweightUDP_rules.mk
 
-IP_CORES += evrmgt gateDriverSERDES gateDriverSERDES_ODELAY kdOutputDriverMMCM outputDriverMMCM evLogFIFO eventMonitorFIFO ila_td256_s4096_cap
+IP_CORES += \
+	evrmgt \
+	gateDriverSERDES \
+	gateDriverSERDES_ODELAY \
+	gateDriverSERDES_SE \
+	gateDriverSERDES_ODELAY_SE \
+	kdOutputDriverMMCM \
+	outputDriverMMCM \
+	evLogFIFO \
+	eventMonitorFIFO \
+	ila_td256_s4096_cap
 evrmgt_DIR = $(PLATFORM_7SERIES_COMMON_DIR)/evrmgt
 evrmgt_TOP = $(evrmgt_DIR)/evrmgt.v
 gateDriverSERDES_DIR = $(PLATFORM_7SERIES_COMMON_DIR)/gateDriverSERDES
 gateDriverSERDES_TOP = $(gateDriverSERDES_DIR)/gateDriverSERDES.v
 gateDriverSERDES_ODELAY_DIR = $(PLATFORM_7SERIES_COMMON_DIR)/gateDriverSERDES_ODELAY
 gateDriverSERDES_ODELAY_TOP = $(gateDriverSERDES_ODELAY_DIR)/gateDriverSERDES_ODELAY.v
+gateDriverSERDES_SE_DIR = $(PLATFORM_7SERIES_COMMON_DIR)/gateDriverSERDES_SE
+gateDriverSERDES_SE_TOP = $(gateDriverSERDES_SE_DIR)/gateDriverSERDES_SE.v
+gateDriverSERDES_ODELAY_SE_DIR = $(PLATFORM_7SERIES_COMMON_DIR)/gateDriverSERDES_ODELAY_SE
+gateDriverSERDES_ODELAY_SE_TOP = $(gateDriverSERDES_ODELAY_SE_DIR)/gateDriverSERDES_ODELAY_SE.v
 kdOutputDriverMMCM_DIR = $(PLATFORM_7SERIES_COMMON_DIR)/kdOutputDriverMMCM
 kdOutputDriverMMCM_TOP = $(kdOutputDriverMMCM_DIR)/kdOutputDriverMMCM.v
 outputDriverMMCM_DIR = $(PLATFORM_7SERIES_COMMON_DIR)/outputDriverMMCM
@@ -94,10 +108,29 @@ eventMonitorFIFO_TOP = $(eventMonitorFIFO_DIR)/synth/eventMonitorFIFO.vhd
 ila_td256_s4096_cap_DIR = $(PLATFORM_7SERIES_COMMON_DIR)/ila_td256_s4096_cap
 ila_td256_s4096_cap_TOP = $(ila_td256_s4096_cap_DIR)/synth/ila_td256_s4096_cap.v
 
-IP_CORES_TOP_LVL_SRCS += $(evrmgt_TOP) $(gateDriverSERDES_TOP) $(gateDriverSERDES_ODELAY_TOP) $(kdOutputDriverMMCM_TOP) $(outputDriverMMCM_TOP) $(evLogFIFO_TOP) $(eventMonitorFIFO_TOP) $(ila_td256_s4096_cap_TOP)
-IP_CORES_DIRS += $(evrmgt_DIR) $(evrmgt_DIR)/evrmgt/example_design \
-				 $(gateDriverSERDES_DIR) $(gateDriverSERDES_ODELAY_DIR) $(kdOutputDriverMMCM_DIR) $(outputDriverMMCM_DIR) \
-				 $(evLogFIFO_DIR) $(eventMonitorFIFO_DIR) $(ila_td256_s4096_cap_DIR)
+IP_CORES_TOP_LVL_SRCS += \
+	$(evrmgt_TOP) \
+	$(gateDriverSERDES_TOP) \
+	$(gateDriverSERDES_ODELAY_TOP) \
+	$(gateDriverSERDES_SE_TOP) \
+	$(gateDriverSERDES_ODELAY_SE_TOP) \
+	$(kdOutputDriverMMCM_TOP) \
+	$(outputDriverMMCM_TOP) \
+	$(evLogFIFO_TOP) \
+	$(eventMonitorFIFO_TOP) \
+	$(ila_td256_s4096_cap_TOP)
+IP_CORES_DIRS += \
+	$(evrmgt_DIR) \
+	$(evrmgt_DIR)/evrmgt/example_design \
+	$(gateDriverSERDES_DIR) \
+	$(gateDriverSERDES_ODELAY_DIR) \
+	$(gateDriverSERDES_SE_DIR) \
+	$(gateDriverSERDES_ODELAY_SE_DIR) \
+	$(kdOutputDriverMMCM_DIR) \
+	$(outputDriverMMCM_DIR) \
+	$(evLogFIFO_DIR) \
+	$(eventMonitorFIFO_DIR) \
+	$(ila_td256_s4096_cap_DIR)
 IP_CORES_XDCS += $(evrmgt_TOP:%.v=%.xdc)
 
 IP_CORES_SRCS_DIRS = $(IP_CORES_DIRS)
@@ -155,6 +188,8 @@ VFLAGS_DEP += $(addprefix -I, $(BD_SRCS_DIRS))
 evrmgt_VFLAGS_COMMAND_FILE = evrmgt_iverilog_cfile.txt
 gateDriverSERDES_VFLAGS_COMMAND_FILE = gateDriverSERDES_iverilog_cfile.txt
 gateDriverSERDES_ODELAY_VFLAGS_COMMAND_FILE = gateDriverSERDES_ODELAY_iverilog_cfile.txt
+gateDriverSERDES_SE_VFLAGS_COMMAND_FILE = gateDriverSERDES_SE_iverilog_cfile.txt
+gateDriverSERDES_ODELAY_SE_VFLAGS_COMMAND_FILE = gateDriverSERDES_ODELAY_SE_iverilog_cfile.txt
 kdOutputDriverMMCM_VFLAGS_COMMAND_FILE = kdOutputDriverMMCM_iverilog_cfile.txt
 outputDriverMMCM_VFLAGS_COMMAND_FILE = outputDriverMMCM_iverilog_cfile.txt
 evLogFIFO_VFLAGS_COMMAND_FILE = evLogFIFO_iverilog_cfile.txt
@@ -162,11 +197,13 @@ eventMonitorFIFO_VFLAGS_COMMAND_FILE = eventMonitorFIFO_iverilog_cfile.txt
 ila_td256_s4096_cap_VFLAGS_COMMAND_FILE = ila_td256_s4096_cap_iverilog_cfile.txt
 
 VFLAGS_COMMAND_FILE += \
-					  $(evrmgt_VFLAGS_COMMAND_FILE) \
-					  $(gateDriverSERDES_VFLAGS_COMMAND_FILE) \
-					  $(gateDriverSERDES_ODELAY_VFLAGS_COMMAND_FILE) \
-					  $(kdOutputDriverMMCM_VFLAGS_COMMAND_FILE) \
-					  $(outputDriverMMCM_VFLAGS_COMMAND_FILE)
+	$(evrmgt_VFLAGS_COMMAND_FILE) \
+	$(gateDriverSERDES_VFLAGS_COMMAND_FILE) \
+	$(gateDriverSERDES_ODELAY_VFLAGS_COMMAND_FILE) \
+	$(gateDriverSERDES_SE_VFLAGS_COMMAND_FILE) \
+	$(gateDriverSERDES_ODELAY_SE_VFLAGS_COMMAND_FILE) \
+	$(kdOutputDriverMMCM_VFLAGS_COMMAND_FILE) \
+	$(outputDriverMMCM_VFLAGS_COMMAND_FILE)
 # $(evLogFIFO_VFLAGS_COMMAND_FILE)
 # $(eventMonitorFIFO_VFLAGS_COMMAND_FILE)
 # using ILA with verilog gives an error:

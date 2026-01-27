@@ -59,6 +59,10 @@ work/
 !/gateware/platform/xilinx/*/*/gateDriverSERDES/gateDriverSERDES.xci
 /gateware/platform/xilinx/*/*/gateDriverSERDES_ODELAY/
 !/gateware/platform/xilinx/*/*/gateDriverSERDES_ODELAY/gateDriverSERDES_ODELAY.xci
+/gateware/platform/xilinx/*/*/gateDriverSERDES_SE/
+!/gateware/platform/xilinx/*/*/gateDriverSERDES_SE/gateDriverSERDES_SE.xci
+/gateware/platform/xilinx/*/*/gateDriverSERDES_ODELAY_SE/
+!/gateware/platform/xilinx/*/*/gateDriverSERDES_ODELAY_SE/gateDriverSERDES_ODELAY_SE.xci
 /gateware/platform/xilinx/*/*/kdOutputDriverMMCM/
 !/gateware/platform/xilinx/*/*/kdOutputDriverMMCM/kdOutputDriverMMCM.xci
 /gateware/platform/xilinx/*/*/outputDriverMMCM/
