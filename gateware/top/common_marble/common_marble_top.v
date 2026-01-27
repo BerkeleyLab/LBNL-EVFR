@@ -462,15 +462,18 @@ assign FMC2_FAN1_TACH = PMOD2_7;
 
 /////////////////////////////////////////////////////////////////////////////
 // Gate drivers
+
+`ifdef KICKER_DRIVER_SINGLE_ENDED
+    localparam GATE_DRIVER_DIFFERENTIAL_OUTPUT = "false";
+`else
+    localparam GATE_DRIVER_DIFFERENTIAL_OUTPUT = "true";
+`endif
+
 generate
 for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
   gateDriver #(
-`ifdef USE_KICKER_DRIVER_SINGLE_ENDED
-        .DIFFERENTIAL_OUPUT("false"),
-`else
-        .DIFFERENTIAL_OUPUT("true"),
-`endif
-        .ADDRESS(i)
+    .DIFFERENTIAL_OUPUT(GATE_DRIVER_DIFFERENTIAL_OUTPUT),
+    .ADDRESS(i)
   )
    gateDriver (
     .sysClk(sysClk),
