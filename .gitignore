@@ -31,6 +31,9 @@ software/app/evfr/evfr_*/
 software/app/kd/kd_*/
 software/src/ad9520Tables.h
 
+# Generated git info files
+*gitHash.vh
+
 ######################
 # Modelsim
 ######################
