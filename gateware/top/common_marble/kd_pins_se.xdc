@@ -370,214 +370,214 @@ set_property -dict {PACKAGE_PIN B10  IOSTANDARD LVCMO25} [get_ports {DRIVER_P[91
 # FMC1 LA_33_N
 set_property -dict {PACKAGE_PIN A10  IOSTANDARD LVCMO25} [get_ports {DRIVER_N[91]}]
 # BANK 32 IO_L1_P
-set_property -dict {PACKAGE_PIN AE17 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[92]}]
+set_property -dict {PACKAGE_PIN AE17 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[92]}]
 # BANK 32 IO_L1_N
-set_property -dict {PACKAGE_PIN AF17 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[92]}]
+set_property -dict {PACKAGE_PIN AF17 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[92]}]
 # BANK 32 IO_L2_P
-set_property -dict {PACKAGE_PIN AF14 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[93]}]
+set_property -dict {PACKAGE_PIN AF14 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[93]}]
 # BANK 32 IO_L2_N
-set_property -dict {PACKAGE_PIN AF15 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[93]}]
+set_property -dict {PACKAGE_PIN AF15 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[93]}]
 # BANK 32 IO_L3_P
-set_property -dict {PACKAGE_PIN AE18 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[94]}]
+set_property -dict {PACKAGE_PIN AE18 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[94]}]
 # BANK 32 IO_L3_N
-set_property -dict {PACKAGE_PIN AF18 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[94]}]
+set_property -dict {PACKAGE_PIN AF18 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[94]}]
 # BANK 32 IO_L4_P
-set_property -dict {PACKAGE_PIN AD15 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[95]}]
+set_property -dict {PACKAGE_PIN AD15 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[95]}]
 # BANK 32 IO_L4_N
-set_property -dict {PACKAGE_PIN AE15 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[95]}]
+set_property -dict {PACKAGE_PIN AE15 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[95]}]
 # BANK 32 IO_L5_P
-set_property -dict {PACKAGE_PIN AF19 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[96]}]
+set_property -dict {PACKAGE_PIN AF19 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[96]}]
 # BANK 32 IO_L5_N
-set_property -dict {PACKAGE_PIN AF20 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[96]}]
+set_property -dict {PACKAGE_PIN AF20 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[96]}]
 # BANK 32 IO_L7_P
-set_property -dict {PACKAGE_PIN AA14 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[97]}]
+set_property -dict {PACKAGE_PIN AA14 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[97]}]
 # BANK 32 IO_L7_N
-set_property -dict {PACKAGE_PIN AA15 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[97]}]
+set_property -dict {PACKAGE_PIN AA15 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[97]}]
 # BANK 32 IO_L8_P
-set_property -dict {PACKAGE_PIN AC14 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[98]}]
+set_property -dict {PACKAGE_PIN AC14 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[98]}]
 # BANK 32 IO_L8_N
-set_property -dict {PACKAGE_PIN AD14 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[98]}]
+set_property -dict {PACKAGE_PIN AD14 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[98]}]
 # BANK 32 IO_L9_P
-set_property -dict {PACKAGE_PIN Y15  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[99]}]
+set_property -dict {PACKAGE_PIN Y15  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[99]}]
 # BANK 32 IO_L9_N
-set_property -dict {PACKAGE_PIN Y16  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[99]}]
+set_property -dict {PACKAGE_PIN Y16  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[99]}]
 # BANK 32 IO_L10_P
-set_property -dict {PACKAGE_PIN AB14 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[100]}]
+set_property -dict {PACKAGE_PIN AB14 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[100]}]
 # BANK 32 IO_L10_N
-set_property -dict {PACKAGE_PIN AB15 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[100]}]
+set_property -dict {PACKAGE_PIN AB15 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[100]}]
 # BANK 32 IO_L11_P
-set_property -dict {PACKAGE_PIN AA17 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[101]}]
+set_property -dict {PACKAGE_PIN AA17 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[101]}]
 # BANK 32 IO_L11_N
-set_property -dict {PACKAGE_PIN AA18 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[101]}]
+set_property -dict {PACKAGE_PIN AA18 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[101]}]
 # BANK 32 IO_L13_P
-set_property -dict {PACKAGE_PIN AC18 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[102]}]
+set_property -dict {PACKAGE_PIN AC18 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[102]}]
 # BANK 32 IO_L13_N
-set_property -dict {PACKAGE_PIN AD18 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[102]}]
+set_property -dict {PACKAGE_PIN AD18 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[102]}]
 # BANK 32 IO_L14_P
-set_property -dict {PACKAGE_PIN AB17 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[103]}]
+set_property -dict {PACKAGE_PIN AB17 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[103]}]
 # BANK 32 IO_L14_N
-set_property -dict {PACKAGE_PIN AC17 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[103]}]
+set_property -dict {PACKAGE_PIN AC17 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[103]}]
 # BANK 32 IO_L15_P
-set_property -dict {PACKAGE_PIN AD20 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[104]}]
+set_property -dict {PACKAGE_PIN AD20 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[104]}]
 # BANK 32 IO_L15_N
-set_property -dict {PACKAGE_PIN AE20 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[104]}]
+set_property -dict {PACKAGE_PIN AE20 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[104]}]
 # BANK 32 IO_L16_P
-set_property -dict {PACKAGE_PIN AA19 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[105]}]
+set_property -dict {PACKAGE_PIN AA19 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[105]}]
 # BANK 32 IO_L16_N
-set_property -dict {PACKAGE_PIN AA20 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[105]}]
+set_property -dict {PACKAGE_PIN AA20 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[105]}]
 # BANK 32 IO_L17_P
-set_property -dict {PACKAGE_PIN AC19 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[106]}]
+set_property -dict {PACKAGE_PIN AC19 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[106]}]
 # BANK 32 IO_L17_N
-set_property -dict {PACKAGE_PIN AD19 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[106]}]
+set_property -dict {PACKAGE_PIN AD19 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[106]}]
 # BANK 32 IO_L20_P
-set_property -dict {PACKAGE_PIN V16  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[107]}]
+set_property -dict {PACKAGE_PIN V16  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[107]}]
 # BANK 32 IO_L20_N
-set_property -dict {PACKAGE_PIN V17  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[107]}]
+set_property -dict {PACKAGE_PIN V17  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[107]}]
 # BANK 32 IO_L21_P
-set_property -dict {PACKAGE_PIN W18  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[108]}]
+set_property -dict {PACKAGE_PIN W18  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[108]}]
 # BANK 32 IO_L21_N
-set_property -dict {PACKAGE_PIN W19  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[108]}]
+set_property -dict {PACKAGE_PIN W19  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[108]}]
 # BANK 32 IO_L22_P
-set_property -dict {PACKAGE_PIN W15  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[109]}]
+set_property -dict {PACKAGE_PIN W15  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[109]}]
 # BANK 32 IO_L22_N
-set_property -dict {PACKAGE_PIN W16  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[109]}]
+set_property -dict {PACKAGE_PIN W16  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[109]}]
 # BANK 32 IO_L23_P
-set_property -dict {PACKAGE_PIN V18  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[110]}]
+set_property -dict {PACKAGE_PIN V18  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[110]}]
 # BANK 32 IO_L23_N
-set_property -dict {PACKAGE_PIN V19  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[110]}]
+set_property -dict {PACKAGE_PIN V19  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[110]}]
 # BANK 32 IO_L24_P
-set_property -dict {PACKAGE_PIN V14  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[111]}]
+set_property -dict {PACKAGE_PIN V14  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[111]}]
 # BANK 32 IO_L24_N
-set_property -dict {PACKAGE_PIN W14  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[111]}]
+set_property -dict {PACKAGE_PIN W14  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[111]}]
 # BANK 34 IO_L1_P
-set_property -dict {PACKAGE_PIN U6   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[112]}]
+set_property -dict {PACKAGE_PIN U6   IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[112]}]
 # BANK 34 IO_L1_N
-set_property -dict {PACKAGE_PIN U5  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[112]}]
+set_property -dict {PACKAGE_PIN U5  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[112]}]
 # BANK 34 IO_L2_P
-set_property -dict {PACKAGE_PIN U2   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[113]}]
+set_property -dict {PACKAGE_PIN U2   IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[113]}]
 # BANK 34 IO_L2_N
-set_property -dict {PACKAGE_PIN U1   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[113]}]
+set_property -dict {PACKAGE_PIN U1   IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[113]}]
 # BANK 34 IO_L3_P
-set_property -dict {PACKAGE_PIN W6   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[114]}]
+set_property -dict {PACKAGE_PIN W6   IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[114]}]
 # BANK 34 IO_L3_N
-set_property -dict {PACKAGE_PIN W5   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[114]}]
+set_property -dict {PACKAGE_PIN W5   IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[114]}]
 # BANK 34 IO_L4_P
-set_property -dict {PACKAGE_PIN V3   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[115]}]
+set_property -dict {PACKAGE_PIN V3   IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[115]}]
 # BANK 34 IO_L4_N
-set_property -dict {PACKAGE_PIN W3   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[115]}]
+set_property -dict {PACKAGE_PIN W3   IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[115]}]
 # BANK 34 IO_L5_P
-set_property -dict {PACKAGE_PIN U7   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[116]}]
+set_property -dict {PACKAGE_PIN U7   IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[116]}]
 # BANK 34 IO_L5_N
-set_property -dict {PACKAGE_PIN V6 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[116]}]
+set_property -dict {PACKAGE_PIN V6 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[116]}]
 # BANK 34 IO_L7_P
-set_property -dict {PACKAGE_PIN Y3   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[117]}]
+set_property -dict {PACKAGE_PIN Y3   IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[117]}]
 # BANK 34 IO_L7_N
-set_property -dict {PACKAGE_PIN Y2   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[117]}]
+set_property -dict {PACKAGE_PIN Y2   IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[117]}]
 # BANK 34 IO_L8_P
-set_property -dict {PACKAGE_PIN V2   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[118]}]
+set_property -dict {PACKAGE_PIN V2   IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[118]}]
 # BANK 34 IO_L8_N
-set_property -dict {PACKAGE_PIN V1   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[118]}]
+set_property -dict {PACKAGE_PIN V1   IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[118]}]
 # BANK 34 IO_L9_P
-set_property -dict {PACKAGE_PIN AB1  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[119]}]
+set_property -dict {PACKAGE_PIN AB1  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[119]}]
 # BANK 34 IO_L9_N
-set_property -dict {PACKAGE_PIN AC1   IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[119]}]
+set_property -dict {PACKAGE_PIN AC1   IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[119]}]
 # BANK 34 IO_L10_P
-set_property -dict {PACKAGE_PIN W1 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[120]}]
+set_property -dict {PACKAGE_PIN W1 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[120]}]
 # BANK 34 IO_L10_N
-set_property -dict {PACKAGE_PIN Y1  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[120]}]
+set_property -dict {PACKAGE_PIN Y1  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[120]}]
 # BANK 34 IO_L11_P
-set_property -dict {PACKAGE_PIN AB2  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[121]}]
+set_property -dict {PACKAGE_PIN AB2  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[121]}]
 # BANK 34 IO_L11_N
-set_property -dict {PACKAGE_PIN AC2  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[121]}]
+set_property -dict {PACKAGE_PIN AC2  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[121]}]
 # BANK 34 IO_L13_P
-set_property -dict {PACKAGE_PIN AA4  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[122]}]
+set_property -dict {PACKAGE_PIN AA4  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[122]}]
 # BANK 34 IO_L13_N
-set_property -dict {PACKAGE_PIN AB4  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[122]}]
+set_property -dict {PACKAGE_PIN AB4  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[122]}]
 # BANK 34 IO_L14_P
-set_property -dict {PACKAGE_PIN AC4  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[123]}]
+set_property -dict {PACKAGE_PIN AC4  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[123]}]
 # BANK 34 IO_L14_N
-set_property -dict {PACKAGE_PIN AC3  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[123]}]
+set_property -dict {PACKAGE_PIN AC3  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[123]}]
 # BANK 34 IO_L15_P
-set_property -dict {PACKAGE_PIN AA5  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[124]}]
+set_property -dict {PACKAGE_PIN AA5  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[124]}]
 # BANK 34 IO_L15_N
-set_property -dict {PACKAGE_PIN AB5  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[124]}]
+set_property -dict {PACKAGE_PIN AB5  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[124]}]
 # BANK 34 IO_L16_P
-set_property -dict {PACKAGE_PIN AB6  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[125]}]
+set_property -dict {PACKAGE_PIN AB6  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[125]}]
 # BANK 34 IO_L16_N
-set_property -dict {PACKAGE_PIN AC6  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[125]}]
+set_property -dict {PACKAGE_PIN AC6  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[125]}]
 # BANK 34 IO_L17_P
-set_property -dict {PACKAGE_PIN Y6  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[126]}]
+set_property -dict {PACKAGE_PIN Y6  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[126]}]
 # BANK 34 IO_L17_N
-set_property -dict {PACKAGE_PIN Y5  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[126]}]
+set_property -dict {PACKAGE_PIN Y5  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[126]}]
 # BANK 34 IO_L20_P
-set_property -dict {PACKAGE_PIN AD1  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[127]}]
+set_property -dict {PACKAGE_PIN AD1  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[127]}]
 # BANK 34 IO_L20_N
-set_property -dict {PACKAGE_PIN AE1  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[127]}]
+set_property -dict {PACKAGE_PIN AE1  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[127]}]
 # BANK 34 IO_L21_P
-set_property -dict {PACKAGE_PIN AF5  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[128]}]
+set_property -dict {PACKAGE_PIN AF5  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[128]}]
 # BANK 34 IO_L21_N
-set_property -dict {PACKAGE_PIN AF4  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[128]}]
+set_property -dict {PACKAGE_PIN AF4  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[128]}]
 # BANK 34 IO_L22_P
-set_property -dict {PACKAGE_PIN AE3 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[129]}]
+set_property -dict {PACKAGE_PIN AE3 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[129]}]
 # BANK 34 IO_L22_N
-set_property -dict {PACKAGE_PIN AE2  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[129]}]
+set_property -dict {PACKAGE_PIN AE2  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[129]}]
 # BANK 34 IO_L23_P
-set_property -dict {PACKAGE_PIN AE6  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[130]}]
+set_property -dict {PACKAGE_PIN AE6  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[130]}]
 # BANK 34 IO_L23_N
-set_property -dict {PACKAGE_PIN AE5  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[130]}]
+set_property -dict {PACKAGE_PIN AE5  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[130]}]
 # BANK 34 IO_L24_P
-set_property -dict {PACKAGE_PIN AF3  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[131]}]
+set_property -dict {PACKAGE_PIN AF3  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[131]}]
 # BANK 34 IO_L24_N
-set_property -dict {PACKAGE_PIN AF2  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[131]}]
+set_property -dict {PACKAGE_PIN AF2  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[131]}]
 # BANK 33 IO_L9_P
-set_property -dict {PACKAGE_PIN AC8  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[132]}]
+set_property -dict {PACKAGE_PIN AC8  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[132]}]
 # BANK 33 IO_L9_N
-set_property -dict {PACKAGE_PIN AD8  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[132]}]
+set_property -dict {PACKAGE_PIN AD8  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[132]}]
 # BANK 33 IO_L10_P
-set_property -dict {PACKAGE_PIN AB7  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[133]}]
+set_property -dict {PACKAGE_PIN AB7  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[133]}]
 # BANK 33 IO_L10_N
-set_property -dict {PACKAGE_PIN AC7  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[133]}]
+set_property -dict {PACKAGE_PIN AC7  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[133]}]
 # BANK 33 IO_L11_P
-set_property -dict {PACKAGE_PIN AA9  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[134]}]
+set_property -dict {PACKAGE_PIN AA9  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[134]}]
 # BANK 33 IO_L11_N
-set_property -dict {PACKAGE_PIN AB9  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[134]}]
+set_property -dict {PACKAGE_PIN AB9  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[134]}]
 # BANK 33 IO_L13_P
-set_property -dict {PACKAGE_PIN AB11 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[135]}]
+set_property -dict {PACKAGE_PIN AB11 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[135]}]
 # BANK 33 IO_L13_N
-set_property -dict {PACKAGE_PIN AC11 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[135]}]
+set_property -dict {PACKAGE_PIN AC11 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[135]}]
 # BANK 33 IO_L14_P
-set_property -dict {PACKAGE_PIN AA10  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[136]}]
+set_property -dict {PACKAGE_PIN AA10  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[136]}]
 # BANK 33 IO_L14_N
-set_property -dict {PACKAGE_PIN AB10 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[136]}]
+set_property -dict {PACKAGE_PIN AB10 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[136]}]
 # BANK 33 IO_L15_P
-set_property -dict {PACKAGE_PIN AB12 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[137]}]
+set_property -dict {PACKAGE_PIN AB12 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[137]}]
 # BANK 33 IO_L15_N
-set_property -dict {PACKAGE_PIN AC12 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[137]}]
+set_property -dict {PACKAGE_PIN AC12 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[137]}]
 # BANK 33 IO_L16_P
-set_property -dict {PACKAGE_PIN AA13 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[138]}]
+set_property -dict {PACKAGE_PIN AA13 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[138]}]
 # BANK 33 IO_L16_N
-set_property -dict {PACKAGE_PIN AA12 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[138]}]
+set_property -dict {PACKAGE_PIN AA12 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[138]}]
 # BANK 33 IO_L17_P
-set_property -dict {PACKAGE_PIN AC13 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[139]}]
+set_property -dict {PACKAGE_PIN AC13 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[139]}]
 # BANK 33 IO_L17_N
-set_property -dict {PACKAGE_PIN AD13 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[139]}]
+set_property -dict {PACKAGE_PIN AD13 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[139]}]
 # BANK 33 IO_L20_P
-set_property -dict {PACKAGE_PIN AD10 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[140]}]
+set_property -dict {PACKAGE_PIN AD10 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[140]}]
 # BANK 33 IO_L20_N
-set_property -dict {PACKAGE_PIN AE10 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[140]}]
+set_property -dict {PACKAGE_PIN AE10 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[140]}]
 # BANK 33 IO_L21_P
-set_property -dict {PACKAGE_PIN AE12 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[141]}]
+set_property -dict {PACKAGE_PIN AE12 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[141]}]
 # BANK 33 IO_L21_N
-set_property -dict {PACKAGE_PIN AF12 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[141]}]
+set_property -dict {PACKAGE_PIN AF12 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[141]}]
 # BANK 33 IO_L22_P
-set_property -dict {PACKAGE_PIN AE8  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[142]}]
+set_property -dict {PACKAGE_PIN AE8  IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[142]}]
 # BANK 33 IO_L22_N
-set_property -dict {PACKAGE_PIN AF8  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[142]}]
+set_property -dict {PACKAGE_PIN AF8  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[142]}]
 # BANK 33 IO_L23_P
-set_property -dict {PACKAGE_PIN AE13 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[143]}]
+set_property -dict {PACKAGE_PIN AE13 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[143]}]
 # BANK 33 IO_L23_N
-set_property -dict {PACKAGE_PIN AF13 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[143]}]
+set_property -dict {PACKAGE_PIN AF13 IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[143]}]
 # BANK 33 IO_L24_P
-set_property -dict {PACKAGE_PIN AF10 IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_P[144]}]
+set_property -dict {PACKAGE_PIN AF10 IOSTANDARD LVCMOS25} [get_ports {DRIVER_P[144]}]
 # BANK 33 IO_L24_N
-set_property -dict {PACKAGE_PIN AF9  IOSTANDARD HSTL_I_DCI} [get_ports {DRIVER_N[144]}]
+set_property -dict {PACKAGE_PIN AF9  IOSTANDARD LVCMOS25} [get_ports {DRIVER_N[144]}]
