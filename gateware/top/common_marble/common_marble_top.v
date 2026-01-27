@@ -464,7 +464,14 @@ assign FMC2_FAN1_TACH = PMOD2_7;
 // Gate drivers
 generate
 for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
-  gateDriver #(.ADDRESS(i))
+  gateDriver #(
+`ifdef USE_KICKER_DRIVER_SINGLE_ENDED
+        .DIFFERENTIAL_OUPUT("false"),
+`else
+        .DIFFERENTIAL_OUPUT("true"),
+`endif
+        .ADDRESS(i)
+  )
    gateDriver (
     .sysClk(sysClk),
     .sysCsrStrobe(GPIO_STROBES[GPIO_IDX_CONFIG_KD_GATE_DRIVER]),

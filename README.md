@@ -59,7 +59,7 @@ ARM_TOOLCHAIN_LOCATION=/media/Xilinx/Vivado/2020.2.2/Vitis/2020.2/gnu/microblaze
 
 ##### Fanout via QSFP2
 
-Add `TESTING_OPTION=USE_QSFP_FANOUT` to the make command to enable the fanout via QSFP2. Note that it's a testing feature and the fanout latency is not fully deterministic but can vary by approximately one clock period.
+Add `GW_VARIANT=USE_QSFP_FANOUT` to the make command to enable the fanout via QSFP2. Note that it's a testing feature and the fanout latency is not fully deterministic but can vary by approximately one clock period.
 
 ### Deploying
 

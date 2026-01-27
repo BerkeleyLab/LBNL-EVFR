@@ -6,7 +6,7 @@ XILINX_TOOL := VIVADO
 FPGA_VENDOR := xilinx
 FPGA_PLATFORM := 7series
 FPGA_APPLICATION ?= evfr
-TESTING_ARGS_VIVADO ?= none
+VARIANT ?=
 
 CMD_SEP = ;
 __THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
@@ -56,19 +56,32 @@ SYSTEM_TOP_TIM_XDC = $(TARGET)_top_tim.xdc
 CFG_EVRIO = $(shell $(GW_SCRIPTS_DIR)/check_evrio.sh $(SW_TGT_DIR)/$(FPGA_APPLICATION)_$(HARDWARE)/config.h)
 
 ifeq ($(CFG_EVRIO),Y)
-SYSTEM_TOP_PINS_XDC += evrio.xdc
+    ifeq ($(VARIANT),USE_QSFP_FANOUT)
+        SYNTH_OPT += QSFP_FANOUT
+        VFLAGS_DEP += -DQSFP_FANOUT
+        SYSTEM_TOP_PINS_XDC += $(COMMON_TOP_LVL_DIR)/qsfp_fanout_pins.xdc
+    else ifeq ($(VARIANT),)
+        SYSTEM_TOP_PINS_XDC += evrio.xdc
+    else
+        $(error VARIANT = $(VARIANT) incompatible with CFG_EVRIO = $(CFG_EVRIO))
+    endif
 endif
 
 ifeq ($(CFG_EVRIO),N)
-SYSTEM_TOP_PINS_XDC += kd_pins.xdc
-SYSTEM_TOP_TIM_XDC += kd_tim.xdc
+    ifeq ($(VARIANT),USE_KICKER_DRIVER_SINGLE_ENDED)
+        SYNTH_OPT += KICKER_DRIVER_SINGLE_ENDED
+        VFLAGS_DEP += -DKICKER_DRIVER_SINGLE_ENDED
+        SYSTEM_TOP_PINS_XDC += kd_pins_se.xdc
+        SYSTEM_TOP_TIM_XDC += kd_tim.xdc
+    else ifeq ($(VARIANT),)
+        SYSTEM_TOP_PINS_XDC += kd_pins.xdc
+        SYSTEM_TOP_TIM_XDC += kd_tim.xdc
+    else
+        $(error VARIANT = $(VARIANT) incompatible with CFG_EVRIO = $(CFG_EVRIO))
+    endif
 endif
 
-ifeq ($(TESTING_ARGS_VIVADO),USE_QSFP_FANOUT)
-SYNTH_OPT += QSFP_FANOUT
-VFLAGS_DEP += -DQSFP_FANOUT
-SYSTEM_TOP_PINS_XDC += $(COMMON_TOP_LVL_DIR)/qsfp_fanout_pins.xdc
-endif
+$(info VARIANT = $(VARIANT), CFG_EVRIO = $(CFG_EVRIO))
 
 # ip_cores generation scripts/names
 

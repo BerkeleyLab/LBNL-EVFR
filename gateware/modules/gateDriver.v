@@ -3,6 +3,7 @@
 // All others are in the kicker gate driver clock domain.
 
 module gateDriver #(
+    parameter DIFFERENTIAL_OUPUT = "true",
     parameter ADDRESS = -1
     ) (
     input wire        sysClk,
@@ -22,9 +23,15 @@ localparam DELAY_COUNT_WIDTH   = 4;
 localparam WIDTH_COUNT_WIDTH   = 4;
 localparam PATTERN_SHIFT_WIDTH = $clog2(SERDES_WIDTH);
 localparam ODELAY_WIDTH        = 5;
-localparam PULSE_INFO_WIDTH = 1 + ODELAY_WIDTH + 
+localparam PULSE_INFO_WIDTH = 1 + ODELAY_WIDTH +
                                   PATTERN_SHIFT_WIDTH + WIDTH_COUNT_WIDTH +
                                   PATTERN_SHIFT_WIDTH + DELAY_COUNT_WIDTH;
+
+generate
+if (DIFFERENTIAL_OUPUT != "true" && DIFFERENTIAL_OUPUT != "false") begin
+    DIFFERENTIAL_OUPUT_can_only_be_true_or_false error();
+end
+endgenerate
 
 ////////////////////// System clock domain //////////////////////////////////
 reg [PULSE_INFO_WIDTH-1:0] sysPulseInfo;
@@ -57,9 +64,9 @@ wire [PATTERN_SHIFT_WIDTH-1:0] trailingZeroCount =
 wire [ODELAY_WIDTH-1:0] odelayValue =
                             pulseInfo[(DELAY_COUNT_WIDTH +
                                        PATTERN_SHIFT_WIDTH +
-                                       WIDTH_COUNT_WIDTH + 
+                                       WIDTH_COUNT_WIDTH +
                                        PATTERN_SHIFT_WIDTH)+:ODELAY_WIDTH];
-wire enable = pulseInfo[(ODELAY_WIDTH + 
+wire enable = pulseInfo[(ODELAY_WIDTH +
                          DELAY_COUNT_WIDTH +
                          PATTERN_SHIFT_WIDTH +
                          WIDTH_COUNT_WIDTH  +
@@ -133,29 +140,63 @@ end
 
 generate
 if (ADDRESS < 92) begin
- // Instantiate pin driver OSERDES
- gateDriverSERDES gateDriverSERDES (
-    .data_out_from_device(pattern),
-    .data_out_to_pins_p(P),
-    .data_out_to_pins_n(N),
-    .clk_in(kgdBitClk),
-    .clk_div_in(kgdClk),
-    .io_reset(1'b0));
+
+    if (DIFFERENTIAL_OUPUT == "true") begin
+        // Instantiate pin driver OSERDES
+        gateDriverSERDES gateDriverSERDES (
+           .data_out_from_device(pattern),
+           .data_out_to_pins_p(P),
+           .data_out_to_pins_n(N),
+           .clk_in(kgdBitClk),
+           .clk_div_in(kgdClk),
+           .io_reset(1'b0));
+    end
+
+    if (DIFFERENTIAL_OUPUT == "false") begin
+        // Instantiate pin driver OSERDES
+        gateDriverSERDES_SE gateDriverSERDES (
+           .data_out_from_device(pattern),
+           .data_out_to_pins(P),
+           .clk_in(kgdBitClk),
+           .clk_div_in(kgdClk),
+           .io_reset(1'b0));
+
+        assign N = 1'b0;
+    end
 end
 else begin
- // Instantiate pin driver OSERDES with ODELAY
-gateDriverSERDES_ODELAY gateDriverSERDES (
-    .data_out_from_device(pattern),
-    .data_out_to_pins_p(P),
-    .data_out_to_pins_n(N),
-    .out_delay_reset(1'b0),
-    .out_delay_data_ce(1'b0),
-    .out_delay_data_inc(1'b0),
-    .out_delay_tap_in(odelayValue),
-    .out_delay_tap_out(),
-    .clk_in(kgdBitClk),
-    .clk_div_in(kgdClk),
-    .io_reset(1'b0));
+    if (DIFFERENTIAL_OUPUT == "true") begin
+        // Instantiate pin driver OSERDES with ODELAY
+        gateDriverSERDES_ODELAY gateDriverSERDES (
+            .data_out_from_device(pattern),
+            .data_out_to_pins_p(P),
+            .data_out_to_pins_n(N),
+            .out_delay_reset(1'b0),
+            .out_delay_data_ce(1'b0),
+            .out_delay_data_inc(1'b0),
+            .out_delay_tap_in(odelayValue),
+            .out_delay_tap_out(),
+            .clk_in(kgdBitClk),
+            .clk_div_in(kgdClk),
+            .io_reset(1'b0));
+    end
+
+    if (DIFFERENTIAL_OUPUT == "false") begin
+        // Instantiate pin driver OSERDES with ODELAY
+        gateDriverSERDES_ODELAY_SE gateDriverSERDES (
+            .data_out_from_device(pattern),
+            .data_out_to_pins(P),
+            .out_delay_reset(1'b0),
+            .out_delay_data_ce(1'b0),
+            .out_delay_data_inc(1'b0),
+            .out_delay_tap_in(odelayValue),
+            .out_delay_tap_out(),
+            .clk_in(kgdBitClk),
+            .clk_div_in(kgdClk),
+            .io_reset(1'b0));
+
+        assign N = 1'b0;
+    end
 end
 
 endgenerate
