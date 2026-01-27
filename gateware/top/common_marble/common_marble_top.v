@@ -39,7 +39,9 @@ module common_marble_top #(
 
 `ifdef KICKER_DRIVER
     output [CFG_KD_OUTPUT_COUNT-1:0] DRIVER_P,
+`ifndef KICKER_DRIVER_SINGLE_ENDED
     output [CFG_KD_OUTPUT_COUNT-1:0] DRIVER_N,
+`endif
     // FIXME: Do we need pretrigger outputs on some PMOD lines too?
 `else
     // FMC1 EVIO (only in event fanout)
@@ -471,6 +473,7 @@ assign FMC2_FAN1_TACH = PMOD2_7;
 
 generate
 for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
+  wire gateDriver_N;
   gateDriver #(
     .DIFFERENTIAL_OUPUT(GATE_DRIVER_DIFFERENTIAL_OUTPUT),
     .ADDRESS(i)
@@ -483,7 +486,12 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
     .kgdBitClk(kgdBitClk),
     .kgdStrobe(kgdGateStrobe),
     .P(DRIVER_P[i]),
-    .N(DRIVER_N[i]));
+    .N(gateDriver_N));
+
+`ifndef KICKER_DRIVER_SINGLE_ENDED
+    assign DRIVER_N[i] = gateDriver_N;
+`endif
+
 end
 endgenerate
 
