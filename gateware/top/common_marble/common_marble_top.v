@@ -473,25 +473,36 @@ assign FMC2_FAN1_TACH = PMOD2_7;
 
 generate
 for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
-  wire gateDriver_N;
-  gateDriver #(
-    .DIFFERENTIAL_OUPUT(GATE_DRIVER_DIFFERENTIAL_OUTPUT),
-    .ADDRESS(i)
-  )
-   gateDriver (
-    .sysClk(sysClk),
-    .sysCsrStrobe(GPIO_STROBES[GPIO_IDX_CONFIG_KD_GATE_DRIVER]),
-    .sysGPIO_OUT(GPIO_OUT),
-    .kgdClk(kgdClk),
-    .kgdBitClk(kgdBitClk),
-    .kgdStrobe(kgdGateStrobe),
-    .P(DRIVER_P[i]),
-    .N(gateDriver_N));
+
+    if (i == 2) begin
+        assign DRIVER_P[i] = evrClk;
+    end
+    else if (i == 3) begin
+        assign DRIVER_P[i] = evrTriggerBus[0];
+    end
+    else if (i == 4) begin
+        assign DRIVER_P[i] = kgdGateStrobe;
+    end
+    else begin
+        wire gateDriver_N;
+        gateDriver #(
+          .DIFFERENTIAL_OUPUT(GATE_DRIVER_DIFFERENTIAL_OUTPUT),
+          .ADDRESS(i)
+        )
+         gateDriver (
+          .sysClk(sysClk),
+          .sysCsrStrobe(GPIO_STROBES[GPIO_IDX_CONFIG_KD_GATE_DRIVER]),
+          .sysGPIO_OUT(GPIO_OUT),
+          .kgdClk(kgdClk),
+          .kgdBitClk(kgdBitClk),
+          .kgdStrobe(kgdGateStrobe),
+          .P(DRIVER_P[i]),
+          .N(gateDriver_N));
 
 `ifndef KICKER_DRIVER_SINGLE_ENDED
-    assign DRIVER_N[i] = gateDriver_N;
+        assign DRIVER_N[i] = gateDriver_N;
 `endif
-
+    end
 end
 endgenerate
 
