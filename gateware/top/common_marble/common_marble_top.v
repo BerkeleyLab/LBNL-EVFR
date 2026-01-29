@@ -38,6 +38,8 @@ module common_marble_top #(
 `endif
 
 `ifdef KICKER_DRIVER
+    output FMC2_CLK1_M2C_P,
+    output FMC2_CLK1_M2C_N,
     output [CFG_KD_OUTPUT_COUNT-1:0] DRIVER_P,
 `ifndef KICKER_DRIVER_SINGLE_ENDED
     output [CFG_KD_OUTPUT_COUNT-1:0] DRIVER_N,
@@ -103,8 +105,6 @@ module common_marble_top #(
     // Test points -- FIXME: THESE ARE FOR THE FMC-DBG FOR TEMPORARY TESTING
     output FMC1_CLK1_M2C_P,
     output FMC1_CLK1_M2C_N,
-    output FMC2_CLK1_M2C_P,
-    output FMC2_CLK1_M2C_N,
 
     output TWI_SCL,
     inout  TWI_SDA,
