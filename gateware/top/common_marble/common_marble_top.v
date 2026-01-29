@@ -103,6 +103,8 @@ module common_marble_top #(
     // Test points -- FIXME: THESE ARE FOR THE FMC-DBG FOR TEMPORARY TESTING
     output FMC1_CLK1_M2C_P,
     output FMC1_CLK1_M2C_N,
+    output FMC2_CLK1_M2C_P,
+    output FMC2_CLK1_M2C_N,
 
     output TWI_SCL,
     inout  TWI_SDA,
@@ -459,6 +461,8 @@ kickerDriverClockGenerator #(.DEBUG("false"))
     .kgdGateStrobe(kgdGateStrobe));
 assign FMC1_CLK1_M2C_P = evrTriggerBus[0];
 assign FMC1_CLK1_M2C_N = kgdGateStrobe;
+assign FMC2_CLK1_M2C_P = evrTriggerBus[0];
+assign FMC2_CLK1_M2C_N = kgdGateStrobe;
 assign FMC1_FAN1_TACH = PMOD2_6;
 assign FMC2_FAN1_TACH = PMOD2_7;
 
@@ -474,13 +478,13 @@ assign FMC2_FAN1_TACH = PMOD2_7;
 generate
 for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
 
-    if (i == 2) begin
+    if (i == 0) begin
         assign DRIVER_P[i] = evrClk;
     end
-    else if (i == 3) begin
+    else if (i == 1) begin
         assign DRIVER_P[i] = evrTriggerBus[0];
     end
-    else if (i == 4) begin
+    else if (i == 2) begin
         assign DRIVER_P[i] = kgdGateStrobe;
     end
     else begin

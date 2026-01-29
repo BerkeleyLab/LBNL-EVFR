@@ -73,6 +73,10 @@ set_property -dict {PACKAGE_PIN W9 IOSTANDARD LVCMOS15} [get_ports PMOD2_7]
 set_property -dict {PACKAGE_PIN E18 IOSTANDARD LVCMOS25} [get_ports FMC1_CLK1_M2C_P]
 set_property -dict {PACKAGE_PIN D18 IOSTANDARD LVCMOS25} [get_ports FMC1_CLK1_M2C_N]
 
+# FMC2_CLK1_M2C -- Used for diagnostics
+set_property -dict {PACKAGE_PIN F22 IOSTANDARD LVCMOS25} [get_ports FMC2_CLK1_M2C_P]
+set_property -dict {PACKAGE_PIN E23 IOSTANDARD LVCMOS25} [get_ports FMC2_CLK1_M2C_N]
+
 # 125 MHz from U20
 set_property -dict {PACKAGE_PIN AC9 IOSTANDARD DIFF_SSTL15} [get_ports DDR_REF_CLK_P]
 set_property -dict {PACKAGE_PIN AD9 IOSTANDARD DIFF_SSTL15} [get_ports DDR_REF_CLK_N]
