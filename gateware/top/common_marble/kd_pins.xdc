@@ -581,3 +581,7 @@ set_property -dict {PACKAGE_PIN AF13 IOSTANDARD DIFF_HSTL_I_DCI} [get_ports {DRI
 set_property -dict {PACKAGE_PIN AF10 IOSTANDARD DIFF_HSTL_I_DCI} [get_ports {DRIVER_P[144]}]
 # BANK 33 IO_L24_N
 set_property -dict {PACKAGE_PIN AF9  IOSTANDARD DIFF_HSTL_I_DCI} [get_ports {DRIVER_N[144]}]
+
+# FMC2_CLK1_M2C -- Used for diagnostics
+set_property -dict {PACKAGE_PIN F22 IOSTANDARD LVCMOS25} [get_ports FMC2_CLK1_M2C_P]
+set_property -dict {PACKAGE_PIN E23 IOSTANDARD LVCMOS25} [get_ports FMC2_CLK1_M2C_N]
