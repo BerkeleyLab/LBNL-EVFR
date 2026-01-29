@@ -479,13 +479,34 @@ generate
 for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
 
     if (i == 0) begin
+`ifdef KICKER_DRIVER_SINGLE_ENDED
         assign DRIVER_P[i] = evrClk;
+`else
+        OBUFDS driver_obufds_0 (
+            .O(DRIVER_P[i]),
+            .OB(DRIVER_N[i]),
+            .I(evrClk));
+`endif
     end
     else if (i == 1) begin
+`ifdef KICKER_DRIVER_SINGLE_ENDED
         assign DRIVER_P[i] = evrTriggerBus[0];
+`else
+        OBUFDS driver_obufds_1 (
+            .O(DRIVER_P[i]),
+            .OB(DRIVER_N[i]),
+            .I(evrTriggerBus[0]));
+`endif
     end
     else if (i == 2) begin
+`ifdef KICKER_DRIVER_SINGLE_ENDED
         assign DRIVER_P[i] = kgdGateStrobe;
+`else
+        OBUFDS driver_obufds_2 (
+            .O(DRIVER_P[i]),
+            .OB(DRIVER_N[i]),
+            .I(kgdGateStrobe));
+`endif
     end
     else begin
         wire gateDriver_N;
