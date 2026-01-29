@@ -482,9 +482,9 @@ endgenerate
 // FIXME add a switch to select which one to send to the diagnostic
 // input
 assign FMC1_CLK1_M2C_P = evrTriggerBus[0];
-assign FMC1_CLK1_M2C_N = kgdGateStrobe;
-assign FMC2_CLK1_M2C_P = evrTriggerBus[0];
-assign FMC2_CLK1_M2C_N = kgdGateStrobe;
+assign FMC1_CLK1_M2C_N = kgdGateStrobe[0];
+assign FMC2_CLK1_M2C_P = evrTriggerBus[1];
+assign FMC2_CLK1_M2C_N = kgdGateStrobe[1];
 assign FMC1_FAN1_TACH = PMOD2_6;
 assign FMC2_FAN1_TACH = PMOD2_7;
 
@@ -502,6 +502,7 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
 
    wire gateDriver_N;
    gateDriver #(
+     .NUM_GATES(CFG_GATE_COUNT),
      .DIFFERENTIAL_OUPUT(GATE_DRIVER_DIFFERENTIAL_OUTPUT),
      .ADDRESS(i)
    )
