@@ -61,6 +61,7 @@ endgenerate
 // to drive the SERDES
 //////////////////////////////////////////////////////////////
 
+wire [NUM_GATES-1:0] pendingGates;
 reg [NUM_GATES-1:0] kgdToggles = 0, kgdMatches = 0;
 generate
 for (i = 0; i < NUM_GATES; i = i + 1) begin
@@ -72,7 +73,7 @@ for (i = 0; i < NUM_GATES; i = i + 1) begin
 end
 endgenerate
 
-wire [NUM_GATES-1:0] pendingGates = kgdToggles ^ kgdMatches;
+assign pendingGates = kgdToggles ^ kgdMatches;
 
 // Priority encoder
 if (NUM_GATES != 2) begin
