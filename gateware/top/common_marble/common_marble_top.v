@@ -452,7 +452,7 @@ wire sysIdelayControlReset;
 kickerDriverClockGateGenerator #(
     .DEBUG("false"),
     .NUM_GATES(CFG_GATE_COUNT))
-  kickerDriverClockGenerator (
+  kickerDriverClockGateGenerator (
     .sysClk(sysClk),
     .sysClockCsrStrobe(GPIO_STROBES[GPIO_IDX_CONFIG_KD_CLOCK]),
     .sysGateCsrStrobe(GPIO_STROBES_KD_GATE_FLATTENED),
