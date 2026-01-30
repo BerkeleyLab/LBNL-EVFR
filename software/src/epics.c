@@ -122,12 +122,13 @@ static int
 handleCommand(int commandArgCount, struct evfPacket *cmdp,
                                    struct evfPacket *replyp)
 {
+    int hi = cmdp->command & EVF_PROTOCOL_CMD_MASK_HI;
     int lo = cmdp->command & EVF_PROTOCOL_CMD_MASK_LO;
     int idx = cmdp->command & EVF_PROTOCOL_CMD_MASK_IDX;
     int replyArgCount = 0;
     static int powerUpStatus = 1;
 
-    switch (cmdp->command & EVF_PROTOCOL_CMD_MASK_HI) {
+    switch (ahi) {
     case EVF_PROTOCOL_CMD_HI_LONGIN:
         if (commandArgCount != 0) return -1;
         replyArgCount = 1;
@@ -223,30 +224,34 @@ handleCommand(int commandArgCount, struct evfPacket *cmdp,
             return -1;
         }
         switch (lo) {
-        case EVF_PROTOCOL_CMD_LO_KICKER_DRIVER:
-            if (idx == EVF_PROTOCOL_CMD_KICKER_DRIVER_IDX_SET_GROUP_DELAY) {
-                kdGateDriverUpdate(cmdp->args);
-                break;
+        case EVF_PROTOCOL_CMD_KICKER_DRIVER_LO_GROUP_DELAY:
+            if (idx >= EVF_PROTOCOL_KD_COUNT) {
+                return -1;
             }
-            return -1;
 
-        case EVF_PROTOCOL_CMD_LO_KICKER_DRIVER_MONITOR:
-            switch (idx) {
-            case EVF_PROTOCOL_CMD_KICKER_DRIVER_MONITOR_IDX_INIT:
-                kdGateDriverInitMonitorStatus();
-                break;
-                
-            case EVF_PROTOCOL_CMD_KICKER_DRIVER_MONITOR_IDX_READ:
-                replyArgCount = kdGateDriverGetMonitorStatus(replyp->args);
-                break;
-
-            default: return -1;
-            }
+            kdGateDriverUpdate(idx, cmdp->args);
             break;
 
         default: return -1;
         }
         break;
+
+   case EVF_PROTOCOL_CMD_HI_KICKER_DRIVER_MONITOR:
+        if (!(hwConfig & HWCONFIG_HAS_KICKER_DRIVER)) {
+            return -1;
+        }
+       switch (lo) {
+       case EVF_PROTOCOL_CMD_KICKER_DRIVER_MONITOR_LO_INIT:
+           kdGateDriverInitMonitorStatus();
+           break;
+
+       case EVF_PROTOCOL_CMD_KICKER_DRIVER_MONITOR_LO_READ:
+           replyArgCount = kdGateDriverGetMonitorStatus(replyp->args);
+           break;
+
+       default: return -1;
+       }
+       break;
 
     default: return -1;
     }
