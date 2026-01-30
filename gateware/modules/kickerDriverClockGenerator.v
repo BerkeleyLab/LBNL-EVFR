@@ -43,13 +43,6 @@ assign sysStatus = { 1'b0, sysIdelayControlReset,
 ///////////////////////////////////////////////////////////////////////////////
 // Fine delay generation
 
-// Delay control block shared by IDELAY blocks
-(* IODELAY_GROUP = "KD_DELAYS" *)
-IDELAYCTRL idelayControl (
-    .REFCLK(refClk200),
-    .RST(sysIdelayControlReset),
-    .RDY());
-
 // Programmable delay on clock (0 to ~800 ps)
 wire evrClkDelayed, evrClkDelayedBUF;
 (* IODELAY_GROUP = "DLYGRP_1" *)
