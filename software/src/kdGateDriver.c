@@ -5,12 +5,11 @@
 #include <stdint.h>
 #include "iicEVIO.h"
 #include "kdGateDriver.h"
+#include "evfrProtocol.h"
 #include "gpio.h"
 #include "util.h"
 
-
-#define REG_GATE(base,chan)         ((base) + (GPIO_IDX_CONFIG_KD_GATE * (chan)))
-#define REG_GATE_DRIVER(base,chan)  ((base) + (GPIO_IDX_PER_KD_GATE_DRIVER * (chan)))
+#define REG(base,chan)      ((base) + (GPIO_IDX_PER_KD_GATE * (chan)))
 
 static void
 setGroupDelay(unsigned int idx, int clocks, int iDelayTarget)
