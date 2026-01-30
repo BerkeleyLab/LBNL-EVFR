@@ -122,7 +122,7 @@ static int
 handleCommand(int commandArgCount, struct evfPacket *cmdp,
                                    struct evfPacket *replyp)
 {
-    int hi = cmdp->command & EVF_PROTOCOL_CMD_MASK_HI;
+    int ahi = cmdp->command & EVF_PROTOCOL_CMD_MASK_HI;
     int lo = cmdp->command & EVF_PROTOCOL_CMD_MASK_LO;
     int idx = cmdp->command & EVF_PROTOCOL_CMD_MASK_IDX;
     int replyArgCount = 0;
