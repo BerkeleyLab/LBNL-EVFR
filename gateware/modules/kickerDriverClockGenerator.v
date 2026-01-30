@@ -69,6 +69,9 @@ BUFG evrClkDelayedBUFG (
 
 ///////////////////////////////////////////////////////////////////////////////
 // Generate bit and byte clocks from delayed reference
+// See "kickerDriverGateGenerator", but the clock has
+// to be advanced by -112.5o to compensate the effect
+// of removing the 2.5ns delay on the gate strobe
 kdOutputDriverMMCM gateDriverMMCM (
     .clk_in1(evrClkDelayedBUF),
     .reset(1'b0),

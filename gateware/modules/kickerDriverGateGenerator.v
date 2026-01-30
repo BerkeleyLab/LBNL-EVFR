@@ -36,25 +36,32 @@ assign sysStatus = { {16 {1'b0}},
 
 ///////////////////////////////////////////////////////////////////////////////
 // Fixed delay on gate strobe (~2.5 ns)
-wire kgdGateStrobe_w;
-(* IODELAY_GROUP = "DLYGRP_1" *)
-IDELAYE2 #(.IDELAY_TYPE("FIXED"),
-           .IDELAY_VALUE(31),
-           .DELAY_SRC("DATAIN"),
-           .SIGNAL_PATTERN("DATA"))
-  evrGateStrobeDelay (
-    .C(1'b0),
-    .REGRST(1'b0),
-    .LD(1'b0),
-    .CE(1'b0),
-    .INC(1'b0),
-    .CINVCTRL(1'b0),
-    .CNTVALUEIN(5'b0),
-    .IDATAIN(),
-    .DATAIN(evrGateStrobe),
-    .LDPIPEEN(1'b0),
-    .CNTVALUEOUT(),
-    .DATAOUT(kgdGateStrobe_w));
+// wire kgdGateStrobe_w;
+// (* IODELAY_GROUP = "DLYGRP_1" *)
+// IDELAYE2 #(.IDELAY_TYPE("FIXED"),
+//            .IDELAY_VALUE(31),
+//            .DELAY_SRC("DATAIN"),
+//            .SIGNAL_PATTERN("DATA"))
+//   evrGateStrobeDelay (
+//     .C(1'b0),
+//     .REGRST(1'b0),
+//     .LD(1'b0),
+//     .CE(1'b0),
+//     .INC(1'b0),
+//     .CINVCTRL(1'b0),
+//     .CNTVALUEIN(5'b0),
+//     .IDATAIN(),
+//     .DATAIN(evrGateStrobe),
+//     .LDPIPEEN(1'b0),
+//     .CNTVALUEOUT(),
+//     .DATAOUT(kgdGateStrobe_w));
+
+// NOTE. We want the gate strobe to be delayed by 2.5ns so, even
+// if we delay yhe clock by 800ps (10 taps) we would still capture
+// the strobe. This is not possible due to route conflicts if using
+// 2 gate Strobe IDELAYS. Instead delay the clock by -2.5ns, which
+// is equivalent to a - (2.5/8) * 360 = -112.5o of phase advance
+assign kgdGateStrobe_w = evrGateStrobe;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Coarse delay generation
