@@ -481,10 +481,10 @@ endgenerate
 
 // FIXME add a switch to select which one to send to the diagnostic
 // input
-assign FMC1_CLK1_M2C_P = kgdGateStrobe[0];
-assign FMC1_CLK1_M2C_N = kgdGateStrobe[1];
-assign FMC2_CLK1_M2C_P = evrTriggerBus[0];
-assign FMC2_CLK1_M2C_N = evrTriggerBus[1];
+assign FMC1_CLK1_M2C_P = kgdGateStrobe[0] || kgdGateStrobe[1];
+assign FMC1_CLK1_M2C_N = kgdClk;
+assign FMC2_CLK1_M2C_P = evrTriggerBus[0] || evrTriggerBus[1];
+assign FMC2_CLK1_M2C_N = evrClk;
 assign FMC1_FAN1_TACH = PMOD2_6;
 assign FMC2_FAN1_TACH = PMOD2_7;
 
@@ -503,16 +503,6 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
 
     if (i == 0) begin
 `ifdef KICKER_DRIVER_SINGLE_ENDED
-        assign DRIVER_P[i] = evrClk;
-`else
-        OBUFDS driver_obufds_0 (
-            .O(DRIVER_P[i]),
-            .OB(DRIVER_N[i]),
-            .I(evrClk));
-`endif
-    end
-    else if (i == 1) begin
-`ifdef KICKER_DRIVER_SINGLE_ENDED
         assign DRIVER_P[i] = evrTriggerBus[0];
 `else
         OBUFDS driver_obufds_1 (
@@ -521,7 +511,7 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
             .I(evrTriggerBus[0]));
 `endif
     end
-    else if (i == 2) begin
+    else if (i == 1) begin
 `ifdef KICKER_DRIVER_SINGLE_ENDED
         assign DRIVER_P[i] = kgdGateStrobe[0];
 `else
@@ -531,7 +521,7 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
             .I(kgdGateStrobe[0]));
 `endif
     end
-    else if (i == 3) begin
+    else if (i == 2) begin
 `ifdef KICKER_DRIVER_SINGLE_ENDED
         assign DRIVER_P[i] = evrTriggerBus[1];
 `else
@@ -541,7 +531,7 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
             .I(evrTriggerBus[1]));
 `endif
     end
-    else if (i == 4) begin
+    else if (i == 3) begin
 `ifdef KICKER_DRIVER_SINGLE_ENDED
         assign DRIVER_P[i] = kgdGateStrobe[1];
 `else
