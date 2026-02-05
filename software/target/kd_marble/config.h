@@ -46,6 +46,15 @@
  */
 #define CFG_KD_OUTPUT_COUNT                 145
 
+#define CFG_KD_FMC2_OUTPUT_COUNT            58
+#define CFG_KD_FMC1_OUTPUT_COUNT            34
+#define CFG_KD_SODIMM_OUTPUT_COUNT          53
+
+static_assert((CFG_KD_FMC2_OUTPUT_COUNT +
+            CFG_KD_FMC1_OUTPUT_COUNT +
+            CFG_KD_SODIMM_OUTPUT_COUNT) == CFG_KD_OUTPUT_COUNT,
+        "Kicker driver FMC1 + FMC2 + SODIMM is not equal the total output counts");
+
 /*
  * QSFP Fanout for testing
  */

@@ -1,1 +1,0 @@
-../common_marble/kd_pins_se.xdc

@@ -40,9 +40,13 @@ module common_marble_top #(
 `ifdef KICKER_DRIVER
     output FMC2_CLK1_M2C_P,
     output FMC2_CLK1_M2C_N,
-    output [CFG_KD_OUTPUT_COUNT-1:0] DRIVER_P,
-`ifndef KICKER_DRIVER_SINGLE_ENDED
-    output [CFG_KD_OUTPUT_COUNT-1:0] DRIVER_N,
+    output   [CFG_KD_FMC2_OUTPUT_COUNT-1:0] DRIVER_FMC2_P,
+    output   [CFG_KD_FMC1_OUTPUT_COUNT-1:0] DRIVER_FMC1_P,
+    output [CFG_KD_SODIMM_OUTPUT_COUNT-1:0] DRIVER_SODIMM_P,
+    output [CFG_KD_SODIMM_OUTPUT_COUNT-1:0] DRIVER_SODIMM_N,
+`ifndef KICKER_DRIVER_FMC_SINGLE_ENDED
+    output [CFG_KD_FMC2_OUTPUT_COUNT-1:0] DRIVER_FMC2_N,
+    output [CFG_KD_FMC1_OUTPUT_COUNT-1:0] DRIVER_FMC1_N,
 `endif
     // FIXME: Do we need pretrigger outputs on some PMOD lines too?
 `else
@@ -481,81 +485,108 @@ endgenerate
 
 // FIXME add a switch to select which one to send to the diagnostic
 // input
-assign FMC1_CLK1_M2C_P = kgdGateStrobe[0] || kgdGateStrobe[1];
+assign FMC1_CLK1_M2C_P = evrClk;
 assign FMC1_CLK1_M2C_N = kgdClk;
 assign FMC2_CLK1_M2C_P = evrTriggerBus[0] || evrTriggerBus[1];
-assign FMC2_CLK1_M2C_N = evrClk;
+assign FMC2_CLK1_M2C_N = kgdGateStrobe[0] || kgdGateStrobe[1];
 assign FMC1_FAN1_TACH = PMOD2_6;
 assign FMC2_FAN1_TACH = PMOD2_7;
 
 /////////////////////////////////////////////////////////////////////////////
 // Gate drivers
 
-`ifdef KICKER_DRIVER_SINGLE_ENDED
-    localparam GATE_DRIVER_DIFFERENTIAL_OUTPUT = "false";
+`ifdef KICKER_DRIVER_FMC_SINGLE_ENDED
+    localparam GATE_DRIVER_FMC_DIFFERENTIAL_OUTPUT = "false";
 `else
-    localparam GATE_DRIVER_DIFFERENTIAL_OUTPUT = "true";
+    localparam GATE_DRIVER_FMC_DIFFERENTIAL_OUTPUT = "true";
 `endif
 
 wire [CFG_GATE_COUNT-1:0] GPIO_STROBES_KD_GATE_DRIVER_FLATTENED;
 generate
 for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
 
-    if (i == 0) begin
-`ifdef KICKER_DRIVER_SINGLE_ENDED
-        assign DRIVER_P[i] = evrTriggerBus[0];
-`else
-        OBUFDS driver_obufds_1 (
-            .O(DRIVER_P[i]),
-            .OB(DRIVER_N[i]),
-            .I(evrTriggerBus[0]));
-`endif
+    // FMC 2 connector
+    if (i >= 0 && i <= CFG_KD_FMC2_OUTPUT_COUNT-1) begin
+        if (i == 0) begin
+            `ifdef KICKER_DRIVER_FMC_SINGLE_ENDED
+                assign DRIVER_FMC2_P[i] = evrTriggerBus[0];
+            `else
+                OBUFDS driver_obufds_1 (
+                    .O(DRIVER_FMC2_P[i]),
+                    .OB(DRIVER_FMC2_N[i]),
+                    .I(evrTriggerBus[0]));
+            `endif
+        end
+        else if (i == 1) begin
+            `ifdef KICKER_DRIVER_FMC_SINGLE_ENDED
+                assign DRIVER_FMC2_P[i] = kgdGateStrobe[0];
+            `else
+                OBUFDS driver_obufds_2 (
+                    .O(DRIVER_FMC2_P[i]),
+                    .OB(DRIVER_FMC2_N[i]),
+                    .I(kgdGateStrobe[0]));
+            `endif
+        end
+        else if (i == 2) begin
+            `ifdef KICKER_DRIVER_FMC_SINGLE_ENDED
+                assign DRIVER_FMC2_P[i] = evrTriggerBus[1];
+            `else
+                OBUFDS driver_obufds_1 (
+                    .O(DRIVER_FMC2_P[i]),
+                    .OB(DRIVER_FMC2_N[i]),
+                    .I(evrTriggerBus[1]));
+            `endif
+        end
+        else if (i == 3) begin
+            `ifdef KICKER_DRIVER_FMC_SINGLE_ENDED
+                assign DRIVER_FMC2_P[i] = kgdGateStrobe[1];
+            `else
+                OBUFDS driver_obufds_2 (
+                    .O(DRIVER_FMC2_P[i]),
+                    .OB(DRIVER_FMC2_N[i]),
+                    .I(kgdGateStrobe[1]));
+            `endif
+        end
+        else if (i >= 10 && i <= 19) begin
+            `ifdef KICKER_DRIVER_FMC_SINGLE_ENDED
+                assign DRIVER_FMC2_P[i] = 1'b0;
+            `else
+                OBUFDS driver_obufds_2 (
+                    .O(DRIVER_FMC2_P[i]),
+                    .OB(DRIVER_FMC2_N[i]),
+                    .I(1'b0));
+            `endif
+        end
+        else begin
+            wire gateDriver_N;
+            gateDriver #(
+                .NUM_GATES(CFG_GATE_COUNT),
+                .DIFFERENTIAL_OUPUT(GATE_DRIVER_FMC_DIFFERENTIAL_OUTPUT),
+                .ADDRESS(i))
+              gateDriver (
+                .sysClk(sysClk),
+                .sysCsrStrobe(GPIO_STROBES_KD_GATE_DRIVER_FLATTENED),
+                .sysGPIO_OUT(GPIO_OUT),
+                .kgdClk(kgdClk),
+                .kgdBitClk(kgdBitClk),
+                .kgdStrobe(kgdGateStrobe),
+                .P(DRIVER_FMC2_P[i]),
+                .N(gateDriver_N));
+
+            `ifndef KICKER_DRIVER_FMC_SINGLE_ENDED
+                assign DRIVER_FMC2_N[i] = gateDriver_N;
+            `endif
+        end
     end
-    else if (i == 1) begin
-`ifdef KICKER_DRIVER_SINGLE_ENDED
-        assign DRIVER_P[i] = kgdGateStrobe[0];
-`else
-        OBUFDS driver_obufds_2 (
-            .O(DRIVER_P[i]),
-            .OB(DRIVER_N[i]),
-            .I(kgdGateStrobe[0]));
-`endif
-    end
-    else if (i == 2) begin
-`ifdef KICKER_DRIVER_SINGLE_ENDED
-        assign DRIVER_P[i] = evrTriggerBus[1];
-`else
-        OBUFDS driver_obufds_1 (
-            .O(DRIVER_P[i]),
-            .OB(DRIVER_N[i]),
-            .I(evrTriggerBus[1]));
-`endif
-    end
-    else if (i == 3) begin
-`ifdef KICKER_DRIVER_SINGLE_ENDED
-        assign DRIVER_P[i] = kgdGateStrobe[1];
-`else
-        OBUFDS driver_obufds_2 (
-            .O(DRIVER_P[i]),
-            .OB(DRIVER_N[i]),
-            .I(kgdGateStrobe[1]));
-`endif
-    end
-    else if (i >= 10 && i <= 19) begin
-`ifdef KICKER_DRIVER_SINGLE_ENDED
-        assign DRIVER_P[i] = 1'b0;
-`else
-        OBUFDS driver_obufds_2 (
-            .O(DRIVER_P[i]),
-            .OB(DRIVER_N[i]),
-            .I(1'b0));
-`endif
-    end
-    else begin
+
+    // FMC 1 connector
+    if (i >= CFG_KD_FMC2_OUTPUT_COUNT &&
+        i <= CFG_KD_FMC2_OUTPUT_COUNT + CFG_KD_FMC1_OUTPUT_COUNT - 1) begin
+        localparam integer ch = i - CFG_KD_FMC2_OUTPUT_COUNT;
         wire gateDriver_N;
         gateDriver #(
             .NUM_GATES(CFG_GATE_COUNT),
-            .DIFFERENTIAL_OUPUT(GATE_DRIVER_DIFFERENTIAL_OUTPUT),
+            .DIFFERENTIAL_OUPUT(GATE_DRIVER_FMC_DIFFERENTIAL_OUTPUT),
             .ADDRESS(i))
           gateDriver (
             .sysClk(sysClk),
@@ -564,12 +595,32 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
             .kgdClk(kgdClk),
             .kgdBitClk(kgdBitClk),
             .kgdStrobe(kgdGateStrobe),
-            .P(DRIVER_P[i]),
+            .P(DRIVER_FMC1_P[ch]),
             .N(gateDriver_N));
 
-`ifndef KICKER_DRIVER_SINGLE_ENDED
-        assign DRIVER_N[i] = gateDriver_N;
-`endif
+        `ifndef KICKER_DRIVER_FMC_SINGLE_ENDED
+            assign DRIVER_FMC1_N[ch] = gateDriver_N;
+        `endif
+    end
+
+    // SODIMM connector
+    if (i >= CFG_KD_FMC2_OUTPUT_COUNT + CFG_KD_FMC1_OUTPUT_COUNT &&
+        i <= CFG_KD_FMC2_OUTPUT_COUNT + CFG_KD_FMC1_OUTPUT_COUNT + CFG_KD_SODIMM_OUTPUT_COUNT - 1) begin
+        localparam integer ch = i - (CFG_KD_FMC2_OUTPUT_COUNT + CFG_KD_FMC1_OUTPUT_COUNT);
+        wire gateDriver_N;
+        gateDriver #(
+            .NUM_GATES(CFG_GATE_COUNT),
+            .DIFFERENTIAL_OUPUT("true"),
+            .ADDRESS(i))
+          gateDriver (
+            .sysClk(sysClk),
+            .sysCsrStrobe(GPIO_STROBES_KD_GATE_DRIVER_FLATTENED),
+            .sysGPIO_OUT(GPIO_OUT),
+            .kgdClk(kgdClk),
+            .kgdBitClk(kgdBitClk),
+            .kgdStrobe(kgdGateStrobe),
+            .P(DRIVER_SODIMM_P[ch]),
+            .N(DRIVER_SODIMM_N[ch]));
     end
 end
 endgenerate

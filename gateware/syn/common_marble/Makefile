@@ -68,10 +68,10 @@ ifeq ($(CFG_EVRIO),Y)
 endif
 
 ifeq ($(CFG_EVRIO),N)
-    ifeq ($(VARIANT),USE_KICKER_DRIVER_SINGLE_ENDED)
-        SYNTH_OPT += KICKER_DRIVER_SINGLE_ENDED
-        VFLAGS_DEP += -DKICKER_DRIVER_SINGLE_ENDED
-        SYSTEM_TOP_PINS_XDC += kd_pins_se.xdc
+    ifeq ($(VARIANT),USE_KICKER_DRIVER_FMC_SINGLE_ENDED)
+        SYNTH_OPT += KICKER_DRIVER_FMC_SINGLE_ENDED
+        VFLAGS_DEP += -DKICKER_DRIVER_FMC_SINGLE_ENDED
+        SYSTEM_TOP_PINS_XDC += kd_pins_fmc_se.xdc
         SYSTEM_TOP_TIM_XDC += kd_tim.xdc
     else ifeq ($(VARIANT),)
         SYSTEM_TOP_PINS_XDC += kd_pins.xdc
