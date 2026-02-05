@@ -6,6 +6,8 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+#include <assert.h>
+
 #define VERILOG_KICKER_DRIVER
 
 /*
