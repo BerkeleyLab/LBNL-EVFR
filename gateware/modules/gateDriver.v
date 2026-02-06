@@ -12,6 +12,7 @@ module gateDriver #(
     input wire           [31:0] sysGPIO_OUT,
 
     input wire                  kgdClk,
+    input wire                  kgdReset,
     input wire                  kgdBitClk,
     input wire  [NUM_GATES-1:0] kgdStrobe,
     output wire [NUM_GATES-1:0] kgdBusy,
@@ -99,65 +100,40 @@ wire [SERDES_WIDTH-1:0] pattern = patternSingle[priorityBitnum];
 
 generate
 if (ADDRESS < 92) begin
+    gateDriverSerdesIO #(
+        .DIFFERENTIAL_OUPUT(DIFFERENTIAL_OUPUT),
+        .DATA_WIDTH(SERDES_WIDTH),
+        .WITH_ODELAY("false"))
+      gateDriverSerdesIO (
+        .serialClk(kgdClk),
+        .parallelClk(kgdBitClk),
+        .reset(kgdReset),
+        .clockEnable(1'b1),
 
-    if (DIFFERENTIAL_OUPUT == "true") begin
-        // Instantiate pin driver OSERDES
-        gateDriverSERDES gateDriverSERDES (
-           .data_out_from_device(pattern),
-           .data_out_to_pins_p(P),
-           .data_out_to_pins_n(N),
-           .clk_in(kgdBitClk),
-           .clk_div_in(kgdClk),
-           .io_reset(1'b0));
-    end
-
-    if (DIFFERENTIAL_OUPUT == "false") begin
-        // Instantiate pin driver OSERDES
-        gateDriverSERDES_SE gateDriverSERDES (
-           .data_out_from_device(pattern),
-           .data_out_to_pins(P),
-           .clk_in(kgdBitClk),
-           .clk_div_in(kgdClk),
-           .io_reset(1'b0));
-
-        assign N = 1'b0;
-    end
+        .dataIn(pattern),
+        .dataOutP(P),
+        .dataOutN(N));
 end
 else begin
-    if (DIFFERENTIAL_OUPUT == "true") begin
-        // Instantiate pin driver OSERDES with ODELAY
-        gateDriverSERDES_ODELAY gateDriverSERDES (
-            .data_out_from_device(pattern),
-            .data_out_to_pins_p(P),
-            .data_out_to_pins_n(N),
-            .out_delay_reset(1'b0),
-            .out_delay_data_ce(1'b0),
-            .out_delay_data_inc(1'b0),
-            .out_delay_tap_in(odelayValue),
-            .out_delay_tap_out(),
-            .clk_in(kgdBitClk),
-            .clk_div_in(kgdClk),
-            .io_reset(1'b0));
-    end
+    gateDriverSerdesIO #(
+        .DIFFERENTIAL_OUPUT(DIFFERENTIAL_OUPUT),
+        .DATA_WIDTH(SERDES_WIDTH),
+        .WITH_ODELAY("true"))
+      gateDriverSerdesIO (
+        .serialClk(kgdClk),
+        .parallelClk(kgdBitClk),
+        .reset(kgdReset),
+        .clockEnable(1'b1),
 
-    if (DIFFERENTIAL_OUPUT == "false") begin
-        // Instantiate pin driver OSERDES with ODELAY
-        gateDriverSERDES_ODELAY_SE gateDriverSERDES (
-            .data_out_from_device(pattern),
-            .data_out_to_pins(P),
-            .out_delay_reset(1'b0),
-            .out_delay_data_ce(1'b0),
-            .out_delay_data_inc(1'b0),
-            .out_delay_tap_in(odelayValue),
-            .out_delay_tap_out(),
-            .clk_in(kgdBitClk),
-            .clk_div_in(kgdClk),
-            .io_reset(1'b0));
+        .delayReset(1'b0),
+        .delayClockEnable(1'b0),
+        .delayInc(1'b0),
+        .delayInValue(odelayValue),
 
-        assign N = 1'b0;
-    end
+        .dataIn(pattern),
+        .dataOutP(P),
+        .dataOutN(N));
 end
-
 endgenerate
 
 endmodule
