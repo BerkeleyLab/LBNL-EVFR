@@ -118,6 +118,8 @@ OSERDESE2
 // ODELAY
 /////////////////////////
 
+wire oserdesOutput;
+
 generate
 case(WITH_ODELAY)
 
@@ -166,7 +168,6 @@ endgenerate
 // Output Buffer
 /////////////////////////
 
-wire oserdesOutput;
 generate
 case(DIFFERENTIAL_OUPUT)
 
