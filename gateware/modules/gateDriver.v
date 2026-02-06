@@ -113,7 +113,7 @@ if (ADDRESS < 92) begin
         .delayReset(1'b0),
         .delayClockEnable(1'b0),
         .delayInc(1'b0),
-        .delayInValue(1'b0),
+        .delayInValue(0),
 
         .dataIn(pattern),
         .dataOutP(P),
