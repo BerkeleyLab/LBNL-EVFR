@@ -110,6 +110,11 @@ if (ADDRESS < 92) begin
         .reset(kgdReset),
         .clockEnable(1'b1),
 
+        .delayReset(1'b0),
+        .delayClockEnable(1'b0),
+        .delayInc(1'b0),
+        .delayInValue(1'b0),
+
         .dataIn(pattern),
         .dataOutP(P),
         .dataOutN(N));
