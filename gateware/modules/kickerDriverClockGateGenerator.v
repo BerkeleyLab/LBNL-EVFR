@@ -17,6 +17,7 @@ module kickerDriverClockGateGenerator #(
     output        sysIdelayControlReset,
 
     output        kgdClk,
+    output        kgdReset,
     output        kgdBitClk,
     (*mark_debug=DEBUG*) output [NUM_GATES-1:0] kgdGateStrobe);
 
@@ -34,6 +35,7 @@ kickerDriverClockGenerator #(
     .sysIdelayControlReset(sysIdelayControlReset),
 
     .kgdClk(kgdClk),
+    .kgdReset(kgdReset),
     .kgdBitClk(kgdBitClk));
 
 genvar i;

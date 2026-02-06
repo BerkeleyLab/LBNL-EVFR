@@ -15,6 +15,7 @@ module kickerDriverClockGenerator #(
     output reg    sysIdelayControlReset = 0,
 
     output        kgdClk,
+    output        kgdReset,
     output        kgdBitClk);
 
 localparam IDELAY_COUNT_WIDTH = 5;
@@ -72,10 +73,30 @@ BUFG evrClkDelayedBUFG (
 // See "kickerDriverGateGenerator", but the clock has
 // to be advanced by -112.5o to compensate the effect
 // of removing the 2.5ns delay on the gate strobe
+wire mmcmLocked;
 kdOutputDriverMMCM gateDriverMMCM (
     .clk_in1(evrClkDelayedBUF),
     .reset(1'b0),
     .clk_out1(kgdClk),
-    .clk_out2(kgdBitClk));
+    .clk_out2(kgdBitClk),
+    .locked(mmcmLocked));
+
+localparam MMCM_RESET_COUNTER_WIDTH = 8+1;
+wire mmcmLocked;
+(*ASYNC_REG="true"*) reg mmcmLocked_m0 = 0, mmcmLocked_r = 0;
+reg [MMCM_RESET_COUNTER_WIDTH-1:0] mmcmResetCounter = {MMCM_RESET_COUNTER_WIDTH{1'b1}};
+
+always @(posedge evrClkDelayedBUF) begin
+    mmcmLocked_m0 <= mmcmLocked;
+    mmcmLocked_r <= mmcmLocked_m0;
+    if (!mmcmLocked_r) begin
+        mmcmResetCounter <= {MMCM_RESET_COUNTER_WIDTH{1'b1}};
+    end
+    else if (kgdReset) begin
+        mmcmResetCounter <= mmcmResetCounter - 1;
+    end
+end
+
+assign kgdReset = mmcmResetCounter[MMCM_RESET_COUNTER_WIDTH-1];
 
 endmodule
