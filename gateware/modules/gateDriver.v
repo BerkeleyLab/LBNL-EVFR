@@ -105,8 +105,8 @@ if (ADDRESS < 92) begin
         .DATA_WIDTH(SERDES_WIDTH),
         .WITH_ODELAY("false"))
       gateDriverSerdesIO (
-        .serialClk(kgdClk),
-        .parallelClk(kgdBitClk),
+        .serialClk(kgdBitClk),
+        .parallelClk(kgdClk),
         .reset(kgdReset),
         .clockEnable(1'b1),
 
@@ -125,8 +125,8 @@ else begin
         .DATA_WIDTH(SERDES_WIDTH),
         .WITH_ODELAY("true"))
       gateDriverSerdesIO (
-        .serialClk(kgdClk),
-        .parallelClk(kgdBitClk),
+        .serialClk(kgdBitClk),
+        .parallelClk(kgdClk),
         .reset(kgdReset),
         .clockEnable(1'b1),
 
