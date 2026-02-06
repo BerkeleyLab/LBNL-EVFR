@@ -82,7 +82,6 @@ kdOutputDriverMMCM gateDriverMMCM (
     .locked(mmcmLocked));
 
 localparam MMCM_RESET_COUNTER_WIDTH = 8+1;
-wire mmcmLocked;
 (*ASYNC_REG="true"*) reg mmcmLocked_m0 = 0, mmcmLocked_r = 0;
 reg [MMCM_RESET_COUNTER_WIDTH-1:0] mmcmResetCounter = {MMCM_RESET_COUNTER_WIDTH{1'b1}};
 
