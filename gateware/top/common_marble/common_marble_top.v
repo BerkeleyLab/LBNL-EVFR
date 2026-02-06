@@ -449,6 +449,7 @@ badger badger (
 /////////////////////////////////////////////////////////////////////////////
 // Gate driver clocks
 wire kgdClk, kgdBitClk;
+wire kgdReset;
 wire [CFG_GATE_COUNT-1:0] kgdGateStrobe;
 wire [CFG_GATE_COUNT*32-1:0] GPIO_IN_KD_GATE_FLATTENED;
 wire [CFG_GATE_COUNT-1:0] GPIO_STROBES_KD_GATE_FLATTENED;
@@ -468,6 +469,7 @@ kickerDriverClockGateGenerator #(
     .refClk200(refClk200),
     .sysIdelayControlReset(sysIdelayControlReset),
     .kgdClk(kgdClk),
+    .kgdReset(kgdReset),
     .kgdBitClk(kgdBitClk),
     .kgdGateStrobe(kgdGateStrobe));
 
@@ -568,6 +570,7 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
                 .sysCsrStrobe(GPIO_STROBES_KD_GATE_DRIVER_FLATTENED),
                 .sysGPIO_OUT(GPIO_OUT),
                 .kgdClk(kgdClk),
+                .kgdReset(kgdReset),
                 .kgdBitClk(kgdBitClk),
                 .kgdStrobe(kgdGateStrobe),
                 .P(DRIVER_FMC2_P[i]),
@@ -593,6 +596,7 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
             .sysCsrStrobe(GPIO_STROBES_KD_GATE_DRIVER_FLATTENED),
             .sysGPIO_OUT(GPIO_OUT),
             .kgdClk(kgdClk),
+            .kgdReset(kgdReset),
             .kgdBitClk(kgdBitClk),
             .kgdStrobe(kgdGateStrobe),
             .P(DRIVER_FMC1_P[ch]),
@@ -617,6 +621,7 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
             .sysCsrStrobe(GPIO_STROBES_KD_GATE_DRIVER_FLATTENED),
             .sysGPIO_OUT(GPIO_OUT),
             .kgdClk(kgdClk),
+            .kgdReset(kgdReset),
             .kgdBitClk(kgdBitClk),
             .kgdStrobe(kgdGateStrobe),
             .P(DRIVER_SODIMM_P[ch]),
