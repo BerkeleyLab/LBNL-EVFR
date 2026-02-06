@@ -137,7 +137,7 @@ case(WITH_ODELAY)
         .DATAOUT                (oserdesOutput),
         .CLKIN                  (1'b0),
         .C                      (parallelClk),
-        .CE                     (clockEnable),
+        .CE                     (delayClockEnable),
         .INC                    (delayInc),
         .ODATAIN                (oserdesPredelayOFB),
         .LD                     (delayReset),
