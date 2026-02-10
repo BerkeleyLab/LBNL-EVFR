@@ -89,16 +89,12 @@ spiFlashTxRx(struct spiflash_s *spi, const uint8_t *tx_data, uint32_t tx_len,
                                            uint8_t *rx_data, uint32_t rx_len)
 {
     if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
-        printf("spiFlashTxRx: W %d %d", tx_len, rx_len);
+        printf("spiFlashTxRx: W %d %d\n", tx_len, rx_len);
     }
 
     while (tx_len--) {
         int w = *tx_data++;
         int b;
-
-        if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
-            printf(" %02X", w);
-        }
 
         for (b = 0x80 ; b != 0 ; b >>= 1) {
             GPIO_WRITE(GPIO_IDX_QSPI_FLASH_CSR,
@@ -124,17 +120,9 @@ spiFlashTxRx(struct spiflash_s *spi, const uint8_t *tx_data, uint32_t tx_len,
         }
         rx_len--;
         *rx_data++ = r;
-
-        if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
-            printf(" (%02X)", r);
-        }
     }
 
     GPIO_WRITE(GPIO_IDX_QSPI_FLASH_CSR, CSR_W_CLK_CLR);
-
-    if(debugFlags & DEBUGFLAG_BOOT_FLASH) {
-        printf("\n");
-    }
 
     return SPIFLASH_OK;
 }
