@@ -39,6 +39,8 @@
 #define EVF_PROTOCOL_ARG_CAPACITY       350
 #define EVF_PROTOCOL_EVF_COUNT          2
 
+#define EVF_PROTOCOL_KD_COUNT           2
+
 struct evfPacket {
     uint32_t    magic;
     uint32_t    nonce;
@@ -101,21 +103,16 @@ struct evfStatusPacket {
  * The 'set group delay' is the only command actually sent to the FPGA.  The
  * others are addresses of records used internally by the IOC to hold values
  * until pushed by the 'set group delay' command.
- * Although several 'IDX' values are the same there is no conflict since
- * the records in question have different DTYP field values.
  */
 #define EVF_PROTOCOL_CMD_HI_KICKER_DRIVER    0x5000
-# define EVF_PROTOCOL_CMD_LO_KICKER_DRIVER      0x000
-#  define EVF_PROTOCOL_CMD_KICKER_DRIVER_IDX_SET_GROUP_DELAY    0x00
-#  define EVF_PROTOCOL_CMD_KICKER_DRIVER_IDX_SET_GROUP_WIDEN    0x01
-#  define EVF_PROTOCOL_CMD_KICKER_DRIVER_IDX_SET_DRIVER_ENABLES 0x00
-#  define EVF_PROTOCOL_CMD_KICKER_DRIVER_IDX_SET_DRIVER_DELAYS  0x00
-#  define EVF_PROTOCOL_CMD_KICKER_DRIVER_IDX_SET_DRIVER_WIDTHS  0x01
+# define EVF_PROTOCOL_CMD_KICKER_DRIVER_LO_GROUP_DELAY    0x000
+# define EVF_PROTOCOL_CMD_KICKER_DRIVER_LO_GROUP_WIDEN    0x100
+# define EVF_PROTOCOL_CMD_KICKER_DRIVER_LO_DRIVER_ENABLES 0x200
+# define EVF_PROTOCOL_CMD_KICKER_DRIVER_LO_DRIVER_DELAYS  0x300
+# define EVF_PROTOCOL_CMD_KICKER_DRIVER_LO_DRIVER_WIDTHS  0x400
 
-/*
- * Kicker gate driver monitoring
- */
-# define EVF_PROTOCOL_CMD_LO_KICKER_DRIVER_MONITOR  0x100
-#  define EVF_PROTOCOL_CMD_KICKER_DRIVER_MONITOR_IDX_INIT    0x00
-#  define EVF_PROTOCOL_CMD_KICKER_DRIVER_MONITOR_IDX_READ    0x01
+#define EVF_PROTOCOL_CMD_HI_KICKER_DRIVER_MONITOR    0x6000
+# define EVF_PROTOCOL_CMD_KICKER_DRIVER_MONITOR_LO_INIT    0x000
+# define EVF_PROTOCOL_CMD_KICKER_DRIVER_MONITOR_LO_READ    0x100
+
 #endif /* _EVENT_FANOUT_PROTOCOL_ */

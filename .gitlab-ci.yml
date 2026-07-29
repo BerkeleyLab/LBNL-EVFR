@@ -37,7 +37,7 @@ gw_marble:
       - APP: [evfr, kd]
         VARIANT: ""
       - APP: "kd"
-        VARIANT: "USE_KICKER_DRIVER_SINGLE_ENDED"
+        VARIANT: "USE_KICKER_DRIVER_FMC_SINGLE_ENDED"
 
 # Software jobs
 # Gitlab doesn't seem to suport the usage of variables in
@@ -99,7 +99,7 @@ sw_kd_se_marble:
       parallel:
         matrix:
           - APP: kd
-            VARIANT: "USE_KICKER_DRIVER_SINGLE_ENDED"
+            VARIANT: "USE_KICKER_DRIVER_FMC_SINGLE_ENDED"
       artifacts: true
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"

@@ -50,7 +50,7 @@ static char productNames[FMC_COUNT][FMC_PRODUCT_NAME_LENGTH];
 #define QSFP_CONTROL_PORT_EXPANDER_ADDRESS  0x22
 #define MGTCLK_SWITCH_ADDRESS               0x48
 #define FMC1_EEPROM_ADDRESS                 0x50
-#define FMC2_EEPROM_ADDRESS                 0x51
+#define FMC2_EEPROM_ADDRESS                 0x52
 #define QSFP_ADDRESS                        0x50
 
 /*
@@ -257,13 +257,14 @@ int
 iicProcReadFMC_EEPROM(int fmcIndex, uint8_t *buf, int n)
 {
     int r;
+    int addr7 = (fmcIndex == 0)? FMC1_EEPROM_ADDRESS : FMC2_EEPROM_ADDRESS;
 
     iicProcTakeControl();
     if (!iicProcSetMux(IIC_MUX_PORT_FMC1 + fmcIndex)) {
         iicProcRelinquishControl();
         return 0;
     }
-    r = iicProcRead(FMC1_EEPROM_ADDRESS + fmcIndex, 0, buf, n);
+    r = iicProcRead(addr7, 0, buf, n);
     iicProcRelinquishControl();
     return r;
 }
@@ -276,6 +277,7 @@ int
 iicProcWriteFMC_EEPROM(int fmcIndex, uint8_t *buf, int n)
 {
     int subaddress = 0;
+    int addr7 = (fmcIndex == 0)? FMC1_EEPROM_ADDRESS : FMC2_EEPROM_ADDRESS;
 
     iicProcTakeControl();
     if (!iicProcSetMux(IIC_MUX_PORT_FMC1 + fmcIndex)) {
@@ -283,7 +285,7 @@ iicProcWriteFMC_EEPROM(int fmcIndex, uint8_t *buf, int n)
         return 0;
     }
     if (n) {
-        if (!iicSend(FMC1_EEPROM_ADDRESS + fmcIndex, -1, NULL, 0)) {
+        if (!iicSend(addr7, -1, NULL, 0)) {
             SEND_STOP();
             iicProcRelinquishControl();
             return 0;
@@ -309,7 +311,7 @@ iicProcWriteFMC_EEPROM(int fmcIndex, uint8_t *buf, int n)
             /*
              * Poll for completion
              */
-            while (!iicSend(FMC1_EEPROM_ADDRESS + fmcIndex, -1, NULL, 0)) {
+            while (!iicSend(addr7, -1, NULL, 0)) {
                 if (++pass > 30) {
                     SEND_STOP();
                     iicProcRelinquishControl();

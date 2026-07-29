@@ -291,7 +291,7 @@ static void
 drawMMCfirmware(int redraw) {
     if(redraw) {
         char cbuf [23];
-        sprintf(cbuf, "- MMC=%8X", getMMCfirmware());
+        sprintf(cbuf, "- MMC=%08X", getMMCfirmware());
         st7789vShowString(MMC_STR_HOFF,
                           MMC_STR_VOFF, cbuf);
     }
@@ -301,7 +301,7 @@ static void
 drawGitHash(int redraw) {
     if(redraw) {
         char cbuf [23];
-        sprintf(cbuf, "- GIT=%8X", GPIO_READ(GPIO_IDX_GITHASH));
+        sprintf(cbuf, "- GIT=%08lX", GPIO_READ(GPIO_IDX_GITHASH));
         st7789vShowString(GIT_STR_HOFF,
                           GIT_STR_VOFF, cbuf);
     }

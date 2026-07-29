@@ -1,0 +1,1 @@
+../common_marble/kd_pins_fmc_se.xdc
