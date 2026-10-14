@@ -52,7 +52,8 @@
 // Number of gates
 #define GPIO_IDX_CONFIG_KD_GATE          64 // Configure kicker gate
 #define GPIO_IDX_CONFIG_KD_GATE_DRIVER   65 // Configure kicker driver outputs
-#define GPIO_IDX_PER_KD_GATE             2 // KD gate driver register offset
+#define GPIO_IDX_CONFIG_KD_GATE_DRIVER_2 66 // Configure kicker driver outputs 2
+#define GPIO_IDX_PER_KD_GATE             3 // KD gate driver register offset
 
 #include <xil_io.h>
 #include <xparameters.h>
