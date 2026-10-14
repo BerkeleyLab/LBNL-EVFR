@@ -83,7 +83,7 @@ end
 
 wire [ADDRESS_WIDTH-1:0] priorityBitnum = pendingGates[0] ? 0 :
                                           pendingGates[1] ? 1 : 0;
-wire priorityChannelBit = 1 << priorityBitnum;
+wire [NUM_GATES-1:0] priorityChannelBit = 1 << priorityBitnum;
 
 always @(posedge kgdClk) begin
     if (pendingGates != 0 && !busySingle[priorityBitnum]) begin
