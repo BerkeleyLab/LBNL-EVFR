@@ -66,34 +66,13 @@ endgenerate
 // to drive the SERDES
 //////////////////////////////////////////////////////////////
 
-wire [NUM_GATES-1:0] pendingGates;
-reg [NUM_GATES-1:0] kgdToggles = 0, kgdMatches = 0;
-generate
-for (i = 0; i < NUM_GATES; i = i + 1) begin
-    always @(posedge kgdClk) begin
-        if (kgdStrobe[i] && !pendingGates[i]) begin
-            kgdToggles[i] <= !kgdToggles[i];
-        end
-    end
-end
-endgenerate
-
-assign pendingGates = kgdToggles ^ kgdMatches;
-
-// Priority encoder
+// Priority encoder. We select the based on "busy" form the gate itself
 if (NUM_GATES != 2) begin
     NUM_GATES_can_only_be_2 error();
 end
 
-wire [ADDRESS_WIDTH-1:0] priorityBitnum = pendingGates[0] ? 0 :
-                                          pendingGates[1] ? 1 : 0;
-wire [NUM_GATES-1:0] priorityChannelBit = 1 << priorityBitnum;
-
-always @(posedge kgdClk) begin
-    if (pendingGates != 0 && !busySingle[priorityBitnum]) begin
-        kgdMatches <= kgdMatches ^ priorityChannelBit;
-    end
-end
+wire [ADDRESS_WIDTH-1:0] priorityBitnum = busySingle[0] ? 0 :
+                                          busySingle[1] ? 1 : 0;
 
 wire [4:0] odelayValue = odelayValueSingle[priorityBitnum];
 wire [SERDES_WIDTH-1:0] pattern = patternSingle[priorityBitnum];
