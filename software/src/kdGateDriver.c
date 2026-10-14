@@ -1,6 +1,7 @@
 /*
  * Kicker gate driver control
  */
+#include <cstdint>
 #include <stdio.h>
 #include <stdint.h>
 #include "iicEVIO.h"
@@ -48,6 +49,7 @@ kdGateDriverUpdate(unsigned int idx, uint32_t *driverControl)
 {
     int g;
     int groupDelayBuckets, groupDelayODELAY;
+    int offs = 0;
     static int firstTime = 1;
 
     if (idx >= EVF_PROTOCOL_KD_COUNT) {
@@ -62,18 +64,31 @@ kdGateDriverUpdate(unsigned int idx, uint32_t *driverControl)
         GPIO_WRITE(GPIO_IDX_CONFIG_KD_CLOCK, KD_CLOCK_CSR_GROUP_VALUE | 0);
         firstTime = 0;
     }
-    for (g = 0 ; g < CFG_KD_OUTPUT_COUNT ; g++) {
+
+    for (g = 0, offs = 0 ; g < CFG_KD_OUTPUT_COUNT &&
+            offs < EVF_PROTOCOL_ARG_CAPACITY; g++, offs += 2) {
+        uint32_t driverCtl1 = driverControl[offs];
+        uint32_t driverCtl2 = driverControl[offs+1];
+
         if (debugFlags & DEBUGFLAG_KICKER_DRIVER) {
-            printf("  i%-1d g%-3d %06X\n", idx, g, *driverControl);
+            printf("  i%-1d g%-3d %06X %06X\n",
+                   idx, g, driverCtl1, driverCtl2);
         }
 
         GPIO_WRITE(REG(GPIO_IDX_CONFIG_KD_GATE_DRIVER, idx),
                 KD_CSR_ADDRESS_W(g) |
-                KD_CSR_CONFIG_W(*driverControl));
-        driverControl++;
+                KD_CSR_CONFIG_W(driverCtl1));
+        GPIO_WRITE(REG(GPIO_IDX_CONFIG_KD_GATE_DRIVER_2, idx),
+                KD_CSR_ADDRESS_W(g) |
+                KD_CSR_CONFIG_W(driverCtl2));
     }
-    groupDelayBuckets = *driverControl >> 4;
-    groupDelayODELAY = *driverControl & 0xF;
+
+    if (offs >= EVF_PROTOCOL_ARG_CAPACITY) {
+        return;
+    }
+
+    groupDelayBuckets = driverControl[offs] >> 4;
+    groupDelayODELAY = driverControl[offs] & 0xF;
     setGroupDelay(idx, groupDelayBuckets, groupDelayODELAY);
     // FIXME -- need to (re)enable triggers here?
 }
