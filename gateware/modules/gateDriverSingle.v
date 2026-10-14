@@ -9,8 +9,10 @@ module gateDriverSingle #(
     parameter ODELAY_WIDTH       = 5
     ) (
     input wire sysClk,
-    input wire sysCsrStrobe,
     input wire [31:0] sysGPIO_OUT,
+
+    input wire sysCsrStrobe,
+    input wire sysCsr2Strobe,
 
     input wire kgdClk,
     input wire kgdStrobe,
@@ -20,13 +22,17 @@ module gateDriverSingle #(
     output reg  [SERDES_WIDTH-1:0] pattern = {SERDES_WIDTH{1'b1}}
 );
 
-localparam ADDRESS_WIDTH       = 8;
-localparam DELAY_COUNT_WIDTH   = 4;
-localparam WIDTH_COUNT_WIDTH   = 4;
-localparam PATTERN_SHIFT_WIDTH = $clog2(SERDES_WIDTH);
-localparam PULSE_INFO_WIDTH = 1 + ODELAY_WIDTH +
-                                  PATTERN_SHIFT_WIDTH + WIDTH_COUNT_WIDTH +
-                                  PATTERN_SHIFT_WIDTH + DELAY_COUNT_WIDTH;
+localparam integer ADDRESS_WIDTH       = 8;
+localparam integer DELAY_COUNT_WIDTH   = 4;
+
+localparam integer PULSE_INFO_WIDTH = 1 + ODELAY_WIDTH +
+                                          DELAY_COUNT_WIDTH;
+
+localparam integer WIDTH_COUNT_WIDTH   = 12;
+localparam integer PATTERN_SHIFT_WIDTH = $clog2(SERDES_WIDTH);
+
+localparam integer PULSE_INFO_2_WIDTH = PATTERN_SHIFT_WIDTH + WIDTH_COUNT_WIDTH +
+                                PATTERN_SHIFT_WIDTH;
 
 ////////////////////// System clock domain //////////////////////////////////
 reg [PULSE_INFO_WIDTH-1:0] sysPulseInfo;
@@ -39,32 +45,39 @@ always @(posedge sysClk) begin
     end
 end
 
+reg [PULSE_INFO_2_WIDTH-1:0] sysPulseInfo2;
+reg                        sysInfo2Toggle = 0;
+
+always @(posedge sysClk) begin
+    if (sysCsr2Strobe && (sysGPIO_OUT[24+:ADDRESS_WIDTH] == ADDRESS)) begin
+        sysPulseInfo2 <= sysGPIO_OUT[PULSE_INFO_2_WIDTH-1:0];
+        sysInfo2Toggle <= !sysInfo2Toggle;
+    end
+end
+
 ///////////////// Kicker Gate Driver Clock Domain /////////////////////////////
 (* ASYNC_REG="TRUE" *) reg infoToggle_m = 0;
 reg infoToggle = 0, infoMatch = 0;
 reg [PULSE_INFO_WIDTH-1:0] pulseInfo;
 
+(* ASYNC_REG="TRUE" *) reg info2Toggle_m = 0;
+reg info2Toggle = 0, info2Match = 0;
+reg [PULSE_INFO_2_WIDTH-1:0] pulseInfo2;
+
 // Split stored value into pulse parameters
 wire [DELAY_COUNT_WIDTH-1:0] delayCount =
                             pulseInfo[0+:DELAY_COUNT_WIDTH];
+assign odelayValue = pulseInfo[DELAY_COUNT_WIDTH+:ODELAY_WIDTH];
+wire enable = pulseInfo[ODELAY_WIDTH +
+                         DELAY_COUNT_WIDTH];
+
 wire [PATTERN_SHIFT_WIDTH-1:0] leadingZeroCount =
-                            pulseInfo[DELAY_COUNT_WIDTH+:PATTERN_SHIFT_WIDTH];
+                            pulseInfo2[0+:PATTERN_SHIFT_WIDTH];
 wire [WIDTH_COUNT_WIDTH-1:0] widthCount =
-                            pulseInfo[(DELAY_COUNT_WIDTH +
-                                       PATTERN_SHIFT_WIDTH)+:WIDTH_COUNT_WIDTH];
+                            pulseInfo2[PATTERN_SHIFT_WIDTH+:WIDTH_COUNT_WIDTH];
 wire [PATTERN_SHIFT_WIDTH-1:0] trailingZeroCount =
-                            pulseInfo[(DELAY_COUNT_WIDTH +
-                                       PATTERN_SHIFT_WIDTH +
-                                       WIDTH_COUNT_WIDTH)+:PATTERN_SHIFT_WIDTH];
-assign odelayValue = pulseInfo[(DELAY_COUNT_WIDTH +
-                                PATTERN_SHIFT_WIDTH +
-                                WIDTH_COUNT_WIDTH +
-                                PATTERN_SHIFT_WIDTH)+:ODELAY_WIDTH];
-wire enable = pulseInfo[(ODELAY_WIDTH +
-                         DELAY_COUNT_WIDTH +
-                         PATTERN_SHIFT_WIDTH +
-                         WIDTH_COUNT_WIDTH  +
-                         PATTERN_SHIFT_WIDTH)];
+                            pulseInfo2[(PATTERN_SHIFT_WIDTH + WIDTH_COUNT_WIDTH)+:
+                                PATTERN_SHIFT_WIDTH];
 
 // Initial and final SERDES patterns
 // SERDES sends LSB first
@@ -93,6 +106,14 @@ always @(posedge kgdClk) begin
         infoMatch <= infoToggle;
         pulseInfo <= sysPulseInfo;
     end
+
+    info2Toggle_m <= sysInfo2Toggle;
+    info2Toggle   <= info2Toggle_m;
+    if (info2Toggle != info2Match) begin
+        info2Match <= info2Toggle;
+        pulseInfo2 <= sysPulseInfo2;
+    end
+
     case (state)
     S_IDLE: begin
         busy <= 1'b0;

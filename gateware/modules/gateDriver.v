@@ -8,8 +8,10 @@ module gateDriver #(
     parameter ADDRESS            = -1
     ) (
     input wire                  sysClk,
-    input wire  [NUM_GATES-1:0] sysCsrStrobe,
     input wire           [31:0] sysGPIO_OUT,
+
+    input wire  [NUM_GATES-1:0] sysCsrStrobe,
+    input wire  [NUM_GATES-1:0] sysCsr2Strobe,
 
     input wire                  kgdClk,
     input wire                  kgdReset,
@@ -42,8 +44,10 @@ for (i = 0; i < NUM_GATES; i = i + 1) begin
      .SERDES_WIDTH(SERDES_WIDTH)
     ) gateDriverSingle (
         .sysClk(sysClk),
-        .sysCsrStrobe(sysCsrStrobe[i]),
         .sysGPIO_OUT(sysGPIO_OUT),
+
+        .sysCsrStrobe(sysCsrStrobe[i]),
+        .sysCsr2Strobe(sysCsr2Strobe[i]),
 
         .kgdClk(kgdClk),
         .kgdStrobe(kgdStrobe[i]),
