@@ -504,6 +504,7 @@ assign FMC2_FAN1_TACH = PMOD2_7;
 `endif
 
 wire [CFG_GATE_COUNT-1:0] GPIO_STROBES_KD_GATE_DRIVER_FLATTENED;
+wire [CFG_GATE_COUNT-1:0] GPIO_STROBES_KD_GATE_DRIVER_2_FLATTENED;
 generate
 for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
 
@@ -567,8 +568,9 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
                 .ADDRESS(i))
               gateDriver (
                 .sysClk(sysClk),
-                .sysCsrStrobe(GPIO_STROBES_KD_GATE_DRIVER_FLATTENED),
                 .sysGPIO_OUT(GPIO_OUT),
+                .sysCsrStrobe(GPIO_STROBES_KD_GATE_DRIVER_FLATTENED),
+                .sysCsr2Strobe(GPIO_STROBES_KD_GATE_DRIVER_2_FLATTENED),
                 .kgdClk(kgdClk),
                 .kgdReset(kgdReset),
                 .kgdBitClk(kgdBitClk),
@@ -635,6 +637,8 @@ for (i = 0; i < CFG_GATE_COUNT; i = i + 1) begin
 
 assign GPIO_STROBES_KD_GATE_DRIVER_FLATTENED[i] =
     GPIO_STROBES[GPIO_IDX_CONFIG_KD_GATE_DRIVER + i*GPIO_IDX_PER_KD_GATE];
+assign GPIO_STROBES_KD_GATE_DRIVER_2_FLATTENED[i] =
+    GPIO_STROBES[GPIO_IDX_CONFIG_KD_GATE_DRIVER_2 + i*GPIO_IDX_PER_KD_GATE];
 
 end
 endgenerate
