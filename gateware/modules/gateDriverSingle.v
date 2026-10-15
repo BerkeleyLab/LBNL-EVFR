@@ -19,6 +19,7 @@ module gateDriverSingle #(
 
     output reg busy = 0,
     output wire [4:0] odelayValue,
+    output reg odelayLoad = 0,
     output reg  [SERDES_WIDTH-1:0] pattern = {SERDES_WIDTH{1'b1}}
 );
 
@@ -58,11 +59,11 @@ end
 ///////////////// Kicker Gate Driver Clock Domain /////////////////////////////
 (* ASYNC_REG="TRUE" *) reg infoToggle_m = 0;
 reg infoToggle = 0, infoMatch = 0;
-reg [PULSE_INFO_WIDTH-1:0] pulseInfo;
+reg [PULSE_INFO_WIDTH-1:0] pulseInfo = 0;
 
 (* ASYNC_REG="TRUE" *) reg info2Toggle_m = 0;
 reg info2Toggle = 0, info2Match = 0;
-reg [PULSE_INFO_2_WIDTH-1:0] pulseInfo2;
+reg [PULSE_INFO_2_WIDTH-1:0] pulseInfo2 = 0;
 
 // Split stored value into pulse parameters
 wire [DELAY_COUNT_WIDTH-1:0] delayCount =
@@ -102,9 +103,11 @@ reg [2:0] state = S_IDLE;
 always @(posedge kgdClk) begin
     infoToggle_m <= sysInfoToggle;
     infoToggle   <= infoToggle_m;
+    odelayLoad <= 1'b0;
     if (infoToggle != infoMatch) begin
         infoMatch <= infoToggle;
         pulseInfo <= sysPulseInfo;
+        odelayLoad <= 1'b1;
     end
 
     info2Toggle_m <= sysInfo2Toggle;

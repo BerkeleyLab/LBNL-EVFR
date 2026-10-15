@@ -22,7 +22,7 @@ module gateDriverSerdesIO #(
 
 generate
 if (DATA_WIDTH != 10) begin
-    DATA_WIDTH_can_only_be_set_to_10();
+    DATA_WIDTH_can_only_be_set_to_10 error();
 end
 endgenerate
 
@@ -158,7 +158,7 @@ assign oserdesOutput = oserdesPredelayOQ;
 end
 
 default: begin // block syntesis otherwise
-    WITH_ODELAY_can_only_be_true_or_false();
+    WITH_ODELAY_can_only_be_true_or_false error2();
 end
 
 endcase
@@ -187,7 +187,7 @@ case(DIFFERENTIAL_OUPUT)
         );
     end
 default: begin // block syntesis otherwise
-    DIFFERENTIAL_OUPUT_HAS_WRONG_VALUE();
+    DIFFERENTIAL_OUPUT_HAS_WRONG_VALUE error3();
 end
 
 endcase

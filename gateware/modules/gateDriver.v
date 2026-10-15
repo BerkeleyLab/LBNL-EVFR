@@ -34,6 +34,7 @@ localparam SERDES_WIDTH = 10;
 
 wire busySingle [0:NUM_GATES-1];
 wire [4:0] odelayValueSingle [0:NUM_GATES-1];
+wire odelayLoadSingle [0:NUM_GATES-1];
 wire [SERDES_WIDTH-1:0] patternSingle [0:NUM_GATES-1];
 
 genvar i;
@@ -54,6 +55,7 @@ for (i = 0; i < NUM_GATES; i = i + 1) begin
 
         .busy(busySingle[i]),
         .odelayValue(odelayValueSingle[i]),
+        .odelayLoad(odelayLoadSingle[i]),
         .pattern(patternSingle[i]));
 
     assign kgdBusy[i] = busySingle[i];
@@ -73,8 +75,17 @@ end
 
 wire [ADDRESS_WIDTH-1:0] priorityBitnum = busySingle[0] ? 0 :
                                           busySingle[1] ? 1 : 0;
+reg [ADDRESS_WIDTH-1:0] priorityBitnumLoaded = 0;
+
+always @(posedge kgdClk) begin
+    priorityBitnumLoaded <= priorityBitnum;
+end
 
 wire [4:0] odelayValue = odelayValueSingle[priorityBitnum];
+
+wire odelayLoad = odelayLoadSingle[priorityBitnum] ||
+                  (priorityBitnum != priorityBitnumLoaded);
+
 wire [SERDES_WIDTH-1:0] pattern = patternSingle[priorityBitnum];
 
 //////////////////////////////////////////////////////////////
@@ -113,7 +124,7 @@ else begin
         .reset(kgdReset),
         .clockEnable(1'b1),
 
-        .delayReset(1'b0),
+        .delayReset(odelayLoad),
         .delayClockEnable(1'b0),
         .delayInc(1'b0),
         .delayInValue(odelayValue),
