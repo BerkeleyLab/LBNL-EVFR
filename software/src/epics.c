@@ -228,6 +228,14 @@ handleCommand(int commandArgCount, struct evfPacket *cmdp,
             if (idx >= EVF_PROTOCOL_KD_COUNT) {
                 return -1;
             }
+            /*
+             * Two configuration words per output plus the group delay.
+             * Reject anything else: kdGateDriverUpdate() reads all of
+             * them, and words beyond the received packet are stale.
+             */
+            if (commandArgCount != (2 * CFG_KD_OUTPUT_COUNT) + 1) {
+                return -1;
+            }
 
             kdGateDriverUpdate(idx, cmdp->args);
             break;
