@@ -1,7 +1,6 @@
 /*
  * Kicker gate driver control
  */
-#include <cstdint>
 #include <stdio.h>
 #include <stdint.h>
 #include "iicEVIO.h"
