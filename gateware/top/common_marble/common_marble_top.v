@@ -596,6 +596,7 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
           gateDriver (
             .sysClk(sysClk),
             .sysCsrStrobe(GPIO_STROBES_KD_GATE_DRIVER_FLATTENED),
+            .sysCsr2Strobe(GPIO_STROBES_KD_GATE_DRIVER_2_FLATTENED),
             .sysGPIO_OUT(GPIO_OUT),
             .kgdClk(kgdClk),
             .kgdReset(kgdReset),
@@ -621,6 +622,7 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
           gateDriver (
             .sysClk(sysClk),
             .sysCsrStrobe(GPIO_STROBES_KD_GATE_DRIVER_FLATTENED),
+            .sysCsr2Strobe(GPIO_STROBES_KD_GATE_DRIVER_2_FLATTENED),
             .sysGPIO_OUT(GPIO_OUT),
             .kgdClk(kgdClk),
             .kgdReset(kgdReset),
