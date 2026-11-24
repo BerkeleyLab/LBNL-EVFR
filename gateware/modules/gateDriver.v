@@ -5,7 +5,8 @@
 module gateDriver #(
     parameter NUM_GATES          = 2,
     parameter DIFFERENTIAL_OUPUT = "true",
-    parameter ADDRESS            = -1
+    parameter ADDRESS            = -1,
+    parameter SERDES_POLARITY    = "ACTIVE_LOW"
     ) (
     input wire                  sysClk,
     input wire           [31:0] sysGPIO_OUT,
@@ -42,7 +43,8 @@ generate
 for (i = 0; i < NUM_GATES; i = i + 1) begin
    gateDriverSingle #(
      .ADDRESS(ADDRESS),
-     .SERDES_WIDTH(SERDES_WIDTH)
+     .SERDES_WIDTH(SERDES_WIDTH),
+     .SERDES_POLARITY(SERDES_POLARITY)
     ) gateDriverSingle (
         .sysClk(sysClk),
         .sysGPIO_OUT(sysGPIO_OUT),

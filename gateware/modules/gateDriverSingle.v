@@ -5,6 +5,7 @@
 module gateDriverSingle #(
     parameter ADDRESS            = -1,
     parameter SERDES_WIDTH       = 10,
+    parameter SERDES_POLARITY    = "ACTIVE_LOW",
     // DON'T CHANGE THIS
     parameter ODELAY_WIDTH       = 5
     ) (
@@ -22,6 +23,12 @@ module gateDriverSingle #(
     output reg odelayLoad = 0,
     output reg  [SERDES_WIDTH-1:0] pattern = {SERDES_WIDTH{1'b1}}
 );
+
+generate
+if (SERDES_POLARITY != "ACTIVE_LOW" && SERDES_POLARITY != "ACTIVE_HIGH") begin
+    SERDES_POLARITY_can_only_be_active_low_or_active_high error();
+end
+endgenerate
 
 localparam integer ADDRESS_WIDTH       = 8;
 localparam integer DELAY_COUNT_WIDTH   = 4;
@@ -80,10 +87,19 @@ wire [PATTERN_SHIFT_WIDTH-1:0] trailingZeroCount =
                             pulseInfo2[(PATTERN_SHIFT_WIDTH + WIDTH_COUNT_WIDTH)+:
                                 PATTERN_SHIFT_WIDTH];
 
+localparam [SERDES_WIDTH-1:0] SERDES_IDLE_PATTERN = (SERDES_POLARITY == "ACTIVE_LOW") ?
+                                            {SERDES_WIDTH{1'b1}} : {SERDES_WIDTH{1'b0}};
+localparam [SERDES_WIDTH-1:0] SERDES_ACTIVE_PATTERN = ~SERDES_IDLE_PATTERN;
+
+wire [SERDES_WIDTH-1:0] firstPatternComb = (SERDES_POLARITY == "ACTIVE_LOW") ?
+    ~({SERDES_WIDTH{1'b1}} << leadingZeroCount) : ({SERDES_WIDTH{1'b1}} << leadingZeroCount);
+wire [SERDES_WIDTH-1:0] lastPatternComb = (SERDES_POLARITY == "ACTIVE_LOW") ?
+    ~({SERDES_WIDTH{1'b1}} >> trailingZeroCount) : ({SERDES_WIDTH{1'b1}} >> trailingZeroCount);
+
 // Initial and final SERDES patterns
 // SERDES sends LSB first
-reg [SERDES_WIDTH-1:0] firstPattern = {SERDES_WIDTH{1'b1}};
-reg [SERDES_WIDTH-1:0] lastPattern = {SERDES_WIDTH{1'b1}};
+reg [SERDES_WIDTH-1:0] firstPattern = SERDES_IDLE_PATTERN;
+reg [SERDES_WIDTH-1:0] lastPattern = SERDES_IDLE_PATTERN;
 
 // Pulse counters
 reg [DELAY_COUNT_WIDTH:0] delayCounter = 0;
@@ -120,38 +136,46 @@ always @(posedge kgdClk) begin
     case (state)
     S_IDLE: begin
         busy <= 1'b0;
-        pattern <= {SERDES_WIDTH{1'b1}};
+        pattern <= SERDES_IDLE_PATTERN;
         delayCounter <= {1'b0, delayCount} - 1;
         widthCounter <= {1'b0, widthCount} - 1;
-        firstPattern <= ~({SERDES_WIDTH{1'b1}} << leadingZeroCount);
-        lastPattern <= ~({SERDES_WIDTH{1'b1}} >> trailingZeroCount);
+        firstPattern <= firstPatternComb;
+        lastPattern <= lastPatternComb;
         if (kgdStrobe && enable) begin
             busy <= 1'b1;
             state <= S_DELAY;
         end
     end
+
     S_DELAY: begin
         delayCounter <= delayCounter - 1;
         if (delayCounterDone) begin
             state <= S_SEND_FIRST;
         end
     end
+
     S_SEND_FIRST: begin
         pattern <= firstPattern;
         state <= S_SEND_FILL;
     end
+
     S_SEND_FILL: begin
-        pattern <= {SERDES_WIDTH{1'b0}};
+        pattern <= SERDES_ACTIVE_PATTERN;
         widthCounter <= widthCounter - 1;
         if (widthCounterDone) begin
             state <= S_SEND_LAST;
         end
     end
+
     S_SEND_LAST: begin
         pattern <= lastPattern;
         state <= S_IDLE;
     end
-    default: state <= S_IDLE;
+
+    default: begin
+        state <= S_IDLE;
+    end
+
     endcase
 end
 
