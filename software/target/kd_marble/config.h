@@ -69,6 +69,11 @@ static_assert((CFG_KD_FMC2_OUTPUT_COUNT +
         "Kicker driver FMC1 + FMC2 + SODIMM is not equal the total output counts");
 
 /*
+ * Kicker SERDES polarity
+ */
+#define CFG_KD_SERDES_POLARITY              "ACTIVE_HIGH"
+
+/*
  * QSFP Fanout for testing
  */
 #define CFG_NUM_GTX_QSFP_FANOUT      3

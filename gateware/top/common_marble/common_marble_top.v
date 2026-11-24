@@ -565,7 +565,9 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
             gateDriver #(
                 .NUM_GATES(CFG_GATE_COUNT),
                 .DIFFERENTIAL_OUPUT(GATE_DRIVER_FMC_DIFFERENTIAL_OUTPUT),
-                .ADDRESS(i))
+                .ADDRESS(i),
+                .SERDES_POLARITY(CFG_KD_SERDES_POLARITY)
+            )
               gateDriver (
                 .sysClk(sysClk),
                 .sysGPIO_OUT(GPIO_OUT),
