@@ -241,7 +241,7 @@ updatePulse(int output)
     int coarseWidthCount;
     int firstPattern, lastPattern;
 
-    if (pulseInfo->mode == MODE_PATTERN) {
+    if (pulse->mode & MODE_PATTERN) {
         delay = delay - (delay % CFG_EVR_OUTPUT_SERDES_WIDTH);
     }
     leadingZeroCount = delay % CFG_EVR_OUTPUT_SERDES_WIDTH;
