@@ -57,7 +57,7 @@ assign sysStatus = { {16 {1'b0}},
 //     .DATAOUT(kgdGateStrobe_w));
 
 // NOTE. We want the gate strobe to be delayed by 2.5ns so, even
-// if we delay yhe clock by 800ps (10 taps) we would still capture
+// if we delay the clock by 800ps (10 taps) we would still capture
 // the strobe. This is not possible due to route conflicts if using
 // 2 gate Strobe IDELAYS. Instead delay the clock by -2.5ns, which
 // is equivalent to a - (2.5/8) * 360 = -112.5o of phase advance

@@ -31,7 +31,7 @@ end
 endgenerate
 
 localparam integer ADDRESS_WIDTH       = 8;
-localparam integer DELAY_COUNT_WIDTH   = 4;
+localparam integer DELAY_COUNT_WIDTH   = 12;
 
 localparam integer PULSE_INFO_WIDTH = 1 + ODELAY_WIDTH +
                                           DELAY_COUNT_WIDTH;
