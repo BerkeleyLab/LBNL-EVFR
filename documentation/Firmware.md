@@ -113,7 +113,7 @@ The event receiver has **12 outputs**, each triggered by its own trigger bus lin
 | 1–4 | Differential pattern outputs | ✓ |
 | 5–12 | Single-ended trigger outputs | — |
 
-Delays and widths are in RF buckets. In the pattern modes the delay is rounded down to a multiple of four buckets, because the pattern hardware works four buckets at a time. See [Event Receiver Outputs ↗](https://git.als.lbl.gov/alsu/epics/iocs/siocEventClient/-/blob/HEAD/documentation/EPICSnotes.md#event-receiver-outputs) for the EPICS records.
+Delays and widths are in RF buckets, up to 16,777,215 buckets (about 33.5 ms) each. In the pattern modes the delay is rounded down to a multiple of four buckets, because the pattern hardware works four buckets at a time. See [Event Receiver Outputs ↗](https://git.als.lbl.gov/alsu/epics/iocs/siocEventClient/-/blob/HEAD/documentation/EPICSnotes.md#event-receiver-outputs) for the EPICS records.
 
 > [!NOTE]
 > The driver circuit on the UTIO boards has a low-to-high propagation time almost 2 ns longer than its high-to-low propagation time. To get a pulse *N* buckets wide at the output connector, program a width of *N* + 1 buckets.
@@ -136,8 +136,12 @@ The firmware blocks that generate the gate driver triggers:
 
 1. An **IDELAY** block delays the event receiver's recovered clock by 0–800 ps in about 80 ps steps, producing the clock used by the gate driver blocks. It is common to both groups.
 2. A **delay counter** per group, programmable in event receiver ticks (≈ 8 ns).
-3. **Counters, a state machine, and the OSERDES** in each output's SelectIO block generate a pulse with a delay of 0–120 ns in 800 ps steps and a width of up to 4096 ticks (about 32 µs) in 800 ps steps.
+3. **Counters, a state machine, and the OSERDES** in each output's SelectIO block generate a pulse with a delay of up to 4095 ticks (just under 32.77 µs) and a width of up to about 32.78 µs, both in 800 ps steps. The delay and width counters are each 12 bits.
 4. The SelectIO blocks of the SO-DIMM outputs include an **ODELAY** block, adding 0–800 ps in about 80 ps steps.
+
+### Output polarity
+
+Gate driver outputs are **active high**: they idle low and go high for the pulse. The polarity is set at build time by `CFG_KD_SERDES_POLARITY` in `software/target/kd_marble/config.h` (`"ACTIVE_HIGH"` or `"ACTIVE_LOW"`). While the gate driver clock is starting up or has lost lock, the output serializers are held in reset and their outputs are low, which is the idle level for active-high outputs.
 
 ### Two groups
 
