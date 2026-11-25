@@ -594,7 +594,9 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
         gateDriver #(
             .NUM_GATES(CFG_GATE_COUNT),
             .DIFFERENTIAL_OUPUT(GATE_DRIVER_FMC_DIFFERENTIAL_OUTPUT),
-            .ADDRESS(i))
+            .ADDRESS(i),
+            .SERDES_POLARITY(CFG_KD_SERDES_POLARITY)
+        )
           gateDriver (
             .sysClk(sysClk),
             .sysCsrStrobe(GPIO_STROBES_KD_GATE_DRIVER_FLATTENED),
@@ -620,7 +622,9 @@ for (i = 0 ; i < CFG_KD_OUTPUT_COUNT ; i = i + 1) begin : gateDrivers
         gateDriver #(
             .NUM_GATES(CFG_GATE_COUNT),
             .DIFFERENTIAL_OUPUT("true"),
-            .ADDRESS(i))
+            .ADDRESS(i),
+            .SERDES_POLARITY(CFG_KD_SERDES_POLARITY)
+        )
           gateDriver (
             .sysClk(sysClk),
             .sysCsrStrobe(GPIO_STROBES_KD_GATE_DRIVER_FLATTENED),
