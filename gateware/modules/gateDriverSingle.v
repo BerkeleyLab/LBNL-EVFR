@@ -21,7 +21,8 @@ module gateDriverSingle #(
     output reg busy = 0,
     output wire [4:0] odelayValue,
     output reg odelayLoad = 0,
-    output reg  [SERDES_WIDTH-1:0] pattern = {SERDES_WIDTH{1'b1}}
+    output reg  [SERDES_WIDTH-1:0] pattern = (SERDES_POLARITY == "ACTIVE_LOW") ?
+                                             {SERDES_WIDTH{1'b1}} : {SERDES_WIDTH{1'b0}}
 );
 
 generate
